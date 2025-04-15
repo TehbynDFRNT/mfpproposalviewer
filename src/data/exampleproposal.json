@@ -1,0 +1,318 @@
+{
+    "quote": {
+      "quoteId": "tnuf-18857-ndh",
+      "dateCreated": "15/04/2025",
+      "customerInfo": {
+        "customerId": "0b7179a5-0a80-47ed-b12b-9989a520d770",
+        "owner1": "Beau Brown",
+        "owner2": "Bella Brown",
+        "phoneNumber": "+61412345678",
+        "emailAddress": "beau@beauville.com",
+        "propertyDetails": {
+          "homeAddress": "19-21 Packer Road",
+          "siteAddress": "Unit 9",
+          "installationArea": "Brisbane",
+          "residentHomeowner": true
+        },
+        "proposalInfo": {
+          "proposalName": "Beau Brown & Bella Brown Pool Proposal"
+        }
+      },
+      "poolSelection": {
+        "pool": {
+          "modelName": "Verona (4.5m x 2.5m)",
+          "poolRange": "Latin",
+          "poolType": "SMALL",
+          "weightKg": 414,
+          "volumeLiters": 10300,
+          "color": "Silver Mist",
+          "dimensions": {
+            "lengthM": 4.5,
+            "widthM": 2.5,
+            "shallowDepthM": 1.1,
+            "deepDepthM": 1.5,
+            "waterlineLitersPerMeter": 13.8
+          },
+          "pricing": {
+            "basePriceExGst": 11700,
+            "basePriceIncGst": 12870
+          }
+        },
+        "fixedCosts": [
+          { "name": "Temporary Safety Barrier", "cost": 400 },
+          { "name": "Freight",                  "cost": 800 },
+          { "name": "Earthbond",                "cost": 40  },
+          { "name": "Ag Line",                  "cost": 35  },
+          { "name": "Pipe Fitting + 3 Way Valve","cost": 300 },
+          { "name": "Filter Slab",              "cost": 50  },
+          { "name": "Miscellaneous",            "cost": 2700},
+          { "name": "Form 15",                  "cost": 1295},
+          { "name": "Fire Ant",                 "cost": 165 },
+          { "name": "Handover",                 "cost": 500 }
+        ],
+        "totalFixedCosts": 6285,
+        "individualCosts": [
+          { "name": "Pea Gravel",    "cost": 1628 },
+          { "name": "Trucked Water", "cost": 129  },
+          { "name": "Coping Supply", "cost": 1107 },
+          { "name": "Coping Lay",    "cost": 1045 },
+          { "name": "Install Fee",   "cost": 2550 },
+          { "name": "Salt Bags",     "cost": 19   },
+          { "name": "Beam",          "cost": 1123 }
+        ],
+        "totalIndividualCosts": 7601,
+        "costSummary": {
+           "totalCost": 26756,
+           "totalMargin": 1170
+         }
+      },
+      "siteRequirements": {
+        "standardSiteRequirements": {
+          "trafficControl": {
+            "level": "None Required",
+            "cost": 0
+          },
+          "craneSelection": {
+            "type": "Franna Crane-S20T-L1",
+            "cost": 700
+          },
+          "bobcatSelection": {
+            "type": "D1",
+            "cost": 1000
+          }
+        },
+        "customSiteRequirements": [
+          {
+            "description": "Airconditioner Temporary Removal and Replacement",
+            "price": 300
+          },
+          "Notes: Airconditioner removal needed for site access."
+        ],
+        "costSummary": {
+          "totalCost": 2000,
+          "totalMargin": 0
+        }
+      },
+      "concreteAndPaving": {
+        "pavingCategory": "Category 1",
+        "squareMeters": 10,
+        "costSummary": {
+          "ratePerM2": 440,
+          "areaM2": 10,
+          "totalCost": 4400
+        },
+        "rateBreakdown": {
+          "perM2": {
+            "paverCost": 99.0,
+            "wastageCost": 13.0,
+            "marginCost": 100.0,
+            "materialsSubtotal": 212.0,
+            "labourCost": 130.0
+          },
+          "totalForArea": {
+            "paverCost": 990.0,
+            "wastageCost": 130.0,
+            "marginCost": 1000.0,
+            "materialsSubtotal": 2120.0,
+            "labourCost": 1300.0
+          }
+        },
+        "pavingOnExistingConcrete": {
+          "pavingCategory": "Category 1",
+          "squareMeters": 10,
+          "costSummary": {
+            "ratePerM2": 342,
+            "areaM2": 10,
+            "totalCost": 3420
+          },
+          "rateBreakdown": {
+            "perM2": {
+              "paverCost": 99.0,
+              "wastageCost": 13.0,
+              "marginCost": 100.0,
+              "materialsSubtotal": 212.0,
+              "labourCost": 130.0
+            },
+            "totalForArea": {
+              "paverCost": 990.0,
+              "wastageCost": 130.0,
+              "marginCost": 1000.0,
+              "materialsSubtotal": 2120.0,
+              "labourCost": 1300.0
+            }
+          }
+        },
+        "extraConcreting": {
+          "concreteType": "Standard ($180.00/m²)",
+          "meterageM2": 10,
+          "costSummary": {
+            "ratePerM2": 180,
+            "areaM2": 10,
+            "totalCost": 1800
+          },
+          "rateBreakdown": {
+            "perM2": {
+              "basePrice": 128.0,
+              "margin": 52.0,
+              "materialsSubtotal": 180.0
+            },
+            "totalForArea": {
+              "basePrice": 1280.0,
+              "margin": 520.0,
+              "materialsSubtotal": 1800.0
+            }
+          }
+        },
+        "concretePump": {
+          "concretePumpRequired": true,
+          "numberOfDaysRequired": 1,
+          "ratePerDay": 1300,
+          "totalCost": 1300
+        },
+        "underFenceConcreteStrips": {
+          "selectedOption": "Plain Concrete",
+          "ratePerLm": 150,
+          "lengthMeters": 6,
+          "totalCost": 900
+        },
+        "concreteCuts": {
+          "cutType": "1/4 Pool",
+          "costPerCut": 320,
+          "quantity": 2,
+          "totalCost": 640
+        },
+        "costSummary": {
+          "totalCost": 12460,
+          "totalMargin": 2194
+        }
+      },
+      "retainingWalls": {
+        "walls": [
+          {
+            "name": "Retaining Wall 1",
+            "wallType": "Block Wall - Clad ($600.00/m²)",
+            "height1M": 1,
+            "height2M": 1,
+            "lengthM": 2,
+            "baseRatePerM2": 300,
+            "extraRatePerM2": 200,
+            "marginPerM2": 100,
+            "calculation": {
+              "squareMeters": 2,
+              "marginAmount": 200,
+              "totalCost": 1200
+            }
+          }
+        ],
+        "costSummary": {
+          "totalCost": 1200,
+          "totalMargin": 200
+        }
+      },
+      "fencing": {
+        "fenceType": "Frameless Glass",
+        "totalFenceLengthM": 10,
+        "costPerMeter": 396,
+        "fenceLinearCost": 1950,
+        "gateSelection": {
+          "quantity": 1,
+          "gateCostEach": 495,
+          "gateTotalCost": 385,
+          "freeGateDiscount": 385
+        },
+        "fgRetainingPanels": {
+          "simpleCount": 0,
+          "simpleUnitCost": 220,
+          "simpleCost": 0,
+          "complexCount": 0,
+          "complexUnitCost": 660,
+          "complexCost": 0
+        },
+        "earthingRequired": true,
+        "earthingCost": 40,
+        "costSummary": {
+          "totalCost": 1990,
+          "totalMargin": 0
+        }
+      },
+      "electrical": {
+        "standardPower": {
+          "isSelected": true,
+          "rate": 1000
+        },
+        "addOnFenceEarthing": {
+          "isSelected": true,
+          "rate": 350
+        },
+        "heatPumpCircuit": {
+          "isSelected": true,
+          "rate": 750
+        },
+        "costSummary": {
+           "totalCost": 2100,
+           "totalMargin": 0
+         }
+      },
+      "waterFeature": {
+        "size": "1.6m x 0.8m - $3200",
+        "frontFinish": "Bag Washed",
+        "sidesFinish": "Coping Style",
+        "topFinish": "Coping Style",
+        "backCladdingNeeded": true,
+        "backCladdingCost": 1000,
+        "ledBladeSelection": "900mm LED Blade - $300 (includes $100 margin)",
+        "costSummary": {
+           "totalCost": 4500,
+           "totalMargin": 1200
+         }
+      },
+      "addOns": {
+        "heating": {
+          "products": [],
+          "heatingInstallation": []
+        },
+        "poolCleaner": [],
+        "hardwareUpgrades": [],
+        "otherAddOns": [
+           {
+            "name": "Spa Jets",
+            "isSelected": true,
+            "products": [
+              {
+                "name": "ASF-440",
+                "cost": 145,
+                "margin": 75,
+                "total": 220
+              },
+              {
+                "name": "Spa Jet Pump",
+                "cost": 800,
+                "margin": 200,
+                "total": 1000
+              }
+            ]
+          },
+          {
+            "name": "Deck Jet",
+            "isSelected": true,
+             "products": [
+              {
+                "name": "2 Jets",
+                "cost": 715,
+                "margin": 360,
+                "total": 1075
+              }
+            ]
+          }
+        ],
+        "costSummary": {
+          "totalCost": 2295,
+          "totalMargin": 635
+        }
+      },
+      "quoteTotalSummary": {
+        "grandTotalCost": 53301,
+        "grandTotalMargin": 5399
+      }
+    }
+  }
