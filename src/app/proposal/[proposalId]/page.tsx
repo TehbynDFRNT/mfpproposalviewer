@@ -1,11 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'; // Import useCallback
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useJsApiLoader, GoogleMap, Marker } from '@react-google-maps/api';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Mail, MessageSquare, Phone, Home, Wrench, Square, Layers, BarChart2, Filter, Star, ShieldCheck, Handshake } from 'lucide-react';
+// Mock data import for initialising page
+import exampleProposal from '@/data/exampleproposal.json';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button"; // Import Button
-import { Mail, MessageSquare, Phone } from 'lucide-react'; // Import icons
-import { Separator } from "@/components/ui/separator";
+import { useParams } from 'next/navigation';
 
 // Define category IDs in order of user interest
 const CATEGORY_IDS = {
@@ -35,7 +39,11 @@ const CATEGORY_NAMES: { [key: string]: string } = {
 
 export const dynamic = 'force-dynamic';
 
-export default function ProposalPage({ params }: { params: { proposalId: string } }) {
+export default function ProposalPage() {
+  const params = useParams<{ proposalId: string }>();
+  const proposalId = params.proposalId;
+  // Initialise mock proposal data for rendering
+  const proposalData = exampleProposal.quote;
   const [activeSection, setActiveSection] = useState<string | null>(CATEGORY_IDS.CUSTOMER_INFO);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -133,24 +141,72 @@ export default function ProposalPage({ params }: { params: { proposalId: string 
       delete sectionRefs.current[id];
     }
   }, []); // Empty dependency array means this callback itself doesn't change
+  // Fade transition states for left-column content
+  const [displaySection, setDisplaySection] = useState<string | null>(activeSection);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  useEffect(() => {
+    setIsTransitioning(true);
+    const t = setTimeout(() => {
+      setDisplaySection(activeSection);
+      setIsTransitioning(false);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [activeSection]);
+  
+  // Prepare address string for geocoding (using full address)
+  const customerAddress = proposalData.customerInfo.propertyDetails.fullAddress;
+  // Load Google Maps API
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+    libraries: ['places'],
+  });
+  // Map center state
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  // Geocode when Customer Info section becomes active
+  useEffect(() => {
+    if (isLoaded && activeSection === CATEGORY_IDS.CUSTOMER_INFO) {
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ address: customerAddress }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          const loc = results[0].geometry.location;
+          setMapCenter({ lat: loc.lat(), lng: loc.lng() });
+        }
+      });
+    }
+  }, [isLoaded, activeSection, customerAddress]);
+
+  // Control playback of pool selection video on section change
+  const poolVideoRef = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    if (activeSection === CATEGORY_IDS.POOL_SELECTION) {
+      poolVideoRef.current?.play();
+    } else {
+      poolVideoRef.current?.pause();
+    }
+  }, [activeSection]);
+  // Compute section-based progress
+  const sectionIds = Object.values(CATEGORY_IDS);
+  const totalSections = sectionIds.length;
+  const activeIndex = sectionIds.findIndex(id => id === activeSection);
+  const progressPercent = ((activeIndex !== -1 ? activeIndex + 1 : 0) / totalSections) * 100;
 
   return (
     <div className="relative flex min-h-screen flex-col"> {/* Changed to flex-col for header/main/footer layout */}
   {/* --- Header --- */}
   <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
-    {/* Logo Placeholder */}
+    {/* Logo */}
     <div className="flex items-center">
-      <span className="font-semibold text-lg">MFP Pools</span> {/* Or your logo component */}
+      <img src="/logo.png" alt="MFP Pools Logo" className="h-8 w-auto" />
     </div>
     {/* Contact Icons */}
-    <div className="flex items-center space-x-2">
-      <Button variant="ghost" size="icon" aria-label="Email Us">
+      <div className="flex items-center space-x-2">
+      <Button variant="secondary" size="icon" aria-label="Email Us">
         <Mail className="h-5 w-5" />
-      </Button>
-      <Button variant="ghost" size="icon" aria-label="Chat With Us">
+        </Button>
+      <Button variant="secondary" size="icon" aria-label="Chat With Us">
         <MessageSquare className="h-5 w-5" />
       </Button>
-      <Button variant="ghost" size="icon" aria-label="Call Us">
+      <Button variant="secondary" size="icon" aria-label="Call Us">
         <Phone className="h-5 w-5" />
       </Button>
     </div>
@@ -161,50 +217,212 @@ export default function ProposalPage({ params }: { params: { proposalId: string 
   {/* pt-16/pb-16 account for fixed header/footer height */}
   <main className="flex flex-1 pt-16 pb-16">
       {/* Left Column */}
-       <div className="w-2/3 sticky top-16 flex h-[calc(100vh-8rem)] flex-col items-center justify-center overflow-hidden bg-gray-100 dark:bg-gray-900">
+       <div className="w-2/3 sticky top-16 flex h-[calc(100vh-8rem)] flex-col items-center justify-center overflow-hidden overscroll-none touch-none proposal-left">
 {/* Visual placeholder now takes full height of the left column */}
-        <div className="w-full h-full bg-gray-300 dark:bg-gray-700 rounded flex items-center justify-center">
-           {/* Display active section name subtly or remove if visual replaces it entirely */}
-           <p className="text-xl font-semibold opacity-50 p-4 absolute top-4 left-4 bg-background/80 rounded">
-             {activeSection ? CATEGORY_NAMES[activeSection] : 'Overview'}
-           </p>
-           {/* TODO: Replace this div with the actual dynamic visual component */}
+        <div className={`w-full h-full relative rounded overflow-hidden transition-opacity duration-500 ease-in-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+          {displaySection === CATEGORY_IDS.CUSTOMER_INFO ? (
+            isLoaded && mapCenter ? (
+              <GoogleMap
+                mapContainerStyle={{ width: '100%', height: '100%' }}
+                center={mapCenter}
+                zoom={21}
+                options={{
+                  mapTypeId: 'satellite',
+                  disableDefaultUI: true,
+                  clickableIcons: false,
+                  maxZoom: 21,
+                  tilt: 0,
+                  styles: [
+                    { featureType: 'all', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+                    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+                    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+                    { featureType: 'road', stylers: [{ visibility: 'off' }] },
+                    { featureType: 'administrative', stylers: [{ visibility: 'off' }] }
+                  ]
+                }}
+              >
+                <Marker position={mapCenter} />
+              </GoogleMap>
+            ) : (
+              <p className="text-muted-foreground p-4">Loading map…</p>
+            )
+          ) : (
+            <>
+              {displaySection === CATEGORY_IDS.POOL_SELECTION ? (
+                <video
+                  ref={poolVideoRef}
+                  src="/Sheffield.mp4"
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : (
+                <>
+                  <p className="text-xl font-semibold opacity-50 p-4 absolute top-4 left-4 bg-background/80 rounded">
+                    {CATEGORY_NAMES[displaySection]}
+                  </p>
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-muted-foreground">
+                      Visual for {CATEGORY_NAMES[displaySection]}
+                    </p>
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
 
       {/* Right Column */}
-      <div ref={rightColumnRef} className="w-1/3 h-[calc(100vh-8rem)] overflow-y-auto p-8 scroll-smooth border-l"> {/* Added border-l for visual separation */}
-        <h1 className="text-3xl font-bold mb-6">Proposal Details for ID: {params.proposalId}</h1>
+      <div ref={rightColumnRef} className="w-1/3 h-[calc(100vh-8rem)] overflow-y-scroll p-0 scroll-smooth snap-y snap-mandatory proposal-right"> {/* Right column background, enabled scroll snapping */}
 
-        {Object.entries(CATEGORY_IDS).map(([key, id], index, arr) => (
-          <React.Fragment key={id}>
-             {/* Assign ref using the callback */}
-            <Card
-              ref={(node) => assignRef(node, id)}
-              id={id}
-              className={cn(
-                "transition-all duration-300 ease-out mb-8", // Added mb-8 here for consistent spacing
-                activeSection === id ? "opacity-100 ring-2 ring-primary shadow-lg scale-[1.01]" : "opacity-60 scale-100" // Enhanced active style
-              )}
-              style={{ scrollMarginTop: `calc(50vh - 100px)` }} // Adjust scroll snap alignment
-            >
-              <CardHeader>
-                <CardTitle>{CATEGORY_NAMES[id]}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Details for {CATEGORY_NAMES[id]} go here...</p>
-                <div className="h-60"></div> {/* Adjusted dummy height */}
-              </CardContent>
-            </Card>
-            {/* Add Separator unless it's the last item */}
-            {index < arr.length - 1 && <Separator className="my-8" />}
-          </React.Fragment>
-        ))}
+        {Object.entries(CATEGORY_IDS).map(([key, id]) => {
+          const isCustomerInfo = id === CATEGORY_IDS.CUSTOMER_INFO;
+          return (
+            <React.Fragment key={id}>
+              <div
+                ref={(node) => assignRef(node, id)}
+                id={id}
+                className={cn(
+                  "h-full w-full snap-start snap-always flex flex-col p-8 transition-opacity duration-500 ease-in-out",
+                  activeSection === id ? "opacity-100" : "opacity-20"
+                )}
+              >
+                {isCustomerInfo ? (
+                  <>
+                    {/* Custom welcome header */}
+                    <div className="mb-4">
+                      <h2 className="header-welcome">
+                        Welcome <span className="header-owners">{proposalData.customerInfo.owner1.split(' ')[0]} &amp; {proposalData.customerInfo.owner2?.split(' ')[0]}</span>
+                      </h2>
+                      <h3 className="subheader-text mt-1.5">
+                        Your Pool Proposal for {proposalData.customerInfo.propertyDetails.streetAddress}
+                      </h3>
+                    </div>
+                    <Card className="w-full p-5">
+<CardContent className="px-0 space-y-4">
+                      {/* Contact Info */}
+                      <p className="text-sm font-medium">Your Best Contact Details</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <a
+                          href={`tel:${proposalData.customerInfo.phoneNumber}`}
+                          className="flex items-center gap-2 text-sm hover:underline"
+                          aria-label={`Call ${proposalData.customerInfo.phoneNumber}`}
+                        >
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span>{proposalData.customerInfo.phoneNumber}</span>
+                        </a>
+                        <a
+                          href={`mailto:${proposalData.customerInfo.emailAddress}`}
+                          className="flex items-center gap-2 text-sm hover:underline"
+                          aria-label={`Email ${proposalData.customerInfo.emailAddress}`}
+                        >
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span>{proposalData.customerInfo.emailAddress}</span>
+                        </a>
+                      </div>
+                      <Separator />
+                      {/* Pool Installation Location */}
+                      <p className="text-sm font-medium">Pool Installation Location</p>
+                      <div className="flex items-start gap-2">
+                        <Home className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">{proposalData.customerInfo.propertyDetails.fullAddress}</p>
+                      </div>
+                      </CardContent>
+                    </Card>
+                    {/* Quote Summary Card */}
+                    <Card className="w-full p-5 mt-6">
+                      <CardContent className="px-0 space-y-4">
+                        <p className="text-sm font-medium">Complete Pool Quote Includes:</p>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="flex items-center space-x-2">
+                            <Wrench className="h-4 w-4 text-[#DB9D6A]" />
+                            <span>Installation</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Square className="h-4 w-4 text-[#DB9D6A]" />
+                            <span>Coping</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Layers className="h-4 w-4 text-[#DB9D6A]" />
+                            <span>Paving & Concrete</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <BarChart2 className="h-4 w-4 text-[#DB9D6A]" />
+                            <span>Fencing</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Filter className="h-4 w-4 text-[#DB9D6A]" />
+                            <span>Filtration</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Star className="h-4 w-4 text-[#DB9D6A]" />
+                            <span>Upgrades & Extras</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <ShieldCheck className="h-4 w-4 text-[#DB9D6A]" />
+                            <span>Warranty</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Handshake className="h-4 w-4 text-[#DB9D6A]" />
+                            <span>Full Handover</span>
+                          </div>
+                        </div>
+                        <Separator />
+                        {/* Grand Total */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span>Total Quote</span>
+                            <span>${proposalData.quoteTotalSummary.grandTotalCost.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                ) : id === CATEGORY_IDS.POOL_SELECTION ? (
+                  <>
+                    <div className="mb-4">
+                      <h2 className="font-bold font-sans text-white text-3xl mb-4">
+                        Your Pool, {proposalData.poolSelection.pool.modelName.replace(/\s*\(.*\)$/, '')}
+                      </h2>
+                      <h3 className="subheader-text mt-1.5">
+                        From the <span className="text-[#DB9D6A] font-semibold">
+                          {proposalData.poolSelection.pool.poolRange} Range
+                        </span>
+                      </h3>
+                    </div>
+                    <div className="flex-grow" />
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-2xl font-semibold mb-4">
+                      {CATEGORY_NAMES[id]}
+                    </h2>
+                    <div>
+                      <p className="text-muted-foreground">
+                        Details for {CATEGORY_NAMES[id]} go here...
+                      </p>
+                    </div>
+                    <div className="flex-grow" />
+                  </>
+                )}
+              </div>
+            </React.Fragment>
+          );
+        })}
       </div>
     </main>
     
     {/* --- Footer --- */}
-  <footer className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-end border-t bg-background px-4 md:px-6">
+  <footer className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-end space-x-2 border-t bg-[#DB9D6A33] px-4 md:px-6">
+    {/* Progress indicator */}
+    <div
+      className="absolute top-0 left-0 h-px bg-accent transition-all duration-200 ease-out"
+      style={{ width: `${progressPercent}%` }}
+    />
+    <Button variant="destructive" size="lg">Request Changes</Button>
     <Button size="lg">Accept Quote</Button>
   </footer>
   </div>

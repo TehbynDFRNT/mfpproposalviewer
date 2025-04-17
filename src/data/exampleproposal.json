@@ -9,8 +9,12 @@
         "phoneNumber": "+61412345678",
         "emailAddress": "beau@beauville.com",
         "propertyDetails": {
-          "homeAddress": "19-21 Packer Road",
-          "siteAddress": "Unit 9",
+          "fullAddress": "15 Gilday St, Paddington, QLD 4064",
+          "streetAddress": "15 Gilday St",
+          "city": "Paddington",
+          "state": "QLD",
+          "postcode": "4064",
+          "siteAddress": "Paddington, QLD 4064 Australia",
           "installationArea": "Brisbane",
           "residentHomeowner": true
         },
