@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'; // Impo
 import { useJsApiLoader, GoogleMap, Marker } from '@react-google-maps/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Mail, MessageSquare, Phone, Home, Wrench, Square, Layers, BarChart2, Filter, Star, ShieldCheck, Handshake } from 'lucide-react';
+import { Mail, MessageSquare, Phone, Home, Wrench, Square, Layers, BarChart2, Filter, Star, ShieldCheck, Handshake, HelpCircle } from 'lucide-react';
 // Mock data import for initialising page
 import exampleProposal from '@/data/exampleproposal.json';
 import { cn } from "@/lib/utils";
@@ -184,6 +184,25 @@ export default function ProposalPage() {
       poolVideoRef.current?.pause();
     }
   }, [activeSection]);
+
+  // State for Pool Selection sub-sections (0 = Pool Details, 1 = ColourGuard)
+  const [poolSubSection, setPoolSubSection] = useState(0);
+
+  // Wheel-based sub-section navigation inside Pool Selection
+  const handleSubSectionWheel = useCallback(
+    (e: React.WheelEvent<HTMLDivElement>) => {
+      if (activeSection === CATEGORY_IDS.POOL_SELECTION) {
+        if (e.deltaY > 0 && poolSubSection < 1) {
+          setPoolSubSection(1);
+          e.preventDefault();
+        } else if (e.deltaY < 0 && poolSubSection > 0) {
+          setPoolSubSection(0);
+          e.preventDefault();
+        }
+      }
+    },
+    [activeSection, poolSubSection]
+  );
   // Compute section-based progress
   const sectionIds = Object.values(CATEGORY_IDS);
   const totalSections = sectionIds.length;
@@ -256,6 +275,33 @@ export default function ProposalPage() {
                   autoPlay
                   loop
                   playsInline
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : displaySection === CATEGORY_IDS.CONCRETE_PAVING ? (
+                <img
+                  src="/paving.jpg"
+                  alt="Paving & Concrete"
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : displaySection === CATEGORY_IDS.FENCING ? (
+                <img
+                  src="/fencing.jpg"
+                  alt="Fencing"
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : displaySection === CATEGORY_IDS.WATER_FEATURE ? (
+                <video
+                  src="/WaterFeature.mp4"
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : displaySection === CATEGORY_IDS.ADD_ONS ? (
+                <img
+                  src="/lighting.jpg"
+                  alt="Optional Add-ons"
                   className="w-full h-full object-cover object-center"
                 />
               ) : (
@@ -383,6 +429,7 @@ export default function ProposalPage() {
                   </>
                 ) : id === CATEGORY_IDS.POOL_SELECTION ? (
                   <>
+                    {/* Pool Selection Header */}
                     <div className="mb-4">
                       <h2 className="font-bold font-sans text-white text-3xl mb-4">
                         Your Pool, {proposalData.poolSelection.pool.modelName.replace(/\s*\(.*\)$/, '')}
@@ -393,13 +440,123 @@ export default function ProposalPage() {
                         </span>
                       </h3>
                     </div>
+                    <div className="relative">
+                      <div
+                        className={cn(
+                          "absolute top-0 left-0 w-full transition-all duration-500 ease-in-out",
+                          poolSubSection === 0
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 translate-x-4"
+                        )}
+                      >
+                        <Card className="w-full p-5">
+                          <CardContent className="px-0 space-y-4">
+                            <p className="text-sm font-medium">Pool Details</p>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div className="flex flex-col">
+                                <span className="font-medium">Model Name</span>
+                                <span>{proposalData.poolSelection.pool.modelName}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Range</span>
+                                <span>{proposalData.poolSelection.pool.poolRange}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Type</span>
+                                <span>{proposalData.poolSelection.pool.poolType}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Weight (kg)</span>
+                                <span>{proposalData.poolSelection.pool.weightKg.toLocaleString()}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Volume (L)</span>
+                                <span>{proposalData.poolSelection.pool.volumeLiters.toLocaleString()}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Color</span>
+                                <span>{proposalData.poolSelection.pool.color}</span>
+                              </div>
+                            </div>
+                            <Separator />
+                            <p className="text-sm font-medium">Dimensions (m)</p>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div className="flex flex-col">
+                                <span className="font-medium">Length</span>
+                                <span>{proposalData.poolSelection.pool.dimensions.lengthM}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Width</span>
+                                <span>{proposalData.poolSelection.pool.dimensions.widthM}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Shallow Depth</span>
+                                <span>{proposalData.poolSelection.pool.dimensions.shallowDepthM}</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Deep Depth</span>
+                                <span>{proposalData.poolSelection.pool.dimensions.deepDepthM}</span>
+                              </div>
+                              <div className="flex flex-col col-span-2">
+                                <span className="font-medium">Waterline (L/m)</span>
+                                <span>{proposalData.poolSelection.pool.dimensions.waterlineLitersPerMeter}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                      <div
+                        className={cn(
+                          "absolute top-0 left-0 w-full transition-all duration-500 ease-in-out",
+                          poolSubSection === 1
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 -translate-y-4"
+                        )}
+                      >
+                        <Card className="w-full p-5 mt-6">
+                          <CardContent className="px-0 space-y-4">
+                            <p className="text-sm font-medium">ColourGuard® Pool Colour</p>
+                            <p className="text-sm text-muted-foreground">
+                              The only dual-surface protection system with a clear layer that protects the colour layer.
+                            </p>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="flex flex-col items-center">
+                                <img
+                                  src="/silver-mist.png"
+                                  alt="Silver Mist Pool Colour"
+                                  className="h-24 w-24 object-cover rounded-md mb-2"
+                                />
+                                <span className="text-sm font-medium">Pool Colour</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                <img
+                                  src="/silvermist-water.jpg"
+                                  alt="Silver Mist Water Colour"
+                                  className="h-24 w-24 object-cover rounded-md mb-2"
+                                />
+                                <span className="text-sm font-medium">Water Colour</span>
+                              </div>
+                            </div>
+                            <p className="text-sm font-medium flex items-center space-x-2 cursor-pointer">
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" title="Learn more about ColourGuard" />
+                              <span>Learn more about ColourGuard</span>
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
                     <div className="flex-grow" />
                   </>
                 ) : (
                   <>
-                    <h2 className="text-2xl font-semibold mb-4">
-                      {CATEGORY_NAMES[id]}
-                    </h2>
+                    <div className="mb-4">
+                      <h2 className="font-bold font-sans text-white text-3xl mb-4">
+                        {CATEGORY_NAMES[id]}
+                      </h2>
+                      <h3 className="subheader-text mt-1.5">
+                        Your {CATEGORY_NAMES[id]} Details
+                      </h3>
+                    </div>
                     <div>
                       <p className="text-muted-foreground">
                         Details for {CATEGORY_NAMES[id]} go here...
