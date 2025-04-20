@@ -24,7 +24,7 @@
       },
       "poolSelection": {
         "pool": {
-          "modelName": "Verona (4.5m x 2.5m)",
+          "modelName": "Verona",
           "poolRange": "Latin",
           "poolType": "SMALL",
           "weightKg": 414,
@@ -100,7 +100,7 @@
       "concreteAndPaving": {
         "pavingCategory": "Category 1",
         "squareMeters": 10,
-        "costSummary": {
+        "pavingCostSummary": {
           "ratePerM2": 440,
           "areaM2": 10,
           "totalCost": 4400
@@ -185,7 +185,7 @@
           "quantity": 2,
           "totalCost": 640
         },
-        "costSummary": {
+        "sectionTotal": {
           "totalCost": 12460,
           "totalMargin": 2194
         }
