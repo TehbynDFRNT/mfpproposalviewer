@@ -272,13 +272,110 @@
       },
       "addOns": {
         "heating": {
-          "products": [],
-          "heatingInstallation": []
+          "products": [
+            {
+              "name": "Heat Pump",
+              "isSelected": false,
+              "products": [
+                {
+                  "name": "Sunlover Oasis 13kW Heat Pump",
+                  "cost": 2814.24,
+                  "margin": 2405.76,
+                  "total": 5220.00
+                }
+              ]
+            },
+            {
+              "name": "Blanket and Roller",
+              "isSelected": false,
+              "products": [
+                {
+                  "name": "3mm Daisy Thermal Blanket in Foam Blue with Stainless Steel Roller",
+                  "cost": 1503.00,
+                  "margin": 447.00,
+                  "total": 1950.00
+                }
+              ]
+            }
+          ],
+          "heatingInstallation": [
+            {
+              "installationType": "Blanket & Roller",
+              "installationCost": 240,
+              "inclusions": "Professional installation by technician"
+            },
+            {
+              "installationType": "Heat Pump",
+              "installationCost": 605,
+              "inclusions": [
+                "2 × 3-Way bypass valve T-piece",
+                "Drain hose where required",
+                "2 × Concrete slabs 600 × 300",
+                "Professional handover"
+              ]
+            }
+          ]
         },
-        "poolCleaner": [],
-        "hardwareUpgrades": [],
+        "poolCleaner": [
+          {
+            "name": "Dolphin S300i",
+            "isSelected": false,
+            "products": [
+              {
+                "name": "Dolphin S300i Robotic Pool Cleaner",
+                "cost": 1450,
+                "margin": 550,
+                "total": 2000
+              }
+            ]
+          },
+          {
+            "name": "Dolphin DB2",
+            "isSelected": true,
+            "products": [
+              {
+                "name": "Dolphin DB2 Robotic Pool Cleaner",
+                "cost": 980,
+                "margin": 420,
+                "total": 1400
+              }
+            ]
+          }
+        ],
+        "hardwareUpgrades": [
+          {
+            "name": "Quantum UV Sanitation",
+            "isSelected": false,
+            "products": [
+              {
+                "name": "Quantum UV",
+                "cost": 1750,
+                "margin": 1350,
+                "total": 3100
+              }
+            ]
+          },
+          {
+            "name": "Pool Management & Automation",
+            "isSelected": false,
+            "products": [
+              {
+                "name": "Main Controller",
+                "cost": 1427,
+                "margin": 550,
+                "total": 1977
+              },
+              {
+                "name": "Ten amp slave",
+                "cost": 1677,
+                "margin": 700,
+                "total": 2377
+              }
+            ]
+          }
+        ],
         "otherAddOns": [
-           {
+          {
             "name": "Spa Jets",
             "isSelected": true,
             "products": [
@@ -299,7 +396,7 @@
           {
             "name": "Deck Jet",
             "isSelected": true,
-             "products": [
+            "products": [
               {
                 "name": "2 Jets",
                 "cost": 715,
@@ -307,16 +404,46 @@
                 "total": 1075
               }
             ]
+          },
+          {
+            "name": "Pool & Landscape Lighting",
+            "isSelected": false,
+            "products": [
+              {
+                "name": "LED Pool Lighting (5 units)",
+                "cost": 250,
+                "margin": 400,
+                "total": 650
+              },
+              {
+                "name": "Remote Control for LED lights",
+                "cost": 150,
+                "margin": 100,
+                "total": 250
+              }
+            ]
+          },
+          {
+            "name": "Hand Grab Rails",
+            "isSelected": false,
+            "products": [
+              {
+                "name": "Stainless Steel Grab Rails",
+                "cost": 350,
+                "margin": 150,
+                "total": 500
+              }
+            ]
           }
         ],
         "costSummary": {
-          "totalCost": 2295,
-          "totalMargin": 635
+          "totalCost": 3695,
+          "totalMargin": 1055
         }
       },
       "quoteTotalSummary": {
-        "grandTotalCost": 53301,
-        "grandTotalMargin": 5399
+        "grandTotalCost": 54701,
+        "grandTotalMargin": 5819
       }
     }
   }

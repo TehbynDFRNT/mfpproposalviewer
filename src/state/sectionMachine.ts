@@ -4,10 +4,9 @@ export type SectionId =
   | 'filtration-maintenance-section'
   | 'concrete-paving-section'
   | 'fencing-section'
+  | 'retaining-walls-section'
   | 'water-feature-section'
   | 'add-ons-section'
-  | 'retaining-walls-section'
-  | 'electrical-section'
   | 'site-requirements-section';
 
 /** one *logical* step per scroll tick */
@@ -15,14 +14,14 @@ export type Step =
   | { section: 'customer-info-section' }
   | { section: 'pool-selection-section', sub: 0 }   // Pool Details
   | { section: 'pool-selection-section', sub: 1 }   // ColourGuard
-  | { section: 'filtration-maintenance-section' }   // Filtration and Maintenance
-  | { section: 'concrete-paving-section', sub: 1 }  // Cost Metrics
+  | { section: 'site-requirements-section', sub: 0 } // Installation Pricing
+  | { section: 'site-requirements-section', sub: 1 } // Installation Details
+  | { section: 'filtration-maintenance-section' }   // Pool Filtration
+  | { section: 'concrete-paving-section' }          // Concrete & Paving
   | { section: 'fencing-section' }
-  | { section: 'water-feature-section' }
-  | { section: 'add-ons-section' }
   | { section: 'retaining-walls-section' }
-  | { section: 'electrical-section' }
-  | { section: 'site-requirements-section' };
+  | { section: 'water-feature-section' }
+  | { section: 'add-ons-section' };
 
 /** ordered array drives progress bar & canGoNext/Prev */
 export const STEPS: Step[] = [
@@ -31,15 +30,16 @@ export const STEPS: Step[] = [
   { section: 'pool-selection-section', sub: 0 },
   { section: 'pool-selection-section', sub: 1 },
   
-  { section: 'filtration-maintenance-section' },   // Filtration and Maintenance
+  { section: 'site-requirements-section', sub: 0 }, // Installation Pricing
+  { section: 'site-requirements-section', sub: 1 }, // Installation Details
+  
+  { section: 'filtration-maintenance-section' },   // Pool Filtration
 
-  { section: 'concrete-paving-section', sub: 1 },  // Cost Metrics
+  { section: 'concrete-paving-section' },          // Concrete & Paving
   { section: 'fencing-section' },
+  { section: 'retaining-walls-section' },
   { section: 'water-feature-section' },
   { section: 'add-ons-section' },
-  { section: 'retaining-walls-section' },
-  { section: 'electrical-section' },
-  { section: 'site-requirements-section' },
 ];
 
 export type State = { index: number }            // index in STEPS array
