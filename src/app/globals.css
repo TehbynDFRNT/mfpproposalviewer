@@ -85,7 +85,7 @@ html, body {
     @apply text-white text-2xl;
   }
   /* Right column background */
-  .proposal-right {
+  .proposal-background {
     @apply bg-[#07032D];
   }
 }
