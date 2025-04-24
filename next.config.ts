@@ -5,14 +5,14 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: "AIzaSyCl_Mb4Sc41ZREQ3xw2QNUUIidOkbrhjpE",
   },
+  // Temporarily ignore ESLint errors during build
+  // You can remove this once you've cleaned up the ESLint issues
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  // Temporarily ignore TypeScript errors during build
+  // You can remove this once you've cleaned up the TypeScript issues
   typescript: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has type errors.
     ignoreBuildErrors: true,
   },
 };

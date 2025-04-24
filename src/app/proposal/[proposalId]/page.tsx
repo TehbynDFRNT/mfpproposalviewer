@@ -299,11 +299,11 @@ export default function ProposalPage() {
       case CATEGORY_IDS.CUSTOMER_INFO:
         return { type: 'map', address: proposalData.customerInfo.propertyDetails.fullAddress };
       case CATEGORY_IDS.POOL_SELECTION:
-        if (sub === 0) return { type: 'video', src: '/Sheffield.mp4' };
+        if (sub === 0) return { type: 'video', src: '/Sheffield.mov' };
         if (sub === 1) return { type: 'image', src: '/silvermist-water.jpg', alt: 'Pool Water Colour' };
         if (sub === 2) return { type: 'placeholder', name: 'Swim-Ready Essentials' };
         if (sub === 3) return { type: 'placeholder', name: 'Site-Work & Compliance' };
-        return { type: 'video', src: '/Sheffield.mp4' };
+        return { type: 'video', src: '/Sheffield.mov' };
       case CATEGORY_IDS.FILTRATION_MAINTENANCE:
         return { type: 'video', src: '/fire.mp4', alt: 'Pool Filtration' };
       case CATEGORY_IDS.CONCRETE_PAVING:
@@ -1940,7 +1940,7 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                       node.play().catch(e => console.log("Video play error:", e));
                     }
                   }}
-                  src="/Sheffield.mp4"
+                  src="/Sheffield.mov"
                   muted
                   loop
                   playsInline
