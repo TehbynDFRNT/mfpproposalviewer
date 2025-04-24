@@ -153,7 +153,9 @@ export default function ProposalPage() {
   const [spaJetsOpen, setSpaJetsOpen] = useState<boolean>(false);
   const [deckJetsOpen, setDeckJetsOpen] = useState<boolean>(false);
   const [poolHeatingOpen, setPoolHeatingOpen] = useState<boolean>(false);
-  const { section: activeSection, sub = 0 } = SM.current(machineState);
+  const currentStep = SM.current(machineState);
+  const activeSection = currentStep.section;
+  const sub = 'sub' in currentStep ? currentStep.sub : 0;
   const scrollColumnRef = useRef<HTMLDivElement | null>(null); // Ref for the scrollable container
 
   // Prepare data for the select dropdown (unique sections)
