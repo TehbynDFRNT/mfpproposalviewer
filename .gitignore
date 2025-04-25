@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Raw media files (only optimized versions are committed)
+/public/images_raw/
+/public/videos_raw/
+/src/app/proposal/mock/page.tsx.new
