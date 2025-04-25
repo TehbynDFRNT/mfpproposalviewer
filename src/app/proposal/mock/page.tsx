@@ -11,6 +11,8 @@ import { Mail, MessageSquare, Phone, Home, Wrench, Square, Layers, BarChart2, Fi
 // Mock data import for initialising page
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from "next/image";
+import { ResponsiveVideo } from "@/components/ResponsiveVideo";
 import {
   Select,
   SelectContent,
@@ -240,25 +242,25 @@ export default function ProposalPage() {
       case CATEGORY_IDS.CUSTOMER_INFO:
         return { type: 'map', address: proposalData.customerInfo.propertyDetails.fullAddress };
       case CATEGORY_IDS.POOL_SELECTION:
-        if (sub === 0) return { type: 'video', src: '/Sheffield.mov' };
-        if (sub === 1) return { type: 'image', src: '/silvermist-water.jpg', alt: 'Pool Water Colour' };
+        if (sub === 0) return { type: 'video', videoName: 'Sheffield' };
+        if (sub === 1) return { type: 'image', src: '/_opt/silvermist-water.webp', alt: 'Pool Water Colour' };
         if (sub === 2) return { type: 'placeholder', name: 'Swim-Ready Essentials' };
         if (sub === 3) return { type: 'placeholder', name: 'Site-Work & Compliance' };
-        return { type: 'video', src: '/Sheffield.mov' };
+        return { type: 'video', videoName: 'Sheffield' };
       case CATEGORY_IDS.FILTRATION_MAINTENANCE:
-        return { type: 'video', src: '/fire.mp4', alt: 'Pool Filtration' };
+        return { type: 'video', videoName: 'fire', alt: 'Pool Filtration' };
       case CATEGORY_IDS.CONCRETE_PAVING:
-        if (sub === 0) return { type: 'image', src: '/pavers.png', alt: 'Paving Options' };
-        if (sub === 1) return { type: 'image', src: '/paving.jpg', alt: 'Paving & Concrete Cost Metrics' };
-        return { type: 'image', src: '/paving.jpg', alt: 'Paving & Concrete' };
+        if (sub === 0) return { type: 'image', src: '/_opt/pavers.webp', alt: 'Paving Options' };
+        if (sub === 1) return { type: 'image', src: '/_opt/paving.webp', alt: 'Paving & Concrete Cost Metrics' };
+        return { type: 'image', src: '/_opt/paving.webp', alt: 'Paving & Concrete' };
       case CATEGORY_IDS.FENCING:
-        return { type: 'image', src: '/fencing.jpg', alt: 'Fencing' };
+        return { type: 'image', src: '/_opt/fencing.webp', alt: 'Fencing' };
       case CATEGORY_IDS.RETAINING_WALLS:
-        return { type: 'image', src: '/RetainingWallImagery.jpg', alt: 'Paving & Concrete' };
+        return { type: 'image', src: '/_opt/RetainingWallImagery.webp', alt: 'Paving & Concrete' };
       case CATEGORY_IDS.WATER_FEATURE:
-        return { type: 'video', src: '/WaterFeature.mp4', alt: 'Water Feature' };
+        return { type: 'video', videoName: 'WaterFeature', alt: 'Water Feature' };
       case CATEGORY_IDS.ADD_ONS:
-        return { type: 'image', src: '/lighting.jpg', alt: 'Extras & Upgrades' };
+        return { type: 'image', src: '/_opt/lighting.webp', alt: 'Extras & Upgrades' };
       case CATEGORY_IDS.SITE_REQUIREMENTS:
         if (sub === 0) return { type: 'placeholder', name: 'Pool Installation Pricing' };
         if (sub === 1) return { type: 'placeholder', name: 'Installation Details' };
@@ -313,34 +315,13 @@ const scrollLock = useRef(false);
 
 // ─── handler ─────────────────────────────────────────────────────────────
 const handleWheel = useCallback((e: React.WheelEvent) => {
-  const { deltaY } = e;
+  // Disabled scroll wheel based trigger for section changes
+  // Now relying only on the navigation menu for section changes
+  // Original mobile check is preserved for reference
+  // if (typeof window !== 'undefined' && window.innerWidth < 1024) return;
   
-  if (typeof window !== 'undefined' && window.innerWidth < 1024) return;
-
-  // 1. ignore micro‑movements
-  if (Math.abs(deltaY) < MIN_DELTA) return;
-
-  // 2. ignore if we're still in cooldown
-  if (scrollLock.current) { e.preventDefault(); return; }
-
-  // 3. decide direction   (+1 = down, -1 = up)
-  const dir: 1 | -1 = deltaY > 0 ? 1 : -1;
-
-  /* 1 step in the machine ⤵︎ */
-  setMachineState(s =>
-    dir === 1 && SM.canGoNext(s) ? SM.next(s) :
-    dir === -1 && SM.canGoPrev(s) ? SM.prev(s) :
-    s
-  );
-  /* 2 store direction for variants */
-  setDir(dir);
-  lastDir.current = dir;
-
-  /* 3 lock a short cooldown */
-  scrollLock.current = true;
-  setTimeout(() => { scrollLock.current = false; }, SCROLL_COOLDOWN_MS);
-
-  e.preventDefault();
+  // No preventDefault to allow normal scrolling within sections
+  return;
 }, []);
 
 const handleSectionSelectChange = useCallback((newSectionId: string) => {
@@ -397,7 +378,7 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
       <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
         {/* Logo */}
         <div className="flex items-center">
-          <img src="/logo.png" alt="MFP Pools Logo" className="h-8 w-auto" />
+          <Image src="/_opt/logo.webp" alt="MFP Pools Logo" className="h-8 w-auto" width={160} height={40} />
         </div>
         {/* Contact Icons */}
         <div className="flex items-center space-x-2">
@@ -503,17 +484,21 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                               <Card className="w-full overflow-y-auto shadow-lg">
                                 <div className="w-full relative">
                                   <div className="overflow-hidden h-48">
-                                    <img 
-                                      src="/verona-hero.jpg" 
+                                    <Image 
+                                      src="/_opt/verona-hero.webp" 
                                       alt="Verona Pool" 
                                       className="w-full h-full object-cover object-top" 
+                                      width={800}
+                                      height={450}
                                     />
                                     {/* Overlay layout image - bottom right positioning */}
                                     <div className="absolute bottom-0 right-0 p-4">
-                                      <img 
-                                        src="/verona_layout.png" 
+                                      <Image 
+                                        src="/_opt/verona_layout.webp" 
                                         alt="Verona Pool Layout" 
                                         className="w-28 object-contain"
+                                        width={112} 
+                                        height={80}
                                       />
                                     </div>
                                   </div>
@@ -583,10 +568,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                                     <div className="flex flex-row items-center w-full">
                                       {/* Left: VIP graphic */}
                                       <div className="flex-shrink-0 pr-4 flex items-center justify-center h-full">
-                                        <img
-                                          src="/silver_mist_half_circle.png"
+                                        <Image
+                                          src="/_opt/silver_mist_half_circle.webp"
                                           alt="ColourGuard® Silver Mist"
                                           className="w-16 h-16 object-contain transform rotate-90"
+                                          width={64}
+                                          height={64}
                                         />
                                       </div>
 
@@ -615,10 +602,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                                     <div className="flex flex-row items-center w-full">
                                       {/* Left: VIP graphic */}
                                       <div className="flex-shrink-0 pr-4 flex items-center justify-center h-full">
-                                        <img
-                                          src="/graphene.png"
+                                        <Image
+                                          src="/_opt/graphene.webp"
                                           alt="Graphene VIP Upgrade"
                                           className="w-16 rounded-md object-contain"
+                                          width={64}
+                                          height={64}
                                         />
                                       </div>
 
@@ -647,10 +636,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                                     <div className="flex flex-row items-center w-full">
                                       {/* Left: VIP graphic */}
                                       <div className="flex-shrink-0 pr-4 flex items-center justify-center h-full">
-                                        <img
-                                          src="/coping.png"
+                                        <Image
+                                          src="/_opt/coping.webp"
                                           alt="Extra Pavers VIP Upgrade"
                                           className="w-16 rounded-md object-contain"
+                                          width={64}
+                                          height={64}
                                         />
                                       </div>
 
@@ -679,10 +670,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                                     <div className="flex flex-row items-center w-full">
                                       {/* Left: VIP graphic */}
                                       <div className="flex-shrink-0 pr-4 flex items-center justify-center h-full">
-                                        <img
-                                          src="/quadlid.png"
+                                        <Image
+                                          src="/_opt/quadlid.webp"
                                           alt="Quad Skimmer Lid"
                                           className="w-16 rounded-md object-contain"
+                                          width={64}
+                                          height={64}
                                         />
                                       </div>
 
@@ -959,10 +952,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                             <div className="flex flex-row items-center w-full">
                               {/* Left: VIP graphic */}
                               <div className="flex-shrink-0 pr-4 flex items-center justify-center h-full">
-                                <img
-                                  src="/3dstone.png"
+                                <Image
+                                  src="/_opt/3dstone.webp"
                                   alt="Premium 3DStone Paver"
                                   className="w-16 h-16 rounded-md object-contain"
+                                  width={64}
+                                  height={64}
                                 />
                               </div>
                               
@@ -997,19 +992,13 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                             
                             <Separator className="mb-4" />
                             
-                            {/* Filtration Type Selection */}
+                            {/* Premium Filtration Type (Fixed) */}
                             <div className="mb-4">
-                              <p className="text-sm font-medium mb-2">Filtration Type</p>
-                              <Select defaultValue="premium">
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Select filtration type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="premium">Premium (Recommended)</SelectItem>
-                                  <SelectItem value="standard">Standard</SelectItem>
-                                  <SelectItem value="advanced">Advanced</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <div className="flex items-center">
+                                <p className="text-sm font-medium">Premium Filtration System</p>
+                                <span className="ml-2 text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">Recommended</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">High-efficiency filtration with extended warranty</p>
                             </div>
                             
                             {/* Filtration equipment list */}
@@ -1040,10 +1029,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                             <div className="flex flex-row items-center w-full">
                               {/* Left: VIP graphic */}
                               <div className="flex-shrink-0 pr-4 flex items-center justify-center h-full">
-                                <img
-                                  src="/StartUpPack.png"
+                                <Image
+                                  src="/_opt/StartUpPack.webp"
                                   alt="Premium Mineral Start-up Kit"
                                   className="w-16 h-16 rounded-md object-contain"
+                                  width={64}
+                                  height={64}
                                 />
                               </div>
 
@@ -1073,10 +1064,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                             <div className="flex flex-row items-center w-full">
                               {/* Left: VIP graphic */}
                               <div className="flex-shrink-0 pr-4 flex items-center justify-center h-full">
-                                <img
-                                  src="/Handoverkit.png"
+                                <Image
+                                  src="/_opt/Handoverkit.webp"
                                   alt="Daily Clean Kit"
                                   className="w-16 h-16 rounded-md object-contain"
+                                  width={64}
+                                  height={64}
                                 />
                               </div>
 
@@ -1185,10 +1178,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                             <div className="flex flex-row items-center w-full">
                               {/* Left: VIP graphic */}
                               <div className="flex-shrink-0 pr-4 flex items-center justify-center h-full">
-                                <img 
-                                  src="/fencinghero.png" 
+                                <Image 
+                                  src="/_opt/fencinghero.webp" 
                                   alt="Temporary Pool Fencing" 
                                   className="w-16 h-16 object-cover rounded-md" 
+                                  width={64}
+                                  height={64}
                                 />
                               </div>
 
@@ -1217,10 +1212,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                         <Card className="w-full overflow-y-auto shadow-lg">
                           <div className="w-full relative">
                             <div className="overflow-hidden h-48">
-                              <img 
-                                src="/retainingwall.png" 
+                              <Image 
+                                src="/_opt/retainingwall.webp" 
                                 alt="Block Retaining Wall" 
                                 className="w-full h-full object-cover object-top" 
+                                width={800}
+                                height={450}
                               />
                               {/* Overlay diagram - bottom right positioning */}
                               <div className="absolute bottom-0 right-0 p-4">
@@ -1369,10 +1366,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                           <CardContent className="px-0">
                             <div className="flex items-start">
                               <div className="flex-shrink-0 mr-4">
-                                <img 
-                                  src="/Jonah.jpeg" 
+                                <Image 
+                                  src="/_opt/Jonah.webp" 
                                   alt="Jonah" 
                                   className="h-16 w-16 rounded-full object-cover border-2 border-[#DB9D6A]" 
+                                  width={64}
+                                  height={64}
                                 />
                               </div>
                               <div className="flex-1">
@@ -1398,10 +1397,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                         <Card className="w-full overflow-y-auto shadow-lg">
                           <div className="w-full relative">
                             <div className="overflow-hidden h-48">
-                              <img 
-                                src="/water-feature-hero.png" 
+                              <Image 
+                                src="/_opt/water-feature-hero.webp" 
                                 alt="Water Feature" 
                                 className="w-full h-full object-cover object-top" 
+                                width={800}
+                                height={450}
                               />
                               {/* Overlay diagram - bottom right positioning */}
                               <div className="absolute bottom-0 right-0 p-4">
@@ -1487,7 +1488,7 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                                 {/* Left: graphic */}
                                 <div className="flex-shrink-0 pr-4 flex items-center justify-start h-full pt-1">
                                   <div className="w-16 h-16 rounded-md overflow-hidden">
-                                    <img src="/poolcleaner.png" alt="Dolphin DB2 Pool Cleaner" className="w-full h-full object-cover" />
+                                    <Image src="/_opt/poolcleaner.webp" alt="Dolphin DB2 Pool Cleaner" className="w-full h-full object-cover" width={400} height={300} />
                                   </div>
                                 </div>
                                 
@@ -1522,7 +1523,7 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                                 {/* Left: graphic */}
                                 <div className="flex-shrink-0 pr-4 flex items-center justify-start h-full pt-1">
                                   <div className="w-16 h-16 rounded-md overflow-hidden">
-                                    <img src="/spajet.png" alt="Spa Jets" className="w-full h-full object-cover" />
+                                    <Image src="/_opt/spajet.webp" alt="Spa Jets" className="w-full h-full object-cover" width={400} height={300} />
                                   </div>
                                 </div>
                                 
@@ -1559,7 +1560,7 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                                 {/* Left: graphic */}
                                 <div className="flex-shrink-0 pr-4 flex items-center justify-start h-full pt-1">
                                   <div className="w-16 h-16 rounded-md overflow-hidden">
-                                    <img src="/deckjet.png" alt="Deck Jets" className="w-full h-full object-cover" />
+                                    <Image src="/_opt/deckjet.webp" alt="Deck Jets" className="w-full h-full object-cover" width={400} height={300} />
                                   </div>
                                 </div>
                                 
@@ -1596,7 +1597,7 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                                 {/* Left: graphic */}
                                 <div className="flex-shrink-0 pr-4 flex items-center justify-start h-full pt-1">
                                   <div className="w-16 h-16 rounded-md overflow-hidden">
-                                    <img src="/poolblanket.png" alt="Pool Heating Options" className="w-full h-full object-cover" />
+                                    <Image src="/_opt/poolblanket.webp" alt="Pool Heating Options" className="w-full h-full object-cover" width={400} height={300} />
                                   </div>
                                 </div>
                                 
@@ -1715,10 +1716,6 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
           {/* --- End Section Navigation Select --- */}
         </div>
         
-        {/* Helper hint for mobile/desktop layout */}
-        <div className="hidden lg:block text-xs text-neutral-400 absolute bottom-2 right-4">
-          Use mouse wheel to navigate sections
-        </div>
         
         {/* Visual Column (Right Column) */}
         <div className="order-1 lg:order-2 w-full lg:w-2/3 h-[40vh] lg:sticky lg:top-16 lg:h-[calc(100vh-8rem)] flex flex-col items-center justify-center overflow-hidden touch-none proposal-right bg-[#07032D] proposal-background transition-colors duration-300">
@@ -1748,10 +1745,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                 onClick={() => setSitePlanExpanded(!sitePlanExpanded)}
               >
                 <div>
-                  <img 
-                    src="/siteplan.png" 
+                  <Image 
+                    src="/_opt/siteplan.webp" 
                     alt="Property Site Plan" 
                     className={`rounded ${sitePlanExpanded ? 'w-96' : 'w-48'} transition-all duration-300`}
+                    width={sitePlanExpanded ? 384 : 192}
+                    height={sitePlanExpanded ? 288 : 144}
                   />
                   {sitePlanExpanded && (
                     <motion.div
@@ -1775,11 +1774,6 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
             )}
           </AnimatePresence>
           
-          {/* Mobile scroll hint */}
-          <div className="hidden lg:block text-xs text-neutral-400 absolute left-4 bottom-16">
-            ↑ Rotate device for best experience ↑
-          </div>
-
           {/* Fixed Quote Price Card */}
           <div className="hidden lg:flex absolute bottom-4 right-4 z-50 bg-background/90 backdrop-blur-sm text-foreground p-4 rounded-lg shadow-lg border border-[#DB9D6A]/20 w-[28rem] overflow-hidden">
             <div className="flex flex-col">
@@ -1922,18 +1916,8 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                 exit="exit"
                 className="w-full h-full flex justify-center items-start"
               >
-                <video
-                  ref={(node) => {
-                    if (node) {
-                      // Simply play the video immediately when it's mounted
-                      node.play().catch(e => console.log("Video play error:", e));
-                    }
-                  }}
-                  src="/Sheffield.mov"
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
+                <ResponsiveVideo 
+                  baseName="Sheffield"
                   className="w-full h-full object-cover object-top"
                 />
               </motion.div>
@@ -1949,10 +1933,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                 exit="exit" 
                 className="w-full h-full flex justify-center items-start"
               >
-                <img
-                  src="/paving.jpg"
+                <Image
+                  src="/_opt/paving.webp"
                   alt="Paving & Concrete"
                   className="w-full h-full object-cover object-top"
+                  width={800}
+                  height={600}
                 />
               </motion.div>
             )}
@@ -1967,10 +1953,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                 exit="exit"
                 className="w-full h-full flex justify-center items-start"
               >
-                <img
-                  src="/fencing.jpg"
+                <Image
+                  src="/_opt/fencing.webp"
                   alt="Fencing"
                   className="w-full h-full object-cover object-top"
+                  width={800}
+                  height={600}
                 />
               </motion.div>
             )}
@@ -1985,10 +1973,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                 exit="exit"
                 className="w-full h-full flex items-center justify-center"
               >
-                <img
-                  src="/RetainingWallImagery.png"
+                <Image
+                  src="/_opt/RetainingWallImagery.webp"
                   alt="Retaining Wall"
                   className="w-full h-full object-cover object-top"
+                  width={800}
+                  height={600}
                 />
               </motion.div>
             )}
@@ -2003,18 +1993,8 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                 exit="exit"
                 className="w-full h-full flex justify-center items-start"
               >
-                <video
-                  ref={(node) => {
-                    if (node) {
-                      // Simply play the video immediately when it's mounted
-                      node.play().catch(e => console.log("Video play error:", e));
-                    }
-                  }}
-                  src="/WaterFeature.mp4"
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
+                <ResponsiveVideo 
+                  baseName="waterfeature"
                   className="w-full h-full object-cover object-top"
                 />
               </motion.div>
@@ -2030,10 +2010,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                 exit="exit"
                 className="w-full h-full flex justify-center items-start"
               >
-                <img
-                  src="/lighting.jpg"
+                <Image
+                  src="/_opt/lighting.webp"
                   alt="Optional Add-ons"
                   className="w-full h-full object-cover object-top"
+                  width={800}
+                  height={600}
                 />
               </motion.div>
             )}
@@ -2048,18 +2030,8 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                 exit="exit"
                 className="w-full h-full flex justify-center items-start"
               >
-                <video
-                  ref={(node) => {
-                    if (node) {
-                      // Simply play the video immediately when it's mounted
-                      node.play().catch(e => console.log("Video play error:", e));
-                    }
-                  }}
-                  src="/fire.mp4"
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
+                <ResponsiveVideo 
+                  baseName="fire"
                   className="w-full h-full object-cover object-top"
                 />
               </motion.div>
@@ -2075,18 +2047,8 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                 exit="exit"
                 className="w-full h-full flex justify-center items-start"
               >
-                <video
-                  ref={(node) => {
-                    if (node) {
-                      // Simply play the video immediately when it's mounted
-                      node.play().catch(e => console.log("Video play error:", e));
-                    }
-                  }}
-                  src="/FrannaCrane.mp4"
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
+                <ResponsiveVideo 
+                  baseName="FrannaCrane"
                   className="w-full h-full object-cover object-top"
                 />
               </motion.div>

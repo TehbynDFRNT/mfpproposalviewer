@@ -2,11 +2,19 @@
   "name": "mfp",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "img:clean": "rm -rf public/_opt",
+    "img:build": "node scripts/optimize-images.js",
+    "img:diff": "git status --short public/_opt",
+    "vid:clean": "rm -rf public/_vid",
+    "vid:build": "node scripts/optimize-videos.js",
+    "media:clean": "npm run img:clean && npm run vid:clean",
+    "media:build": "npm run img:build && npm run vid:build"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.2.2",
@@ -36,6 +44,7 @@
     "eslint-config-next": "15.3.1",
     "fast-glob": "^3.3.3",
     "fluent-ffmpeg": "^2.1.3",
+    "ignore-loader": "^0.1.2",
     "p-limit": "^6.2.0",
     "sharp": "^0.34.1",
     "tailwindcss": "^4",

@@ -15,6 +15,18 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Exclude raw media files from the build
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /images_raw\//,
+      use: 'ignore-loader',
+    });
+    config.module.rules.push({
+      test: /videos_raw\//,
+      use: 'ignore-loader',
+    });
+    return config;
+  },
 };
 
 export default nextConfig;
