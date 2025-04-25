@@ -11,7 +11,7 @@ export default function HomePage() {
       {/* Navigation Links */}
       <nav className="mt-12 flex flex-col space-y-4 items-center">
         <Button variant="link" asChild>
-          <Link href="/proposal/123">View Sample Proposal (ID: 123)</Link>
+          <Link href="/proposal/mock">View Sample Proposal (Mock)</Link>
         </Button>
         <Button variant="link" asChild>
           <Link href="/contract/456">View Sample Contract (ID: 456)</Link>
