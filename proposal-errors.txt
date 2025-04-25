@@ -1,0 +1,177 @@
+     ./src/app/proposal/[proposalId]/page.tsx
+     10:117  Error: 'HelpCircle' is defined but never used.  
+     @typescript-eslint/no-unused-vars
+     10:148  Error: 'PackageCheck' is defined but never used.  
+     @typescript-eslint/no-unused-vars
+     12:10  Error: 'cn' is defined but never used.  
+     @typescript-eslint/no-unused-vars
+     34:13  Error: Unexpected any. Specify a different type.  
+     @typescript-eslint/no-explicit-any
+     37:7  Error: 'CostTableCard' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     144:9  Error: 'proposalId' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     148:10  Error: 'dir' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     153:10  Error: 'spaJetsOpen' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     153:23  Error: 'setSpaJetsOpen' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     154:10  Error: 'deckJetsOpen' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     154:24  Error: 'setDeckJetsOpen' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     155:10  Error: 'poolHeatingOpen' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     155:27  Error: 'setPoolHeatingOpen' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     191:9  Error: 'poolSubSectionsData' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     202:9  Error: 'essentialsItems' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     213:9  Error: 'siteWorkItems' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     227:30  Error: 'sectionTotal' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     261:9  Error: 'concretePavingSubSectionsData' is assigned a value but never 
+     used.  @typescript-eslint/no-unused-vars
+     267:9  Error: 'installationSubSectionsData' is assigned a value but never 
+     used.  @typescript-eslint/no-unused-vars
+     281:9  Error: 'pavingOptionItems' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     289:9  Error: 'pavingSelectionItems' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     297:9  Error: 'getLeftColumnVisual' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     297:58  Error: 'subIndex' is defined but never used.  
+     @typescript-eslint/no-unused-vars
+     358:9  Error: 'registerVideoRef' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     443:11  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     468:49  Error: 'key' is defined but never used.  
+     @typescript-eslint/no-unused-vars
+     472:21  Error: 'isCustomerInfo' is assigned a value but never used.  
+     @typescript-eslint/no-unused-vars
+     532:37  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     539:39  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     612:41  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     644:41  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     676:41  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     708:41  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     890:247  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, 
+     `&rsquo;`.  react/no-unescaped-entities
+     926:291  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, 
+     `&rsquo;`.  react/no-unescaped-entities
+     988:33  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1069:33  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1102:33  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1214:33  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1246:31  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1398:33  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1427:31  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1504:183  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, 
+     `&rsquo;`.  react/no-unescaped-entities
+     1516:37  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1551:37  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1588:37  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1625:37  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1772:19  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1963:17  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1981:17  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     1999:17  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+     2044:17  Warning: Using `<img>` could result in slower LCP and higher 
+     bandwidth. Consider using `<Image />` from `next/image` or a custom image 
+     loader to automatically optimize images. This may incur additional usage or 
+     cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+      @next/next/no-img-element
+
+     info  - Need to disable some ESLint rules? Learn more here: 
+     https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
