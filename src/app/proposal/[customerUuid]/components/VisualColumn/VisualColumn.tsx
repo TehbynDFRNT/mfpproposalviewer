@@ -10,16 +10,8 @@ import { ResponsiveVideo } from '@/components/ResponsiveVideo';
 import { CATEGORY_IDS } from '../../ProposalViewer.constants';
 import type { VisualColumnProps, Visual } from './VisualColumn.types';
 
-// Animation timing constants
-const F_OUT = 0.35;  // section & visual fade-out
-const F_IN = 0.45;   // fade-in duration
-
-// Animation variants
-const fadeOut = { exit: { opacity: 0, transition: { duration: F_OUT } } };
-const visualIn = {
-  enter: { opacity: 1, transition: { duration: F_IN, ease: 'easeOut' } },
-  initial: { opacity: 0 }
-};
+// Import animation variants from shared module
+import { fadeOut, visualIn } from '@/lib/animation';
 
 // Helper for left-column visuals based on section and sub-section
 const getLeftColumnVisual = (

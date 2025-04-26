@@ -6,12 +6,12 @@ import type { PavingMetric } from '@/types/paving';
 
 export default function ConcretePavingCards({ 
   data, 
-  metricsRows, 
-  metricsTotal 
+  metricsRows = [], 
+  metricsTotal = 0 
 }: { 
   data: ProposalData['concreteAndPaving']; 
-  metricsRows: PavingMetric[];
-  metricsTotal: number; 
+  metricsRows?: PavingMetric[];
+  metricsTotal?: number; 
 }) {
   return (
     <div className="space-y-6 h-full overflow-y-auto">
