@@ -26,11 +26,11 @@ export function ResponsiveVideo({
   return (
     <video
       ref={ref}
+      {...props}
       autoPlay={autoPlay}
       muted
       loop
       playsInline
-      {...props}              /* keep this last so camel-case survives */
     >
       <source src={`/_vid/${baseName}-720.webm`}  type="video/webm" />
       <source src={`/_vid/${baseName}-1080.mp4`} type="video/mp4" />

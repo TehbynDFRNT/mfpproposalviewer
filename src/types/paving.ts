@@ -44,6 +44,12 @@ export interface ConcreteCuts {
   totalCost: number;
 }
 
+export interface PavingMetric {
+  name: string;
+  cost: number;
+  benefit?: string;
+}
+
 export interface ConcreteAndPaving {
   pavingCategory: string;
   squareMeters: number;
