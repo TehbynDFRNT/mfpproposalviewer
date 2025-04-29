@@ -25,6 +25,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Format**: Use 2-space indentation, single quotes for strings
 - **Documentation**: Add JSDoc comments for complex functions and components
 - **Framer Motion**: Use for animations and transitions
+- **Dynamic Routes**: Always remember to reference the dymanic [] path properly to avoid errors.
+- **File Paths with Special Characters**: When working with file paths that contain special characters (like square brackets []), always enclose the path in double quotes to prevent shell pattern expansion. For any file or directory path that contains special characters such as square brackets [] (used in Next.js dynamic routes), spaces, wildcards (*, ?), or other special characters ($, !, etc.), always enclose the path in double quotes, like: ./scripts/create-component-prompt.sh "src/app/proposal/[customerUuid]/components/sections/PoolSelectionCards/DetailsCard.tsx"
 
 ## Proposal Page Section References
 Reference tags for major sections in `src/app/proposal/[proposalId]/page.tsx`:

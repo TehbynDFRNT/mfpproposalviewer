@@ -1,9 +1,11 @@
-import type { ProposalData } from '@/types/proposal';
+import type { Snapshot } from '@/app/lib/types/snapshot';
 
 // Visual types
 export type MapVisual = {
   type: 'map';
   address: string;
+  /** optional: centre the map if we already geocoded on the backend */
+  coordinates?: { lat: number; lng: number };
 };
 
 export type VideoVisual = {
@@ -30,6 +32,6 @@ export interface VisualColumnProps {
   subIndex: number;
   isLoaded: boolean;                       // G-Maps
   mapCenter: { lat: number; lng: number } | null;
-  proposalData: ProposalData;
+  snapshot: Snapshot;
   resetScroll: () => void;
 }

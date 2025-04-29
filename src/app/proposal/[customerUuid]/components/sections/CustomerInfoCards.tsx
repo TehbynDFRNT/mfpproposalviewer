@@ -2,9 +2,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Mail, Phone, Home, Wrench, Square, Layers, BarChart2, Filter, Star, ShieldCheck, Handshake } from 'lucide-react';
 import Image from "next/image";
-import type { ProposalData } from '@/types/proposal';
+import type { Snapshot } from "@/app/lib/types/snapshot";
 
-export default function CustomerInfoCards({ data }: { data: ProposalData['customerInfo'] }) {
+export default function CustomerInfoCards({ snapshot }: { snapshot: Snapshot }) {
+  const { poolProject } = snapshot;
+  const installationAddress = poolProject.siteAddress ?? poolProject.homeAddress ?? 'Address pending...';
   return (
     <div className="space-y-6 h-full overflow-y-auto">
       {/* Customer info cards rendered sequentially */}
@@ -14,20 +16,20 @@ export default function CustomerInfoCards({ data }: { data: ProposalData['custom
           <p className="text-sm font-medium">Your Best Contact Details</p>
           <div className="grid grid-cols-2 gap-4">
             <a
-              href={`tel:${data.phoneNumber}`}
+              href={`tel:${poolProject.phone}`}
               className="flex items-center gap-2 text-sm hover:underline"
-              aria-label={`Call ${data.phoneNumber}`}
+              aria-label={`Call ${poolProject.phone}`}
             >
               <Phone className="h-4 w-4 text-muted-foreground" />
-              <span>{data.phoneNumber}</span>
+              <span>{poolProject.phone}</span>
             </a>
             <a
-              href={`mailto:${data.emailAddress}`}
+              href={`mailto:${poolProject.email}`}
               className="flex items-center gap-2 text-sm hover:underline"
-              aria-label={`Email ${data.emailAddress}`}
+              aria-label={`Email ${poolProject.email}`}
             >
               <Mail className="h-4 w-4 text-muted-foreground" />
-              <span>{data.emailAddress}</span>
+              <span>{poolProject.email}</span>
             </a>
           </div>
           <Separator />
@@ -35,8 +37,26 @@ export default function CustomerInfoCards({ data }: { data: ProposalData['custom
           <p className="text-sm font-medium">Pool Installation Location</p>
           <div className="flex items-start gap-2">
             <Home className="h-4 w-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">{data.propertyDetails.fullAddress}</p>
+            <p className="text-sm text-muted-foreground">
+              {installationAddress}
+            </p>
           </div>
+          
+          {/* Show Home Address if different from Installation Location */}
+          {poolProject.siteAddress &&
+           poolProject.homeAddress &&
+           poolProject.homeAddress !== poolProject.siteAddress && (
+            <>
+              <Separator className="my-2" />
+              <p className="text-sm font-medium mt-3">Owner's Home Address</p>
+              <div className="flex items-start gap-2">
+                <Home className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  {poolProject.homeAddress}
+                </p>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
       

@@ -1,9 +1,19 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from "next/image";
-import type { ProposalData } from '@/types/proposal';
+import type { Snapshot } from "@/app/lib/types/snapshot";
 
-export default function AddOnCards({ data }: { data: ProposalData['addOns'] }) {
+export default function AddOnCards({
+  data,
+}: {
+  data: Snapshot['referenceTables']['extraPavingCosts']
+}) {
+  // compute the total across all rows
+  const totalCost = data.reduce(
+    (sum, row) => sum + row.paver_cost + row.margin_cost,
+    0
+  );
+  
   // Local state for drawer cards, replacing the parent component's state
   const [spaJetsOpen, setSpaJetsOpen] = useState<boolean>(false);
   const [deckJetsOpen, setDeckJetsOpen] = useState<boolean>(false);
@@ -170,7 +180,7 @@ export default function AddOnCards({ data }: { data: ProposalData['addOns'] }) {
         <CardContent className="p-5">
           <div className="flex justify-between items-baseline">
             <p className="font-semibold">Extras & Upgrades Total</p>
-            <p className="text-xl font-bold">${data.costSummary.totalCost.toLocaleString()}</p>
+            <p className="text-xl font-bold">${totalCost.toLocaleString()}</p>
           </div>
         </CardContent>
       </Card>

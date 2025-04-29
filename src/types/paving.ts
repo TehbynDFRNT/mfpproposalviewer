@@ -1,90 +1,24 @@
-export interface PavingCostSummary {
-  ratePerM2: number;
+// src/types/paving.ts
+export interface PavingLine {
+  id: string;
+  category: string;
   areaM2: number;
+  unitCost: number;
   totalCost: number;
 }
 
-export interface SectionTotal {
-  totalCost: number;
-  totalMargin: number;
-}
-
-export interface RateBreakdownPerM2 {
-  paverCost: number;
-  wastageCost: number;
-  marginCost: number;
-  materialsSubtotal: number;
-  labourCost: number;
-}
-
-export interface RateBreakdownTotal {
-  paverCost: number;
-  wastageCost: number;
-  marginCost: number;
-  materialsSubtotal: number;
-  labourCost: number;
-}
-
-export interface RateBreakdown {
-  perM2: RateBreakdownPerM2;
-  totalForArea: RateBreakdownTotal;
-}
-
-export interface ConcretePump {
-  concretePumpRequired: boolean;
-  numberOfDaysRequired: number;
-  ratePerDay: number;
-  totalCost: number;
-}
-
-export interface ConcreteCuts {
-  cutType: string;
-  costPerCut: number;
-  quantity: number;
-  totalCost: number;
-}
-
+/**
+ * Some cards only need a *metric* summary – no id/category.
+ * Keep it simple so the old UI keeps compiling.
+ */
 export interface PavingMetric {
-  name: string;
-  cost: number;
+  /* ---- legacy card fields ---- */
+  name    : string;
   benefit?: string;
-}
+  cost    : number;
 
-export interface ConcreteAndPaving {
-  pavingCategory: string;
-  squareMeters: number;
-  pavingCostSummary: PavingCostSummary;
-  rateBreakdown: RateBreakdown;
-  pavingOnExistingConcrete?: {
-    pavingCategory: string;
-    squareMeters: number;
-    costSummary: PavingCostSummary;
-    rateBreakdown: RateBreakdown;
-  };
-  extraConcreting?: {
-    concreteType: string;
-    meterageM2: number;
-    costSummary: PavingCostSummary;
-    rateBreakdown: {
-      perM2: {
-        basePrice: number;
-        margin: number;
-        materialsSubtotal: number;
-      };
-      totalForArea: {
-        basePrice: number;
-        margin: number;
-        materialsSubtotal: number;
-      };
-    };
-  };
-  concretePump: ConcretePump;
-  underFenceConcreteStrips?: {
-    selectedOption: string;
-    ratePerLm: number;
-    lengthMeters: number;
-    totalCost: number;
-  };
-  concreteCuts: ConcreteCuts;
-  sectionTotal: SectionTotal;
+  /* ---- newer numeric summary (optional) ---- */
+  areaM2?   : number;
+  ratePerM2?: number;
+  totalCost?: number;
 }

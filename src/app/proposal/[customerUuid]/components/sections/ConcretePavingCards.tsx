@@ -1,18 +1,34 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Image from "next/image";
-import type { ProposalData } from '@/types/proposal';
+import type { Snapshot } from "@/app/lib/types/snapshot";
 import type { PavingMetric } from '@/types/paving';
 
-export default function ConcretePavingCards({ 
-  data, 
-  metricsRows = [], 
-  metricsTotal = 0 
-}: { 
-  data: ProposalData['concreteAndPaving']; 
-  metricsRows?: PavingMetric[];
-  metricsTotal?: number; 
+export default function ConcretePavingCards({
+  snapshot
+}: {
+  snapshot: Snapshot;
 }) {
+  // pull only the actual selections out of the project:
+  const rows = [];
+  const proj = snapshot.poolProject;
+
+  if (proj.concrete_cuts) {
+    rows.push({
+      name: `Concrete Cuts (${proj.concrete_cuts})`,
+      cost: proj.concrete_cuts_cost ?? 0,
+    });
+  }
+
+  if (proj.extra_paving_category) {
+    rows.push({
+      name: `Extra Paving (${proj.extra_paving_square_meters} m²)`,
+      cost: proj.extra_paving_total_cost ?? 0,
+    });
+  }
+
+  const metricsRows = rows;
+  const metricsTotal = metricsRows.reduce((sum, r) => sum + r.cost, 0);
   return (
     <div className="space-y-6 h-full overflow-y-auto">
       {/* Concrete & Paving Section Cards */}
@@ -29,13 +45,10 @@ export default function ConcretePavingCards({
           <div className="space-y-3">
             {metricsRows.map(row => (
               <div key={row.name} className="flex justify-between">
-                <div>
-                  <p className="text-sm font-medium">{row.name}</p>
-                  {row.benefit && (
-                    <p className="text-xs text-muted-foreground">{row.benefit}</p>
-                  )}
-                </div>
-                <p className="font-medium whitespace-nowrap">${row.cost.toLocaleString()}</p>
+                <p className="text-sm font-medium">{row.name}</p>
+                <p className="font-medium whitespace-nowrap">
+                  ${row.cost.toLocaleString()}
+                </p>
               </div>
             ))}
           </div>
@@ -45,7 +58,9 @@ export default function ConcretePavingCards({
           {/* Grand total */}
           <div className="flex justify-between items-baseline mt-1">
             <p className="font-semibold">Total Price</p>
-            <p className="text-xl font-bold">${metricsTotal.toLocaleString()}</p>
+            <p className="text-xl font-bold">
+              ${metricsTotal.toLocaleString()}
+            </p>
           </div>
         </CardContent>
       </Card>

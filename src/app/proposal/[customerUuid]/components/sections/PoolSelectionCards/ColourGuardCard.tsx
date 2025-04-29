@@ -3,14 +3,9 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from "next/image";
-import { subCardFade } from '@/lib/animation';
-import type { ProposalData } from '@/types/proposal';
+import { subCardFade } from '@/app/lib/animation';
 
-interface ColourGuardCardProps {
-  fixed: ProposalData['poolSelection']['fixedCosts'];
-}
-
-export function ColourGuardCard({ fixed }: ColourGuardCardProps) {
+export function ColourGuardCard() {
   return (
     <motion.div
       variants={subCardFade}

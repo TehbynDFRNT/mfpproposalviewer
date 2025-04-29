@@ -4,23 +4,18 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Layers, ShieldCheck, Square, Handshake } from 'lucide-react';
-import { subCardFade } from '@/lib/animation';
-import type { ProposalData } from '@/types/proposal';
+import { subCardFade } from '@/app/lib/animation';
+import type { Snapshot } from '@/app/lib/types/snapshot';
 
-interface DetailsCardProps {
-  fixedCosts: ProposalData['poolSelection']['fixedCosts'];
-  individualCosts: ProposalData['poolSelection']['individualCosts'];
-}
-
-export function DetailsCard({ fixedCosts, individualCosts }: DetailsCardProps) {
+// Simple placeholder component without dependencies on old properties
+export function DetailsCard() {
   return (
     <motion.div
-      key="installation-details"
       variants={subCardFade}
       initial="initial"
       animate="enter"
       exit="exit"
-      className="w-full min-h-[80vh] py-4"
+      className="w-full min-h-[80vh] pb-4"
     >
       <div className="space-y-6">
         {/* Installation Details Card */}

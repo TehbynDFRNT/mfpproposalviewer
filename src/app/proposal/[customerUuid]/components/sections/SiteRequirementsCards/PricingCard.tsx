@@ -1,21 +1,36 @@
 'use client';
-
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { subCardFade } from '@/lib/animation';
-import type { ProposalData } from '@/types/proposal';
+import { Separator }          from '@/components/ui/separator';
+import { subCardFade }       from '@/app/lib/animation';
+
+type InstallationRequirement = {
+  crane?:   { label: string; cost: number };
+  bobcat?:  { label: string; cost: number };
+  traffic?: { label: string; cost: number };
+  custom:   { id: string; description: string; price: number }[];
+  costSummary: { totalCost: number };
+};
+
+type ElectricalUI = {
+  items:       { label: string; cost: number }[];
+  costSummary: { totalCost: number };
+};
 
 interface PricingCardProps {
-  siteRequirements: ProposalData['siteRequirements'];
-  poolSelection: ProposalData['poolSelection'];
-  electrical: ProposalData['electrical'];
+  siteRequirements: InstallationRequirement;
+  electrical:       ElectricalUI;
 }
 
-export function PricingCard({ siteRequirements, poolSelection, electrical }: PricingCardProps) {
+export function PricingCard({
+  siteRequirements: s,
+  electrical:       e,
+}: PricingCardProps) {
+  const fmt = (n: number) =>
+    n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
+
   return (
     <motion.div
-      key="installation-pricing"
       variants={subCardFade}
       initial="initial"
       animate="enter"
@@ -23,116 +38,60 @@ export function PricingCard({ siteRequirements, poolSelection, electrical }: Pri
       className="w-full min-h-[80vh] py-4"
     >
       <div className="space-y-6 h-full overflow-y-auto">
-        {/* Pool Installation Section Cards */}
         <Card className="w-full shadow-lg">
           <CardContent className="p-5 space-y-6">
-            <div className="mb-2">
+            <header>
               <h3 className="text-base font-semibold">Pool Installation</h3>
-              <p className="text-sm text-muted-foreground">Comprehensive pool installation and site preparation</p>
-            </div>
-            
-            <Separator className="mb-4" />
-            
-            {/* Pool Installation cost breakdown */}
+              <p className="text-sm text-muted-foreground">
+                Comprehensive site prep & electrical
+              </p>
+            </header>
+
+            <Separator />
+
             <div className="space-y-3">
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-sm font-medium">Pool Installation</p>
-                  <p className="text-xs text-muted-foreground">Fixed costs + variable costs (labor, materials, certifications)</p>
-                </div>
-                <p className="font-medium whitespace-nowrap">${(poolSelection.totalFixedCosts + poolSelection.totalIndividualCosts).toLocaleString()}</p>
-              </div>
-              
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-sm font-medium">Franna Crane ({siteRequirements.standardSiteRequirements.craneSelection.type})</p>
-                  <p className="text-xs text-muted-foreground">Precision pool placement</p>
-                </div>
-                <p className="font-medium whitespace-nowrap">${siteRequirements.standardSiteRequirements.craneSelection.cost.toLocaleString()}</p>
-              </div>
-              
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-sm font-medium">Bobcat ({siteRequirements.standardSiteRequirements.bobcatSelection.type})</p>
-                  <p className="text-xs text-muted-foreground">Site excavation and preparation</p>
-                </div>
-                <p className="font-medium whitespace-nowrap">${siteRequirements.standardSiteRequirements.bobcatSelection.cost.toLocaleString()}</p>
-              </div>
-              
-              {siteRequirements.standardSiteRequirements.trafficControl.cost > 0 && (
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Traffic Control ({siteRequirements.standardSiteRequirements.trafficControl.level})</p>
-                    <p className="text-xs text-muted-foreground">Safe site access</p>
+              {s.crane   && <Line label={`Crane (${s.crane.label})`}   value={s.crane.cost} />}
+              {s.bobcat  && <Line label={`Bobcat (${s.bobcat.label})`} value={s.bobcat.cost} />}
+              {s.traffic && <Line label={`Traffic (${s.traffic.label})`} value={s.traffic.cost} />}
+              {s.custom.map(c => (
+                <Line key={c.id} label={c.description} value={c.price} />
+              ))}
+
+              {e.items.length > 0 && (
+                <>
+                  <div className="pt-4">
+                    <p className="text-sm font-medium mb-1">Electrical</p>
+                    <Separator className="mb-1" />
                   </div>
-                  <p className="font-medium whitespace-nowrap">${siteRequirements.standardSiteRequirements.trafficControl.cost.toLocaleString()}</p>
-                </div>
-              )}
-              
-              {siteRequirements.customSiteRequirements && 
-               siteRequirements.customSiteRequirements[0] && 
-               typeof siteRequirements.customSiteRequirements[0] === 'object' && (
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-sm font-medium">{siteRequirements.customSiteRequirements[0].description}</p>
-                    <p className="text-xs text-muted-foreground">Custom site requirement</p>
-                  </div>
-                  <p className="font-medium whitespace-nowrap">${siteRequirements.customSiteRequirements[0].price.toLocaleString()}</p>
-                </div>
-              )}
-              
-              {/* Electrical Section Items */}
-              <div className="pt-4 pb-0">
-                <p className="text-sm font-medium mb-1">Electrical Requirements</p>
-                <Separator className="mb-1" />
-              </div>
-              
-              {electrical.standardPower.isSelected && (
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Standard Power Circuit</p>
-                    <p className="text-xs text-muted-foreground">Power supply for pool equipment</p>
-                  </div>
-                  <p className="font-medium whitespace-nowrap">${electrical.standardPower.rate.toLocaleString()}</p>
-                </div>
-              )}
-              
-              {electrical.addOnFenceEarthing.isSelected && (
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Fence Earthing</p>
-                    <p className="text-xs text-muted-foreground">Safety grounding for metal fences</p>
-                  </div>
-                  <p className="font-medium whitespace-nowrap">${electrical.addOnFenceEarthing.rate.toLocaleString()}</p>
-                </div>
-              )}
-              
-              {electrical.heatPumpCircuit.isSelected && (
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Heat Pump Circuit</p>
-                    <p className="text-xs text-muted-foreground">Dedicated circuit for heating system</p>
-                  </div>
-                  <p className="font-medium whitespace-nowrap">${electrical.heatPumpCircuit.rate.toLocaleString()}</p>
-                </div>
+                  {e.items.map((i, idx) => (
+                    <Line key={idx} label={i.label} value={i.cost} />
+                  ))}
+                </>
               )}
             </div>
-            
-            <Separator className="mb-3" />
-            
-            {/* Grand total */}
-            <div className="flex justify-between items-baseline mt-1">
+
+            <Separator />
+
+            <div className="flex justify-between items-baseline">
               <p className="font-semibold">Total Installation Price</p>
-              <p className="text-xl font-bold">${(
-                poolSelection.totalFixedCosts + 
-                poolSelection.totalIndividualCosts + 
-                siteRequirements.costSummary.totalCost + 
-                electrical.costSummary.totalCost
-              ).toLocaleString()}</p>
+              <p className="text-xl font-bold">
+                {fmt(s.costSummary.totalCost + e.costSummary.totalCost)}
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
     </motion.div>
+  );
+}
+
+function Line({ label, value }: { label: string; value: number }) {
+  const fmt = (n: number) =>
+    n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
+  return (
+    <div className="flex justify-between">
+      <p className="text-sm font-medium">{label}</p>
+      <p className="font-medium whitespace-nowrap">{fmt(value)}</p>
+    </div>
   );
 }

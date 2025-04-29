@@ -8,7 +8,12 @@ export interface ProposalData {
     owner2?: string | null;
     phoneNumber: string;
     emailAddress: string;
-    propertyDetails: { fullAddress: string };
+    propertyDetails: { 
+      fullAddress: string;      // Site address (or home address as fallback)
+      homeAddress?: string;     // Owner's home address (may be different from site address)
+      formattedAddress?: string; // Properly formatted address for geocoding
+      coordinates?: { lat: number; lng: number }; // Store coordinates if we have them
+    };
   };
 
   /* ─── Pool Selection ────────────────────────── */
@@ -16,6 +21,7 @@ export interface ProposalData {
     pool: {
       name: string;
       color: string;
+      description?: string; // Optional description that could be provided from the backend
       dimensions: { lengthM: number; widthM: number; shallowDepthM: number; deepDepthM: number };
     };
     fixedCosts: Array<{ id: string; name: string; price: number }>;

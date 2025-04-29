@@ -11,17 +11,20 @@ import { CATEGORY_IDS } from '../../ProposalViewer.constants';
 import type { VisualColumnProps, Visual } from './VisualColumn.types';
 
 // Import animation variants from shared module
-import { fadeOut, visualIn } from '@/lib/animation';
+import { fadeOut, visualIn } from '@/app/lib/animation';
 
 // Helper for left-column visuals based on section and sub-section
 const getLeftColumnVisual = (
   sectionId: string | null, 
   subIndex: number, 
-  proposalData: VisualColumnProps['proposalData']
+  snapshot: VisualColumnProps['snapshot']
 ): Visual => {
   switch (sectionId) {
     case CATEGORY_IDS.CUSTOMER_INFO:
-      return { type: 'map', address: proposalData.customerInfo.propertyDetails.fullAddress };
+      return { 
+        type: 'map', 
+        address: snapshot.poolProject.siteAddress ?? snapshot.poolProject.homeAddress ?? ''
+      };
     case CATEGORY_IDS.POOL_SELECTION:
       // Always show the Sheffield video for all sub-indices in pool selection
       return { type: 'video', videoName: 'Sheffield' };
@@ -52,20 +55,23 @@ export default function VisualColumn({
   subIndex,
   isLoaded,
   mapCenter,
-  proposalData,
+  snapshot,
   resetScroll
 }: VisualColumnProps) {
   const [priceCardExpanded, setPriceCardExpanded] = useState<boolean>(false);
   const [sitePlanExpanded, setSitePlanExpanded] = useState<boolean>(false);
   
   const visual = React.useMemo(
-    () => getLeftColumnVisual(activeSection, subIndex, proposalData),
-    [activeSection, subIndex, proposalData]   // safe; proposalData is stable
+    () => getLeftColumnVisual(activeSection, subIndex, snapshot),
+    [activeSection, subIndex, snapshot]   // safe; snapshot is stable
   );
   
   function renderVisual() {
     switch (visual.type) {
       case 'map':
+        // Use coordinates from visual if available
+        const mapCoordinates = visual.coordinates || mapCenter;
+        
         return (
           <motion.div
             key="map"
@@ -75,10 +81,10 @@ export default function VisualColumn({
             exit="exit"
             className="w-full h-full flex justify-center items-start"
           >
-            {isLoaded && mapCenter ? (
+            {isLoaded && mapCoordinates ? (
               <GoogleMap
                 mapContainerStyle={{ width: '100%', height: '100%' }}
-                center={mapCenter}
+                center={mapCoordinates}
                 zoom={21}
                 options={{
                   mapTypeId: 'satellite',
@@ -95,11 +101,11 @@ export default function VisualColumn({
                   ]
                 }}
               >
-                <Marker position={mapCenter} />
+                <Marker position={mapCoordinates} />
               </GoogleMap>
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-white">Loading map...</p>
+                <p className="text-white">Loading map for {visual.address || 'property'}...</p>
               </div>
             )}
           </motion.div>

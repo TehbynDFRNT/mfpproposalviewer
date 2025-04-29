@@ -4,16 +4,10 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Check } from 'lucide-react';
-import { subCardFade } from '@/lib/animation';
-import type { ProposalData } from '@/types/proposal';
+import { subCardFade } from '@/app/lib/animation';
 
-interface SiteWorkCardsProps {
-  fixed: ProposalData['poolSelection']['fixedCosts'];
-  variable: ProposalData['poolSelection']['individualCosts'];
-}
-
-export function SiteWorkCards({ fixed, variable }: SiteWorkCardsProps) {
-  // Site work items with benefits
+export function SiteWorkCards() {
+  // Site work items with benefits - static marketing content
   const siteWorkItems = [
     {name: 'Council certification & CAD plans', benefit: 'paperwork handled'},
     {name: 'Engineer sign-off to AS1839-2021', benefit: 'built to code'},
@@ -25,6 +19,9 @@ export function SiteWorkCards({ fixed, variable }: SiteWorkCardsProps) {
     {name: 'Water delivery & fill', benefit: 'logistics sorted'},
     {name: 'Professional cleans & tuition', benefit: 'sparkling hand-over'}
   ];
+
+  // Fixed marketing value
+  const SITE_WORK_VALUE = 12_500;
 
   return (
     <motion.div
@@ -65,8 +62,9 @@ export function SiteWorkCards({ fixed, variable }: SiteWorkCardsProps) {
             
             <div className="flex justify-between items-baseline">
               <p className="font-semibold">Total Site Work Value</p>
-              <p className="text-xl font-bold">${(fixed.reduce((sum, item) => sum + item.price, 0) + 
-                variable.reduce((sum, item) => sum + item.price, 0)).toLocaleString()}</p>
+              <p className="text-xl font-bold">
+                {SITE_WORK_VALUE.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}
+              </p>
             </div>
           </CardContent>
         </Card>

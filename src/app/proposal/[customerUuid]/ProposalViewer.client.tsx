@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import * as SM from '@/state/sectionMachine';
+import * as SM from '@/app/lib/sectionMachine';
 import { useJsApiLoader } from '@react-google-maps/api';
-import type { ProposalData } from '@/types/proposal';
+import type { Snapshot  } from '@/app/lib/types/snapshot';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Zap, Filter, Droplet, Sun } from 'lucide-react';
@@ -23,13 +23,47 @@ import {
   PoolSelectionCards,
   SiteRequirementsCards
 } from './components';
-import { fadeOut, contentIn } from '@/lib/animation';
-import { lastDir, SECTIONS_WITH_SUBSECTIONS } from '@/lib/layoutConstants';
+import { fadeOut, contentIn } from '@/app/lib/animation';
+import { lastDir, SECTIONS_WITH_SUBSECTIONS } from '@/app/lib/layoutConstants';
 import { CATEGORY_IDS, CATEGORY_NAMES } from './ProposalViewer.constants';
 
-export interface ProposalViewerProps { initialData: ProposalData }
-export default function ProposalViewer({ initialData }: ProposalViewerProps) {
-  const proposalData = initialData;
+export interface ProposalViewerProps { snapshot: Snapshot }
+export default function ProposalViewer({ snapshot }: ProposalViewerProps) {
+  // Add debug logging on mount
+  useEffect(() => {
+    console.log('Complete snapshot object:', snapshot);
+    
+    // Extract address fields for debugging
+    if (snapshot.poolProject) {
+      const project = snapshot.poolProject;
+      console.log('Pool Project Object:', project);
+      
+      // Check address field formats
+      console.log('Address fields available on poolProject:', {
+        site_address: 'site_address' in project,
+        home_address: 'home_address' in project,
+        // These might not exist if camelCase conversion isn't happening
+        siteAddress: 'siteAddress' in project,
+        homeAddress: 'homeAddress' in project
+      });
+      
+      // Log values for debugging
+      console.log('Address field values:', {
+        site_address: project.site_address,
+        home_address: project.home_address,
+        // Use as any to avoid TS errors
+        siteAddress: (project as any).siteAddress,
+        homeAddress: (project as any).homeAddress
+      });
+    }
+    
+    // Log other critical components
+    console.log('Pool Specification:', snapshot.poolSpecification);
+    console.log('Filtration Package:', snapshot.filtrationPackage);
+    console.log('Fencing Package:', snapshot.fencing);
+    console.log('Snapshot Timestamp:', snapshot.timestamp);
+  }, [snapshot]);
+
   const [machineState, setMachineState] = useState<SM.State>(SM.initialState);
   const [, setDir] = useState<1 | -1>(1);   // +1 = forward, -1 = back, state needed for handlers
   const currentStep = SM.current(machineState);
@@ -52,27 +86,87 @@ export default function ProposalViewer({ initialData }: ProposalViewerProps) {
     return Array.from(sectionMap, ([id, name]) => ({ id, name }));
   }, []); // Empty dependency array means this runs only once
 
-  // Prepare address string for geocoding (using full address)
-  const customerAddress = proposalData.customerInfo.propertyDetails.fullAddress;
+  // Get address info from snapshot
+  const fullAddress = snapshot.poolProject.siteAddress ?? snapshot.poolProject.homeAddress;
+  const homeAddress = snapshot.poolProject.homeAddress;
+  const formattedAddress = (fullAddress ?? '').trim().replace(/\s+/g, ' ');
+  
   // Load Google Maps API
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
     libraries: ['places'],
   });
+  
   // Map center state
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  
   // Geocode when Customer Info section becomes active
   useEffect(() => {
+    // Only run geocoding when Customer Info section is active and the API is loaded
     if (isLoaded && activeSection === CATEGORY_IDS.CUSTOMER_INFO) {
+      // Choose which address to geocode (in order of preference)
+      const addressToGeocode = formattedAddress || fullAddress || homeAddress;
+      
+      if (!addressToGeocode) {
+        console.warn("No address found to geocode");
+        // Use fallback if no address available
+        setMapCenter({ lat: -31.9523, lng: 115.8613 }); // Perth, Australia
+        return;
+      }
+      
+      console.log("Geocoding address:", addressToGeocode);
+      
       const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ address: customerAddress }, (results, status) => {
-        if (status === 'OK' && results && results[0]) {
-          const loc = results[0].geometry.location;
-          setMapCenter({ lat: loc.lat(), lng: loc.lng() });
+      
+      // Use more robust geocoding approach with region biasing for Australia
+      geocoder.geocode(
+        { 
+          address: addressToGeocode,
+          region: 'au', // Australia region biasing
+          bounds: {
+            north: -10.0, // Northern Australia approx
+            south: -45.0, // Southern Australia approx
+            east: 155.0,  // Eastern Australia approx
+            west: 110.0   // Western Australia approx
+          }
+        }, 
+        (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const loc = results[0].geometry.location;
+            console.log("Successfully geocoded to:", results[0].formatted_address);
+            console.log("Coordinates:", { lat: loc.lat(), lng: loc.lng() });
+            setMapCenter({ lat: loc.lat(), lng: loc.lng() });
+          } else {
+            console.error('Geocode was not successful:', status);
+            // If the first address fails, try the home address as fallback (if different)
+            if (homeAddress && homeAddress !== fullAddress) {
+              console.log("Trying home address as fallback:", homeAddress);
+              geocoder.geocode(
+                { 
+                  address: homeAddress,
+                  region: 'au' // Australia region biasing
+                }, 
+                (results2, status2) => {
+                  if (status2 === 'OK' && results2 && results2[0]) {
+                    const loc = results2[0].geometry.location;
+                    console.log("Successfully geocoded home address to:", results2[0].formatted_address);
+                    setMapCenter({ lat: loc.lat(), lng: loc.lng() });
+                  } else {
+                    // Last resort fallback
+                    console.error('Both geocoding attempts failed');
+                    setMapCenter({ lat: -31.9523, lng: 115.8613 }); // Perth, Australia
+                  }
+                }
+              );
+            } else {
+              // No home address fallback, use default
+              setMapCenter({ lat: -31.9523, lng: 115.8613 }); // Perth, Australia
+            }
+          }
         }
-      });
+      );
     }
-  }, [isLoaded, activeSection, customerAddress]);
+  }, [isLoaded, activeSection, fullAddress, homeAddress, formattedAddress]);
 
 const handleSectionSelectChange = useCallback((newSectionId: string) => {
   const currentIndex = machineState.index;
@@ -111,7 +205,6 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
     <div className="relative flex min-h-screen flex-col bg-[#07032D] proposal-background"> {/* Changed to flex-col for header/main/footer layout */}
       {/* --- Header --- */}
       <Header />
-      
       {/* --- Main Content Area --- */}
       {/* flex-1 makes this grow to fill space between header/footer */}
       {/* pt-16/pb-16 account for fixed header/footer height */}
@@ -136,111 +229,114 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                   exit="exit"
                   className="major-section w-full flex flex-col p-8 pb-8 lg:pb-0 overflow-hidden"
                 >
-                {/* Render Header conditionally */}
-                <div className="transition-opacity duration-300 ease-in-out opacity-100">
-                  {id === CATEGORY_IDS.CUSTOMER_INFO ? (
-                    <h2 className="header-welcome font-bold font-sans text-white text-2xl lg:text-3xl">
-                      Welcome <span className="header-owners text-2xl lg:text-3xl !text-[#DB9D6A]">{proposalData.customerInfo.owner1.split(' ')[0]} & {proposalData.customerInfo.owner2?.split(' ')[0]}</span>
-                    </h2>
-                  ) : (
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                      {/* Pill on mobile - above heading */}
-                      <div className="flex mb-2 lg:hidden">
-                        <span className="inline-block text-xs font-medium px-2 py-1 rounded-full bg-[#DB9D6A]/80 text-white self-start">
-                          {(id === CATEGORY_IDS.POOL_SELECTION || id === CATEGORY_IDS.FILTRATION_MAINTENANCE || 
-                             id === CATEGORY_IDS.SITE_REQUIREMENTS) && 'Base Pool & Inclusions'}
-                          {(id === CATEGORY_IDS.FENCING || id === CATEGORY_IDS.CONCRETE_PAVING || 
-                             id === CATEGORY_IDS.WATER_FEATURE || id === CATEGORY_IDS.RETAINING_WALLS) && 'Poolscape Options'}
-                          {id === CATEGORY_IDS.ADD_ONS && 'Extras & Upgrades'}
-                        </span>
-                      </div>
-                      
-                      {/* Section heading */}
-                      <h2 className="font-bold font-sans text-white text-xl lg:text-3xl">
-                        {id === CATEGORY_IDS.POOL_SELECTION ? 
-                          'Your Selected Pool' : 
-                          id === CATEGORY_IDS.CONCRETE_PAVING ? 
-                            'Concrete & Paving' : 
-                            CATEGORY_NAMES[id]
-                        }
-                      </h2>
-                      
-                      {/* Pill on desktop - to the right */}
-                      <div className="hidden lg:flex">
-                        <span className="inline-block text-xs font-medium px-2 py-1 rounded-full bg-[#DB9D6A]/80 text-white">
-                          {(id === CATEGORY_IDS.POOL_SELECTION || id === CATEGORY_IDS.FILTRATION_MAINTENANCE || 
-                             id === CATEGORY_IDS.SITE_REQUIREMENTS) && 'Base Pool & Inclusions'}
-                          {(id === CATEGORY_IDS.FENCING || id === CATEGORY_IDS.CONCRETE_PAVING || 
-                             id === CATEGORY_IDS.WATER_FEATURE || id === CATEGORY_IDS.RETAINING_WALLS) && 'Poolscape Options'}
-                          {id === CATEGORY_IDS.ADD_ONS && 'Extras & Upgrades'}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* --- Content Area --- */}
-                {isMultiCardSection ? (
-                  <>
-                    {/* Render MULTIPLE cards with better transitions */}
-                    {(id === CATEGORY_IDS.POOL_SELECTION || id === CATEGORY_IDS.SITE_REQUIREMENTS) && (
-                      <AnimatePresence mode="wait" onExitComplete={resetScroll}>
-                        {/* Pool Selection Subsections */}
-                        {id === CATEGORY_IDS.POOL_SELECTION && (
-                          <PoolSelectionCards
-                            subIndex={sub}
-                            data={proposalData.poolSelection}
-                          />
-                        )}
-                        
-                        {/* Pool Installation Subsections */}
-                        {id === CATEGORY_IDS.SITE_REQUIREMENTS && (
-                          <SiteRequirementsCards
-                            subIndex={sub}
-                            site={proposalData.siteRequirements}
-                            pool={proposalData.poolSelection}
-                            electrical={proposalData.electrical}
-                          />
-                        )}
-                      </AnimatePresence>
-                    )}
-                  </>
-                ) : (
-                  // --- Single Card/Content Sections ---
-                  <div
-                    ref={null}
-                    data-subsection-index={0}
-                    className="subsection-content w-full min-h-[80vh] py-4 pb-8 lg:pb-0 transition-opacity duration-300 ease-in-out opacity-100"
-                  >
+                  {/* Render Header conditionally */}
+                  <div className="transition-opacity duration-300 ease-in-out opacity-100">
                     {id === CATEGORY_IDS.CUSTOMER_INFO ? (
-                      <CustomerInfoCards data={proposalData.customerInfo} />
-                    ) : id === CATEGORY_IDS.FILTRATION_MAINTENANCE ? (
-                      <FiltrationMaintenanceCards />
-                    ) : id === CATEGORY_IDS.CONCRETE_PAVING ? (
-                      <ConcretePavingCards 
-                        data={proposalData.concreteAndPaving} 
-                      />
-                    ) : id === CATEGORY_IDS.FENCING ? (
-                      <FencingCards data={proposalData.fencing} />
-                    ) : id === CATEGORY_IDS.RETAINING_WALLS ? (
-                      <RetainingWallCards data={proposalData.retainingWalls} />
-                    ) : id === CATEGORY_IDS.WATER_FEATURE ? (
-                      <WaterFeatureCards data={proposalData.waterFeature} />
-                    ) : id === CATEGORY_IDS.ADD_ONS ? (
-                      <AddOnCards data={proposalData.addOns} />
+                      <h2 className="header-welcome font-bold font-sans text-white text-2xl lg:text-3xl">
+                        Welcome <span className="header-owners text-2xl lg:text-3xl !text-[#DB9D6A]">{snapshot.poolProject.owner1.split(' ')[0]} & {snapshot.poolProject.owner2?.split(' ')[0]}</span>
+                      </h2>
                     ) : (
-                      // Generic placeholder for other single-content sections
-                      <Card className="w-full h-full p-5 overflow-y-auto">
-                        <CardContent>
-                          <p>Content for {CATEGORY_NAMES[id]} goes here.</p>
-                        </CardContent>
-                      </Card>
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                        {/* Pill on mobile - above heading */}
+                        <div className="flex mb-2 lg:hidden">
+                          <span className="inline-block text-xs font-medium px-2 py-1 rounded-full bg-[#DB9D6A]/80 text-white self-start">
+                            {(id === CATEGORY_IDS.POOL_SELECTION || id === CATEGORY_IDS.FILTRATION_MAINTENANCE || 
+                               id === CATEGORY_IDS.SITE_REQUIREMENTS) && 'Base Pool & Inclusions'}
+                            {(id === CATEGORY_IDS.FENCING || id === CATEGORY_IDS.CONCRETE_PAVING || 
+                               id === CATEGORY_IDS.WATER_FEATURE || id === CATEGORY_IDS.RETAINING_WALLS) && 'Poolscape Options'}
+                            {id === CATEGORY_IDS.ADD_ONS && 'Extras & Upgrades'}
+                          </span>
+                        </div>
+                        
+                        {/* Section heading */}
+                        <h2 className="font-bold font-sans text-white text-xl lg:text-3xl">
+                          {id === CATEGORY_IDS.POOL_SELECTION ? 
+                            'Your Selected Pool' : 
+                            id === CATEGORY_IDS.CONCRETE_PAVING ? 
+                              'Concrete & Paving' : 
+                              CATEGORY_NAMES[id]
+                          }
+                        </h2>
+                        
+                        {/* Pill on desktop - to the right */}
+                        <div className="hidden lg:flex">
+                          <span className="inline-block text-xs font-medium px-2 py-1 rounded-full bg-[#DB9D6A]/80 text-white">
+                            {(id === CATEGORY_IDS.POOL_SELECTION || id === CATEGORY_IDS.FILTRATION_MAINTENANCE || 
+                               id === CATEGORY_IDS.SITE_REQUIREMENTS) && 'Base Pool & Inclusions'}
+                            {(id === CATEGORY_IDS.FENCING || id === CATEGORY_IDS.CONCRETE_PAVING || 
+                               id === CATEGORY_IDS.WATER_FEATURE || id === CATEGORY_IDS.RETAINING_WALLS) && 'Poolscape Options'}
+                            {id === CATEGORY_IDS.ADD_ONS && 'Extras & Upgrades'}
+                          </span>
+                        </div>
+                      </div>
                     )}
                   </div>
-                )}
-                
-              </motion.div>
-            );
+                  {/* --- Content Area --- */}
+                  {isMultiCardSection ? (
+                    <>
+                      {/* Render MULTIPLE cards with better transitions */}
+                      {(id === CATEGORY_IDS.POOL_SELECTION || id === CATEGORY_IDS.SITE_REQUIREMENTS) && (
+                        <AnimatePresence mode="wait" onExitComplete={resetScroll}>
+                          {/* Pool Selection Subsections */}
+                          {id === CATEGORY_IDS.POOL_SELECTION && (
+                            <PoolSelectionCards
+                              subIndex={sub}
+                              pool={snapshot.poolSpecification}
+                              poolCosts={snapshot.poolCosts}
+                              poolMargins={snapshot.poolMargins}
+                            />
+                          )}
+                          
+                          {/* Pool Installation Subsections */}
+                          {id === CATEGORY_IDS.SITE_REQUIREMENTS && (
+                            <SiteRequirementsCards
+                              subIndex={sub}
+                              site={snapshot.poolProject}
+                              electrical={snapshot.electricalRequirements}
+                              referenceTables={snapshot.referenceTables}
+                            />
+                          )}
+                        </AnimatePresence>
+                      )}
+                    </>
+                  ) : (
+                    // --- Single Card/Content Sections ---
+                    (<div
+                      ref={null}
+                      data-subsection-index={0}
+                      className="subsection-content w-full min-h-[80vh] py-4 pb-8 lg:pb-0 transition-opacity duration-300 ease-in-out opacity-100"
+                    >
+                      {id === CATEGORY_IDS.CUSTOMER_INFO ? (
+                        <CustomerInfoCards snapshot={snapshot} />
+                      ) : id === CATEGORY_IDS.FILTRATION_MAINTENANCE ? (
+                        <FiltrationMaintenanceCards pkg={snapshot.filtrationPackage} />
+                      ) : id === CATEGORY_IDS.CONCRETE_PAVING ? (
+                        <ConcretePavingCards 
+                          snapshot={snapshot}
+                        />
+                      ) : id === CATEGORY_IDS.FENCING ? (
+                        <FencingCards data={snapshot.fencing} />
+                      ) : id === CATEGORY_IDS.RETAINING_WALLS ? (
+                        <RetainingWallCards
+                          project={snapshot.poolProject}
+                          referenceTables={snapshot.referenceTables.retainingWalls}
+                        />
+                      ) : id === CATEGORY_IDS.WATER_FEATURE && snapshot.waterFeature ? (
+                        <WaterFeatureCards data={snapshot.waterFeature} />
+                      ) : id === CATEGORY_IDS.ADD_ONS ? (
+                        <AddOnCards data={snapshot.referenceTables.extraPavingCosts} />
+                      ) : (
+                        // Generic placeholder for other single-content sections
+                        (<Card className="w-full h-full p-5 overflow-y-auto">
+                          <CardContent>
+                            <p>Content for {CATEGORY_NAMES[id]} goes here.</p>
+                          </CardContent>
+                        </Card>)
+                      )}
+                    </div>)
+                  )}
+                </motion.div>
+              );
           })}
           </AnimatePresence>
 
@@ -301,11 +397,10 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
           subIndex={sub}
           isLoaded={isLoaded}
           mapCenter={mapCenter}
-          proposalData={proposalData}
+          snapshot={snapshot}
           resetScroll={resetScroll}
         />
       </main>
-      
       {/* --- Footer --- */}
       <Footer
         activeSection={activeSection}

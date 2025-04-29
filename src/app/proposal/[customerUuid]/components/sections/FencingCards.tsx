@@ -1,9 +1,12 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Image from "next/image";
-import type { ProposalData } from '@/types/proposal';
+import type { FencingPackage } from "@/app/lib/types/snapshot";
 
-export default function FencingCards({ data }: { data: ProposalData['fencing'] }) {
+export default function FencingCards(
+  { data }: { data: FencingPackage | null }
+) {
+  if (!data) return null;
   return (
     <div className="space-y-6 h-full overflow-y-auto">
       {/* Fencing Pricing Card */}

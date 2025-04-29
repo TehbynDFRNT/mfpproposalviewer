@@ -1,0 +1,892 @@
+{
+  "fencing": {
+    "flatTopMetal": null,
+    "framelessGlass": {
+      "id": "1abb5446-4d0e-4686-9e49-65c3c3a33af1",
+      "gates": 1,
+      "pool_id": "899101c2-f809-49b5-b402-5388c0420c37",
+      "created_at": "2025-04-15T02:09:09.719508+00:00",
+      "total_cost": 1990,
+      "updated_at": "2025-04-15T02:12:05.682886+00:00",
+      "customer_id": "0b7179a5-0a80-47ed-b12b-9989a520d770",
+      "linear_meters": 10,
+      "simple_panels": 0,
+      "complex_panels": 0,
+      "earthing_required": true
+    }
+  },
+  "poolCosts": {
+    "id": "f82bfc6f-6da1-4c62-97a9-4b8e7bd51950",
+    "beam": 1123,
+    "misc": 0,
+    "pool_id": "899101c2-f809-49b5-b402-5388c0420c37",
+    "salt_bags": 19,
+    "coping_lay": 1045,
+    "created_at": "2025-02-20T04:05:16.942168+00:00",
+    "pea_gravel": 1628,
+    "updated_at": "2025-02-20T04:37:58.618943+00:00",
+    "install_fee": 2550,
+    "coping_supply": 1107,
+    "trucked_water": 129
+  },
+  "timestamp": "2025-04-28T12:49:25Z",
+  "fixedCosts": [
+    {
+      "id": "a3f2eb40-9370-4a3c-bcca-86329216bad3",
+      "name": "Temporary Safety Barrier",
+      "price": 400,
+      "created_at": "2025-02-18T05:56:22.004151+00:00",
+      "display_order": 0
+    },
+    {
+      "id": "c825fe88-893f-4604-9b51-58607c88e9b7",
+      "name": "Freight",
+      "price": 800,
+      "created_at": "2025-02-18T05:51:06.921502+00:00",
+      "display_order": 1
+    },
+    {
+      "id": "b335f1dc-fcda-47df-8834-ba649588adcf",
+      "name": "Earthbond",
+      "price": 40,
+      "created_at": "2025-02-18T05:51:06.921502+00:00",
+      "display_order": 2
+    },
+    {
+      "id": "d19b9dba-c036-484d-b74e-04730d909aac",
+      "name": "Ag Line",
+      "price": 35,
+      "created_at": "2025-02-18T05:51:06.921502+00:00",
+      "display_order": 3
+    },
+    {
+      "id": "7e31adfc-9466-4a6a-8d1f-e33f0676d6dc",
+      "name": "Pipe Fitting + 3 Way Valve",
+      "price": 300,
+      "created_at": "2025-02-18T05:51:06.921502+00:00",
+      "display_order": 4
+    },
+    {
+      "id": "69578277-9345-4786-9e26-2dee48d02a3b",
+      "name": "Filter Slab",
+      "price": 50,
+      "created_at": "2025-02-18T05:51:06.921502+00:00",
+      "display_order": 5
+    },
+    {
+      "id": "6f8bd374-d64b-45d8-95cc-bd351a53f53a",
+      "name": "Miscellaneous",
+      "price": 2700,
+      "created_at": "2025-02-18T05:51:06.921502+00:00",
+      "display_order": 6
+    },
+    {
+      "id": "df475e8c-794b-4a4f-8596-86fad86fa68a",
+      "name": "Form 15",
+      "price": 1295,
+      "created_at": "2025-02-18T05:51:06.921502+00:00",
+      "display_order": 7
+    },
+    {
+      "id": "94485e26-5c0a-4dfc-872a-f815585d82fd",
+      "name": "Fire Ant",
+      "price": 165,
+      "created_at": "2025-02-18T05:51:06.921502+00:00",
+      "display_order": 8
+    },
+    {
+      "id": "8589c183-19f4-443c-9e14-c69d4988c2ac",
+      "name": "Handover",
+      "price": 500,
+      "created_at": "2025-02-18T05:51:06.921502+00:00",
+      "display_order": 9
+    }
+  ],
+  "poolMargins": {
+    "id": "c36122bd-2aa1-464b-84c3-b71bde35f206",
+    "pool_id": "899101c2-f809-49b5-b402-5388c0420c37",
+    "created_at": "2025-02-20T20:52:23.570521+00:00",
+    "updated_at": "2025-02-20T20:52:23.570521+00:00",
+    "margin_percentage": 35.3
+  },
+  "poolProject": {
+    "id": "0b7179a5-0a80-47ed-b12b-9989a520d770",
+    "email": "beau@beauville.com",
+    "phone": "45533535353",
+    "owner1": "beau brown",
+    "owner2": "bella brown",
+    "crane_id": "c4d3e57d-ec08-4f5c-a9d5-8c4d1b6791fc",
+    "bobcat_id": "a4bb1697-c171-489c-bbd5-0f773415b6dc",
+    "created_at": "2025-04-11T01:20:51.069431+00:00",
+    "pool_color": "Silver Mist",
+    "updated_at": "2025-04-26T11:22:37.194927+00:00",
+    "home_address": "19-21 Packer Road",
+    "site_address": "19-21 Packer Road",
+    "concrete_cuts": "94b510b1-bb79-447c-815b-ec589ea537e9:2",
+    "proposal_name": "beau brown & bella brown Pool Proposal",
+    "installation_area": "Brisbane",
+    "concrete_cuts_cost": 640,
+    "resident_homeowner": true,
+    "traffic_control_id": null,
+    "concrete_pump_needed": true,
+    "retaining_wall1_type": "Block Wall - Clad",
+    "retaining_wall2_type": null,
+    "retaining_wall3_type": null,
+    "retaining_wall4_type": null,
+    "extra_concreting_type": "standard",
+    "extra_paving_category": "a1d6186e-5378-4eb7-a348-31a7034cddfb",
+    "pool_specification_id": "899101c2-f809-49b5-b402-5388c0420c37",
+    "concrete_pump_quantity": 1,
+    "retaining_wall1_length": 2,
+    "retaining_wall2_length": 0,
+    "retaining_wall3_length": 0,
+    "retaining_wall4_length": 0,
+    "site_requirements_data": [
+      {
+        "id": "44049c0e-faed-434e-b9d9-1c7f9e2d6df8",
+        "price": 300,
+        "description": "Airconditioner Temporary Removal and Replacement"
+      }
+    ],
+    "extra_paving_total_cost": 4400,
+    "retaining_wall1_height1": 1,
+    "retaining_wall1_height2": 1,
+    "retaining_wall2_height1": 0,
+    "retaining_wall2_height2": 0,
+    "retaining_wall3_height1": 0,
+    "retaining_wall3_height2": 0,
+    "retaining_wall4_height1": 0,
+    "retaining_wall4_height2": 0,
+    "site_requirements_notes": "Air conditioner removal required to meet minimum site access width needs. ",
+    "concrete_pump_total_cost": 1300,
+    "extra_paving_square_meters": 10,
+    "retaining_wall1_total_cost": 1200,
+    "retaining_wall2_total_cost": 0,
+    "retaining_wall3_total_cost": 0,
+    "retaining_wall4_total_cost": 0,
+    "extra_concreting_total_cost": 1800,
+    "extra_concreting_square_meters": 10,
+    "under_fence_concrete_strips_cost": 900,
+    "under_fence_concrete_strips_data": "[{\"id\":\"6d9c978c-8d1c-4696-ae7a-34176ba4f9f6\",\"length\":6}]",
+    "existing_concrete_paving_category": "a1d6186e-5378-4eb7-a348-31a7034cddfb",
+    "existing_concrete_paving_total_cost": 3420,
+    "existing_concrete_paving_square_meters": 10
+  },
+  "waterFeature": {
+    "id": "ad1a0be5-2ce0-4e08-97bc-f0c5e0b2538c",
+    "pool_id": "899101c2-f809-49b5-b402-5388c0420c37",
+    "led_blade": "900mm",
+    "created_at": "2025-04-15T02:16:53.771256+00:00",
+    "top_finish": "coping_style",
+    "total_cost": 4500,
+    "updated_at": "2025-04-15T02:16:53.771256+00:00",
+    "customer_id": "0b7179a5-0a80-47ed-b12b-9989a520d770",
+    "front_finish": "bag_washed",
+    "sides_finish": "coping_style",
+    "water_feature_size": "small",
+    "back_cladding_needed": true
+  },
+  "referenceTables": {
+    "craneCosts": [
+      {
+        "id": "c4d3e57d-ec08-4f5c-a9d5-8c4d1b6791fc",
+        "name": "Franna Crane-S20T-L1",
+        "price": 700,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 1
+      },
+      {
+        "id": "a4f2a21b-93ea-4064-b05c-c8abca4f2e4d",
+        "name": "Franna Crane-S20T+Time-L2",
+        "price": 1000,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 2
+      },
+      {
+        "id": "33596014-7041-433b-b6b2-77b461c99b2d",
+        "name": "Franna Crane-S40T-L3",
+        "price": 1300,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 3
+      },
+      {
+        "id": "2befdbcf-c42d-4188-b2c9-932e92ada605",
+        "name": "Franna Crane-S40T+CW-L4",
+        "price": 1600,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 4
+      },
+      {
+        "id": "c447ac9e-c2b7-4ca2-b503-5352b69cb95f",
+        "name": "Small Slew 40T-L1",
+        "price": 1650,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 5
+      },
+      {
+        "id": "0381b9ac-6090-40f1-beb5-fe6cae681a0b",
+        "name": "Small Slew 40T-L2",
+        "price": 1900,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 6
+      },
+      {
+        "id": "3b8a1cc0-df8f-42c6-8a09-e13d014e69e3",
+        "name": "Small Slew 40T-L3",
+        "price": 2150,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 7
+      },
+      {
+        "id": "000c6f1f-6ad4-47c4-b4d7-084dce331dac",
+        "name": "Small Slew 40T-L4",
+        "price": 2400,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 8
+      },
+      {
+        "id": "d2c3ea9d-a30e-4764-9f89-ea73fcc347d3",
+        "name": "Small Slew 40T-L5",
+        "price": 2650,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 9
+      },
+      {
+        "id": "77045fb9-5484-4b26-baaf-7dd877eb48f0",
+        "name": "Small Slew 40T-L6",
+        "price": 2900,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 10
+      },
+      {
+        "id": "304e81a0-7259-405b-afe1-edfa8742bc23",
+        "name": "Small Slew 40T-L7",
+        "price": 3150,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 11
+      },
+      {
+        "id": "255a0400-6379-4369-bf2c-1905bf088e8f",
+        "name": "Medium Slew 60T-L1",
+        "price": 3300,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 12
+      },
+      {
+        "id": "f4a797bb-6c88-4a33-b36a-360e1cd332c0",
+        "name": "Medium Slew 60T-L2",
+        "price": 3550,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 13
+      },
+      {
+        "id": "49057153-9792-4312-84ed-5d675cb4b0f9",
+        "name": "Medium Slew 60T-L3",
+        "price": 3800,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 14
+      },
+      {
+        "id": "80158ed6-671f-41db-9070-340c3d37ce16",
+        "name": "Large Slew 80T-L1",
+        "price": 3900,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 15
+      },
+      {
+        "id": "653d6688-638b-4824-b073-5f2341b4aaf0",
+        "name": "Large Slew 80T-L2",
+        "price": 4150,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 16
+      },
+      {
+        "id": "2a69aa28-6796-4e9b-9f9f-797dadb898af",
+        "name": "Large Slew 80T-L3",
+        "price": 4400,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 17
+      },
+      {
+        "id": "45a32d68-7bad-4485-9750-cddcd9592ce3",
+        "name": "Large Slew 80T-L4",
+        "price": 4650,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 18
+      },
+      {
+        "id": "f3072b07-9633-4d96-9e04-996b90e57a53",
+        "name": "Large Slew 80T-L5",
+        "price": 4900,
+        "created_at": "2025-02-17T07:11:09.751432+00:00",
+        "display_order": 19
+      }
+    ],
+    "bobcatCosts": [
+      {
+        "id": "a4bb1697-c171-489c-bbd5-0f773415b6dc",
+        "price": 1000,
+        "day_code": "D1",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 1,
+        "size_category": "Size 1"
+      },
+      {
+        "id": "d5ee3f92-5d29-45f3-b847-4e46df7c32d1",
+        "price": 1600,
+        "day_code": "D1",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 1,
+        "size_category": "Size 3"
+      },
+      {
+        "id": "cb4b68fe-48e0-475d-a816-d8aa792ad6e7",
+        "price": 1400,
+        "day_code": "D1",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 1,
+        "size_category": "Size 2"
+      },
+      {
+        "id": "82c22813-0465-48f0-9314-20c53a1436df",
+        "price": 1700,
+        "day_code": "D2",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 2,
+        "size_category": "Size 3"
+      },
+      {
+        "id": "64706ba6-4153-44ca-85c6-0aedd638b154",
+        "price": 1500,
+        "day_code": "D2",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 2,
+        "size_category": "Size 2"
+      },
+      {
+        "id": "23b3ba5c-0ae4-4545-b154-02801c453d8c",
+        "price": 1100,
+        "day_code": "D2",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 2,
+        "size_category": "Size 1"
+      },
+      {
+        "id": "20fd4c0d-24f7-471d-a229-667e6daca24a",
+        "price": 1600,
+        "day_code": "D3",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 3,
+        "size_category": "Size 2"
+      },
+      {
+        "id": "23dfe96c-f64f-4fe5-8e89-964f3aaf7167",
+        "price": 1200,
+        "day_code": "D3",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 3,
+        "size_category": "Size 1"
+      },
+      {
+        "id": "b51d0d3d-4a37-4ad4-a3a0-f3e1acf0c280",
+        "price": 1800,
+        "day_code": "D3",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 3,
+        "size_category": "Size 3"
+      },
+      {
+        "id": "f93a1000-f477-46d0-b16f-87d8840c00ed",
+        "price": 1900,
+        "day_code": "D4",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 4,
+        "size_category": "Size 3"
+      },
+      {
+        "id": "da91c66c-025d-445c-985b-099799215874",
+        "price": 1300,
+        "day_code": "D4",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 4,
+        "size_category": "Size 1"
+      },
+      {
+        "id": "0c7c21de-2422-46b6-bbc9-a918900b82af",
+        "price": 1700,
+        "day_code": "D4",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 4,
+        "size_category": "Size 2"
+      },
+      {
+        "id": "ba5534e6-753d-4212-88f1-695e4060cce3",
+        "price": 1800,
+        "day_code": "D5",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 5,
+        "size_category": "Size 2"
+      },
+      {
+        "id": "c1bb3674-223c-4af3-9897-2d46900ae30d",
+        "price": 1400,
+        "day_code": "D5",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 5,
+        "size_category": "Size 1"
+      },
+      {
+        "id": "da82508f-b63f-44db-8ec2-1cd10c9b788b",
+        "price": 2000,
+        "day_code": "D5",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 5,
+        "size_category": "Size 3"
+      },
+      {
+        "id": "2727343f-cdec-4dfa-bb31-bf519b215f2e",
+        "price": 1900,
+        "day_code": "D6",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 6,
+        "size_category": "Size 2"
+      },
+      {
+        "id": "e58c4b11-912d-44dc-b5c1-e4275ed07c7f",
+        "price": 1500,
+        "day_code": "D6",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 6,
+        "size_category": "Size 1"
+      },
+      {
+        "id": "c48a2fea-bf55-4e74-8094-6fd3c754bbd0",
+        "price": 2100,
+        "day_code": "D6",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 6,
+        "size_category": "Size 3"
+      },
+      {
+        "id": "a4ab5a56-b79b-470e-8c7a-45dc2b29b079",
+        "price": 2200,
+        "day_code": "D7",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 7,
+        "size_category": "Size 3"
+      },
+      {
+        "id": "9f23d9e7-e8fc-4d0d-bebf-70342ea4403a",
+        "price": 1600,
+        "day_code": "D7",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 7,
+        "size_category": "Size 1"
+      },
+      {
+        "id": "2e947748-1b70-46a8-a77d-1a75dfe7f8f6",
+        "price": 2000,
+        "day_code": "D7",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 7,
+        "size_category": "Size 2"
+      },
+      {
+        "id": "a1811caf-ee9c-4bb0-ade2-2b05de63be21",
+        "price": 2100,
+        "day_code": "D8",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 8,
+        "size_category": "Size 2"
+      },
+      {
+        "id": "5bf0b4b4-c0a7-4861-8a42-34dac40cabfd",
+        "price": 2300,
+        "day_code": "D8",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 8,
+        "size_category": "Size 3"
+      },
+      {
+        "id": "a097cf2f-262f-4eec-b5d7-efe462af9527",
+        "price": 1700,
+        "day_code": "D8",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 8,
+        "size_category": "Size 1"
+      },
+      {
+        "id": "8418cb7d-c832-43de-8558-fc112490168f",
+        "price": 2200,
+        "day_code": "D9",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 9,
+        "size_category": "Size 2"
+      },
+      {
+        "id": "a40fa758-0ff3-46f2-ab81-f5a34e1a042f",
+        "price": 2400,
+        "day_code": "D9",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 9,
+        "size_category": "Size 3"
+      },
+      {
+        "id": "05c84dbf-6312-4d7b-b2f5-88e7f2f0ff8a",
+        "price": 1800,
+        "day_code": "D9",
+        "created_at": "2025-02-17T07:04:00.265116+00:00",
+        "display_order": 9,
+        "size_category": "Size 1"
+      }
+    ],
+    "concreteCuts": [
+      {
+        "id": "94b510b1-bb79-447c-815b-ec589ea537e9",
+        "price": 320,
+        "cut_type": "1/4 Pool",
+        "created_at": "2025-03-12T06:03:12.288156+00:00",
+        "updated_at": "2025-03-12T06:03:12.288156+00:00",
+        "display_order": 1
+      },
+      {
+        "id": "4d0aae81-a015-4ccb-82f5-dd941edecb53",
+        "price": 640,
+        "cut_type": "1/2 Pool",
+        "created_at": "2025-03-12T06:03:12.288156+00:00",
+        "updated_at": "2025-03-12T06:03:12.288156+00:00",
+        "display_order": 2
+      },
+      {
+        "id": "21ec071d-dc66-453e-9b52-8bc36470b33f",
+        "price": 960,
+        "cut_type": "3/4 Pool",
+        "created_at": "2025-03-12T06:03:12.288156+00:00",
+        "updated_at": "2025-03-12T06:03:12.288156+00:00",
+        "display_order": 3
+      },
+      {
+        "id": "3aa72ae3-14e9-4d45-b7d3-60ac5f41c79c",
+        "price": 1280,
+        "cut_type": "Full Pool",
+        "created_at": "2025-03-12T06:03:12.288156+00:00",
+        "updated_at": "2025-03-12T06:03:12.288156+00:00",
+        "display_order": 4
+      },
+      {
+        "id": "721accb5-2882-44c0-ad08-b1e055dd7283",
+        "price": 50,
+        "cut_type": "Diagonal Cuts",
+        "created_at": "2025-03-12T06:03:12.288156+00:00",
+        "updated_at": "2025-03-12T06:03:12.288156+00:00",
+        "display_order": 5
+      }
+    ],
+    "retainingWalls": [
+      {
+        "id": "88029bc5-24b4-4b63-8dc0-bc58f5124422",
+        "rate": 300,
+        "type": "Block Wall - Clad",
+        "total": 600,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 200,
+        "updated_at": "2025-04-09T07:00:33.495825+00:00"
+      },
+      {
+        "id": "3645876e-43e1-4470-b8ac-a0d8e9d15cb9",
+        "rate": 400,
+        "type": "Block Wall - Finished Block Work",
+        "total": 500,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 0,
+        "updated_at": "2025-04-09T07:00:37.851121+00:00"
+      },
+      {
+        "id": "1a4e61bd-c61c-42d8-afde-3ac6bf01afef",
+        "rate": 400,
+        "type": "Block Wall - Finished Block Work & Painted",
+        "total": 540,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 40,
+        "updated_at": "2025-04-09T06:59:49.920216+00:00"
+      },
+      {
+        "id": "68440138-926e-49d8-8498-cfe42745265f",
+        "rate": 300,
+        "type": "Block Wall - Rendered",
+        "total": 500,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 100,
+        "updated_at": "2025-04-09T07:00:47.949767+00:00"
+      },
+      {
+        "id": "22a1fd82-947a-41d4-9e8a-ef4cdcb58de1",
+        "rate": 300,
+        "type": "Block Wall - Rendered & Painted",
+        "total": 540,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 140,
+        "updated_at": "2025-04-09T07:00:54.703708+00:00"
+      },
+      {
+        "id": "51b91bab-5feb-45b4-9c76-9790f03b09e5",
+        "rate": 400,
+        "type": "Drop Edge - Clad",
+        "total": 700,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 200,
+        "updated_at": "2025-04-09T07:00:02.787424+00:00"
+      },
+      {
+        "id": "bd52c4fa-fd32-4a53-8746-607c231acea7",
+        "rate": 400,
+        "type": "Drop Edge - Render",
+        "total": 600,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 100,
+        "updated_at": "2025-04-09T07:00:06.908616+00:00"
+      },
+      {
+        "id": "96510a0a-e295-4c55-bab7-70a8a4ec124f",
+        "rate": 400,
+        "type": "Drop Edge - Render & Painted",
+        "total": 640,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 140,
+        "updated_at": "2025-04-09T07:00:10.621211+00:00"
+      },
+      {
+        "id": "ca34365d-97dc-48cb-a354-079c839f6ffa",
+        "rate": 400,
+        "type": "Drop Edge - Strip Finish",
+        "total": 500,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 0,
+        "updated_at": "2025-04-09T07:00:14.420458+00:00"
+      },
+      {
+        "id": "99a39d0a-bf5f-4f3c-89f0-ff1490e50ed5",
+        "rate": 400,
+        "type": "Drop Edge - Strip Finish & Painted",
+        "total": 540,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 40,
+        "updated_at": "2025-04-09T07:00:20.001645+00:00"
+      },
+      {
+        "id": "e5b4b506-ed7b-4af8-90fc-9daf17cf3cb0",
+        "rate": 400,
+        "type": "Timber",
+        "total": 500,
+        "margin": 100,
+        "created_at": "2025-02-26T06:17:16.780085+00:00",
+        "extra_rate": 0,
+        "updated_at": "2025-04-09T07:00:24.363905+00:00"
+      }
+    ],
+    "extraPavingCosts": [
+      {
+        "id": "a1d6186e-5378-4eb7-a348-31a7034cddfb",
+        "category": "Category 1",
+        "created_at": "2025-03-12T04:53:45.809834+00:00",
+        "paver_cost": 99,
+        "updated_at": "2025-03-12T04:53:45.809834+00:00",
+        "margin_cost": 100,
+        "wastage_cost": 13,
+        "display_order": 1
+      },
+      {
+        "id": "0f677f22-ef34-43f8-ac56-036279369fbf",
+        "category": "Category 2",
+        "created_at": "2025-03-12T04:53:45.809834+00:00",
+        "paver_cost": 114,
+        "updated_at": "2025-03-12T04:53:45.809834+00:00",
+        "margin_cost": 100,
+        "wastage_cost": 13,
+        "display_order": 2
+      },
+      {
+        "id": "32c991c6-c523-4ec3-ac48-162243cd586b",
+        "category": "Category 3",
+        "created_at": "2025-03-12T04:53:45.809834+00:00",
+        "paver_cost": 137,
+        "updated_at": "2025-03-12T04:53:45.809834+00:00",
+        "margin_cost": 100,
+        "wastage_cost": 13,
+        "display_order": 3
+      },
+      {
+        "id": "0e60a579-1d4c-4941-acac-6650272cd3eb",
+        "category": "Category 4",
+        "created_at": "2025-03-12T04:53:45.809834+00:00",
+        "paver_cost": 137,
+        "updated_at": "2025-03-12T04:53:45.809834+00:00",
+        "margin_cost": 100,
+        "wastage_cost": 13,
+        "display_order": 4
+      }
+    ],
+    "trafficControlCosts": [
+      {
+        "id": "61b98542-bdb1-4294-9a07-7715cba4a429",
+        "name": "Level 1",
+        "price": 1600,
+        "created_at": "2025-02-17T07:15:54.592033+00:00",
+        "display_order": 1
+      },
+      {
+        "id": "8d906b28-954d-4234-bb15-58456104c3cf",
+        "name": "Level 2",
+        "price": 3100,
+        "created_at": "2025-02-17T07:15:54.592033+00:00",
+        "display_order": 2
+      },
+      {
+        "id": "3f833867-4cfe-423d-b19b-7b9e5be39500",
+        "name": "Level 3",
+        "price": 3800,
+        "created_at": "2025-02-17T07:15:54.592033+00:00",
+        "display_order": 3
+      },
+      {
+        "id": "3a389b6d-82d2-42ea-ae58-b9e9cda3983c",
+        "name": "Level 4",
+        "price": 5300,
+        "created_at": "2025-02-17T07:15:54.592033+00:00",
+        "display_order": 4
+      }
+    ]
+  },
+  "filtrationPackage": {
+    "id": "630c7c7a-8d41-4039-9825-79d414f71263",
+    "name": "Option 6",
+    "pump": {
+      "id": "386a9fa7-cc9a-4a76-8018-6a5d8f882b20",
+      "name": "Theraflo TVS 1.25hp Pump",
+      "price": 930.04,
+      "type_id": "ffcf3ce4-b136-43e5-a709-3b871aa9e8a4",
+      "flow_rate": null,
+      "created_at": "2025-02-17T23:48:32.065975+00:00",
+      "description": null,
+      "model_number": "THERAF60125",
+      "power_consumption": null
+    },
+    "light": {
+      "id": "eae62c3e-8fc3-4cca-bb94-7fa4bd1dc784",
+      "name": "Single LED Light",
+      "price": 396,
+      "type_id": "c8816a62-ad9e-4227-bf74-b2d466a8cc58",
+      "flow_rate": null,
+      "created_at": "2025-02-17T23:47:58.989344+00:00",
+      "description": null,
+      "model_number": "THERAL54EGFSP24",
+      "power_consumption": null
+    },
+    "filter": {
+      "id": "5de66f00-a1e8-479d-896b-74edd73f42a5",
+      "name": "THERA6255 - Theraclear 255 Media Filter",
+      "price": 714.22,
+      "type_id": "95109dfe-be3f-4175-9bcc-c8788e7dca84",
+      "flow_rate": null,
+      "created_at": "2025-02-17T23:51:36.448138+00:00",
+      "description": null,
+      "model_number": "THERA6255 ",
+      "power_consumption": null
+    },
+    "pump_id": "386a9fa7-cc9a-4a76-8018-6a5d8f882b20",
+    "light_id": "eae62c3e-8fc3-4cca-bb94-7fa4bd1dc784",
+    "filter_id": "5de66f00-a1e8-479d-896b-74edd73f42a5",
+    "sanitiser": {
+      "id": "4e326db6-f135-4dc3-b51b-56b20b514942",
+      "name": "Vapure 35G",
+      "price": 1150.91,
+      "type_id": "9af5d4b6-60e0-41fc-9032-4fe2c9137412",
+      "flow_rate": null,
+      "created_at": "2025-02-17T23:49:48.594451+00:00",
+      "description": null,
+      "model_number": "VP35 ",
+      "power_consumption": null
+    },
+    "created_at": "2025-02-18T04:45:19.955795+00:00",
+    "filter_type": null,
+    "handover_kit": {
+      "id": "42975ab4-cb8e-40b0-912d-44f20bfc286d",
+      "name": "Handover Kit 2",
+      "components": [
+        {
+          "id": "f13b412c-6b5a-43f1-95ec-3e3284031c3b",
+          "name": "11M Handover Kit",
+          "model": "KITPOOL11M",
+          "price": 136.13,
+          "quantity": 1
+        },
+        {
+          "id": "28976829-d0f3-40f8-a0d4-afc548d151da",
+          "name": "15KG Enhance Minerals",
+          "model": "IPEM6015 ",
+          "price": 61.12,
+          "quantity": 3
+        },
+        {
+          "id": "d2509ac6-836e-4dd3-b982-99505cfd8b9e",
+          "name": "ABC - Telescopic Pole",
+          "model": "ABC - Telescopic Pole",
+          "price": 20,
+          "quantity": 1
+        },
+        {
+          "id": "0ca7a12e-ac7d-4344-8137-6c207e4c7f93",
+          "name": "Theralux Mineral Test Strip",
+          "model": "ETMT7001 ",
+          "price": 33,
+          "quantity": 1
+        },
+        {
+          "id": "1422a5ee-c246-497a-88b8-2a38022cbf40",
+          "name": "Theralux Startup Kit",
+          "model": "IQSU4000 ",
+          "price": 80.04,
+          "quantity": 1
+        }
+      ]
+    },
+    "sanitiser_id": "4e326db6-f135-4dc3-b51b-56b20b514942",
+    "display_order": 6,
+    "handover_kit_id": "42975ab4-cb8e-40b0-912d-44f20bfc286d"
+  },
+  "poolSpecification": {
+    "id": "899101c2-f809-49b5-b402-5388c0420c37",
+    "name": "Verona",
+    "range": "Latin",
+    "width": 2.5,
+    "length": 4.5,
+    "dig_level": "Dig 2",
+    "weight_kg": 414,
+    "created_at": "2025-02-17T02:33:41.762513+00:00",
+    "depth_deep": 1.5,
+    "dig_type_id": null,
+    "pool_type_id": "8b8f6019-2f05-4b62-99d1-421fdfa24fd2",
+    "depth_shallow": 1.1,
+    "volume_liters": 10300,
+    "waterline_l_m": 13.8,
+    "buy_price_ex_gst": 11700,
+    "salt_volume_bags": 2,
+    "buy_price_inc_gst": 12870,
+    "minerals_kg_topup": 3,
+    "outline_image_url": null,
+    "minerals_kg_initial": 6,
+    "salt_volume_bags_fixed": 2,
+    "default_filtration_package_id": "630c7c7a-8d41-4039-9825-79d414f71263"
+  },
+  "electricalRequirements": null
+}
