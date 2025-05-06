@@ -1,9 +1,12 @@
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/mfp/src/app/proposal/[customerUuid]/ProposalViewer.client.tsx
+ */
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as SM from '@/app/lib/sectionMachine';
 import { useJsApiLoader } from '@react-google-maps/api';
-import type { Snapshot  } from '@/app/lib/types/snapshot';
+import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Zap, Filter, Droplet, Sun } from 'lucide-react';
@@ -22,47 +25,14 @@ import {
   AddOnCards,
   PoolSelectionCards,
   SiteRequirementsCards
-} from './components';
+} from '@/components';
 import { fadeOut, contentIn } from '@/app/lib/animation';
 import { lastDir, SECTIONS_WITH_SUBSECTIONS } from '@/app/lib/layoutConstants';
-import { CATEGORY_IDS, CATEGORY_NAMES } from './ProposalViewer.constants';
+import { CATEGORY_IDS, CATEGORY_NAMES } from '@/app/lib/constants';
+import { isSectionEmpty } from '@/app/lib/utils';
 
-export interface ProposalViewerProps { snapshot: Snapshot }
+export interface ProposalViewerProps { snapshot: ProposalSnapshot }
 export default function ProposalViewer({ snapshot }: ProposalViewerProps) {
-  // Add debug logging on mount
-  useEffect(() => {
-    console.log('Complete snapshot object:', snapshot);
-    
-    // Extract address fields for debugging
-    if (snapshot.poolProject) {
-      const project = snapshot.poolProject;
-      console.log('Pool Project Object:', project);
-      
-      // Check address field formats
-      console.log('Address fields available on poolProject:', {
-        site_address: 'site_address' in project,
-        home_address: 'home_address' in project,
-        // These might not exist if camelCase conversion isn't happening
-        siteAddress: 'siteAddress' in project,
-        homeAddress: 'homeAddress' in project
-      });
-      
-      // Log values for debugging
-      console.log('Address field values:', {
-        site_address: project.site_address,
-        home_address: project.home_address,
-        // Use as any to avoid TS errors
-        siteAddress: (project as any).siteAddress,
-        homeAddress: (project as any).homeAddress
-      });
-    }
-    
-    // Log other critical components
-    console.log('Pool Specification:', snapshot.poolSpecification);
-    console.log('Filtration Package:', snapshot.filtrationPackage);
-    console.log('Fencing Package:', snapshot.fencing);
-    console.log('Snapshot Timestamp:', snapshot.timestamp);
-  }, [snapshot]);
 
   const [machineState, setMachineState] = useState<SM.State>(SM.initialState);
   const [, setDir] = useState<1 | -1>(1);   // +1 = forward, -1 = back, state needed for handlers
@@ -87,8 +57,8 @@ export default function ProposalViewer({ snapshot }: ProposalViewerProps) {
   }, []); // Empty dependency array means this runs only once
 
   // Get address info from snapshot
-  const fullAddress = snapshot.poolProject.siteAddress ?? snapshot.poolProject.homeAddress;
-  const homeAddress = snapshot.poolProject.homeAddress;
+  const fullAddress = snapshot.site_address ?? snapshot.home_address;
+  const homeAddress = snapshot.home_address;
   const formattedAddress = (fullAddress ?? '').trim().replace(/\s+/g, ' ');
   
   // Load Google Maps API
@@ -233,7 +203,7 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                   <div className="transition-opacity duration-300 ease-in-out opacity-100">
                     {id === CATEGORY_IDS.CUSTOMER_INFO ? (
                       <h2 className="header-welcome font-bold font-sans text-white text-2xl lg:text-3xl">
-                        Welcome <span className="header-owners text-2xl lg:text-3xl !text-[#DB9D6A]">{snapshot.poolProject.owner1.split(' ')[0]} & {snapshot.poolProject.owner2?.split(' ')[0]}</span>
+                        Welcome <span className="header-owners text-2xl lg:text-3xl !text-[#DB9D6A]">{snapshot.owner1.split(' ')[0]} & {snapshot.owner2?.split(' ')[0]}</span>
                       </h2>
                     ) : (
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -280,20 +250,16 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                           {/* Pool Selection Subsections */}
                           {id === CATEGORY_IDS.POOL_SELECTION && (
                             <PoolSelectionCards
-                              subIndex={sub}
-                              pool={snapshot.poolSpecification}
-                              poolCosts={snapshot.poolCosts}
-                              poolMargins={snapshot.poolMargins}
-                            />
+                                       subIndex={sub}
+                                        snapshot={snapshot}
+                                       />
                           )}
                           
                           {/* Pool Installation Subsections */}
                           {id === CATEGORY_IDS.SITE_REQUIREMENTS && (
                             <SiteRequirementsCards
                               subIndex={sub}
-                              site={snapshot.poolProject}
-                              electrical={snapshot.electricalRequirements}
-                              referenceTables={snapshot.referenceTables}
+                              snapshot={snapshot}
                             />
                           )}
                         </AnimatePresence>
@@ -309,22 +275,17 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                       {id === CATEGORY_IDS.CUSTOMER_INFO ? (
                         <CustomerInfoCards snapshot={snapshot} />
                       ) : id === CATEGORY_IDS.FILTRATION_MAINTENANCE ? (
-                        <FiltrationMaintenanceCards pkg={snapshot.filtrationPackage} />
+                        <FiltrationMaintenanceCards snapshot={snapshot} />
                       ) : id === CATEGORY_IDS.CONCRETE_PAVING ? (
-                        <ConcretePavingCards 
-                          snapshot={snapshot}
-                        />
+                        <ConcretePavingCards snapshot={snapshot} />
                       ) : id === CATEGORY_IDS.FENCING ? (
-                        <FencingCards data={snapshot.fencing} />
+                        <FencingCards snapshot={snapshot} />
                       ) : id === CATEGORY_IDS.RETAINING_WALLS ? (
-                        <RetainingWallCards
-                          project={snapshot.poolProject}
-                          referenceTables={snapshot.referenceTables.retainingWalls}
-                        />
-                      ) : id === CATEGORY_IDS.WATER_FEATURE && snapshot.waterFeature ? (
-                        <WaterFeatureCards data={snapshot.waterFeature} />
+                        <RetainingWallCards snapshot={snapshot} />
+                      ) : id === CATEGORY_IDS.WATER_FEATURE ? (
+                        <WaterFeatureCards snapshot={snapshot} />
                       ) : id === CATEGORY_IDS.ADD_ONS ? (
-                        <AddOnCards data={snapshot.referenceTables.extraPavingCosts} />
+                        <AddOnCards snapshot={snapshot} />
                       ) : (
                         // Generic placeholder for other single-content sections
                         (<Card className="w-full h-full p-5 overflow-y-auto">
