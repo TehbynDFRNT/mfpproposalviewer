@@ -1,17 +1,29 @@
-// Correct approach: Server Component for fetching data 
-// We'll load data server-side and pass it to the client component
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/mfp/src/app/debug/page.tsx
+ */
+// Server Component for fetching data using the flat SQL view structure
+// We load data server-side and pass it to the client component
 
 import DebugClient from './debug-client';
-import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot';
+import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
 
-export default async function DebugPage() {
+interface DebugPageProps {
+  searchParams: {
+    uuid?: string;
+  };
+}
+
+export default async function DebugPage({ searchParams }: DebugPageProps) {
   let snapshotData = null;
   let errorMessage = null;
   
+  // Default UUID if none provided in URL
+  const defaultUuid = '0b7179a5-0a80-47ed-b12b-9989a520d770';
+  // Use UUID from URL or fallback to default
+  const customerUuid = searchParams.uuid || defaultUuid;
+  
   try {
-    // Using the provided test UUID
-    const testUuid = '0b7179a5-0a80-47ed-b12b-9989a520d770';
-    snapshotData = await getProposalSnapshot(testUuid);
+    snapshotData = await getProposalSnapshot(customerUuid);
     console.log('Server-side snapshot retrieved:', !!snapshotData);
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -22,7 +34,8 @@ export default async function DebugPage() {
   return (
     <DebugClient 
       snapshotData={snapshotData} 
-      errorMessage={errorMessage} 
+      errorMessage={errorMessage}
+      initialUuid={customerUuid}
     />
   );
 }

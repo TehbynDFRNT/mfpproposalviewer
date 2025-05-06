@@ -1,4 +1,7 @@
-import { CATEGORY_IDS } from '@/app/proposal/[customerUuid]/ProposalViewer.constants';
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/mfp/src/app/lib/layoutConstants.ts
+ */
+import { CATEGORY_IDS } from '@/app/lib/constants';
 
 // Define sections that have subsections
 export const SECTIONS_WITH_SUBSECTIONS = [

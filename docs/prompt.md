@@ -1,52 +1,24 @@
 ### OBJECTIVE
 ___________________
 
-> **Flow:**  getProposalSnapshot JSON (camel-cased version of RAW RPC file) → Snapshot.ts → `src/app/proposal/.../<ComponentName>.tsx`
-> **Goal:** Exactly **one strongly-typed object (`Snapshot`)** enters at the RSC boundary and is passed—unchanged—through every React component.  
-> Every card now receives `{ snapshot }` and slices locally. **No `snake_case`; no casts.**
+| # | What to do | Where / Why |
+|---|------------|-------------|
+| **1** | **Run the RPC ➜ camelCase ➜ `withTotals()` — once.** | `getProposalSnapshot.ts`<br>```ts\nconst raw   = …rpc…;\nconst camel = camelcaseKeys(raw, { deep: true });\nreturn withTotals(camel);        // → SnapshotWithTotals\n``` |
+| **2** | **Import the enriched type everywhere:**<br>`SnapshotWithTotals as Snapshot` | Keeps `.totals` (and `.installation`) available & type-safe. |
+| **3** | **Pass exactly one prop into every card / section:**<br>`<SomeCard snapshot={snapshot} />` | No more `pool`, `poolCosts`, etc. |
+| **4** | **Slice inside the component:**<br>`const { poolSpecification, totals } = snapshot;` | *Zero* `snake_case` in React. |
+| **5** | **Camel-case any row you expose (once):**<br>`type NewRow = Camelize<Tables<'new_table'>>;` | Add alias in `snapshot.ts`, swap the field type → compiler green. |
+| **6** | **Camel-case *reference tables* too:**<br>```ts\n type RefBobcat = Camelize<Tables<'bobcat_costs'>>;\n export interface Snapshot { referenceTables: { bobcatCosts: RefBobcat[]; … } }\n``` | Ensures lookup rows (`sizeCategory`, `dayCode`, etc.) are also camelCase, so no mixed cases in helpers. |
+| **7** | **Remove duplicate maths & move logic to `withTotals()`.** | The UI just *reads* numbers; it doesn’t recalc. |
+| **8** | **Search & destroy `snake_case`** (`_`) **in UI folders.** | Every hit → old prop pattern. |
+| **9** | **Run `yarn tsc` after each migration.** | Compiler points to the next file still using the old pattern. |
+| **10** | **If `totals` is undefined, you skipped step 1.** | Call `withTotals()` right after camel-casing. |
+| **11** | **Log once on the server, not in each card.** | Keeps the browser console clean & avoids leaking snake_case fields. |
 
----
-
-## 1 Define **`snapshot.ts`**
-
-| ✔︎ What to do | Why / details |
-|---------------|---------------|
-| **Mirror the payload** | `interface Snapshot` must **exactly** match the camel-cased JSON returned by `get_proposal_snapshot` which ouputs camelized JSON loc |
-| **Deep typing** | Cover every nested structure related to the current file `src/app/proposal/.../<ComponentName>.tsx`
----
-
-## 2 Align front-end component: `src/app/proposal/.../<ComponentName>.tsx`
-
-| Step | Instruction |
-|------|-------------|
-
-| **Prop contract** | Each section card now exports **one** prop, no additional props:<br>`export default function Card({ snapshot }: { snapshot: Snapshot }) { … }` |
-| **Slice locally** | Inside the card: `const { poolProject } = snapshot;` (or whatever slice you need). |
-| **Call-site rename** | Convert `〈Card data={snapshot.poolProject} …〉` → `〈Card snapshot={snapshot} …〉`. |
-| **Clean-up** | Delete ad-hoc assertions, `toCamel()` helpers, and inline casts. |
-| **Perf note** | Passing the full snapshot re-renders the card when **any** field changes. If that becomes noisy, wrap heavy cards in `React.memo` or slice higher up. If you can’t React.memo a card, slice higher up or memoise derived values with useMemo.
-| **User Requests** | Make sure the front end component `src/app/proposal/.../<ComponentName>.tsx` diffs enable the user request to become achievable.
-
----
-
-## 3 Eliminate `snake_case` bleed
-
-* Wrap every RPC call with `fetchWithCamel<Snapshot>()` (generic keeps TS aware).  
-* Remove any remaining `toCamel()` utilities in components.  
-* Confirm **no component** references snake-case keys.
+Follow these eleven steps and every new data slice—defaults, overrides, reference rows—stays **camel-case end-to-end** with a single strongly-typed `snapshot`.
 
 
-## 🎯 Outcome
-
-* The entire `getProposalSnapshot` payload flows end-to-end as **one** strongly-typed object.  
-* Components slice what they need locally, keeping prop surfaces flat and future-proof.  
-* Zero `snake_case` references or unsafe casts remain.  
-* Future RPC field additions demand **no** prop rewiring—just extend `Snapshot`.  
-* Cards re-render only for the data they consume; memoise if any become hotspots.
-* Dead helper code (old toCamel utils, unused props) is deleted as part of each PR
-
-
-____________REST & THINK___________________
+____________Take the time to think, no rush, think on it___________________
 
 ## 2) 📦 snapshot.ts CAMELIZED /type of RSC RPC JSON (TO BE EDITED)
 
@@ -871,8 +843,7 @@ WARNING: We are not using the RAW snake case below, it is for structural referen
 // — copy the JSX/type code you want to change here —
 ```
 
-
-____________REST & THINK___________________
+____________Take the time to think, no rush, think on it___________________
 
 USER REQUESTS: 'UserRequest'
 

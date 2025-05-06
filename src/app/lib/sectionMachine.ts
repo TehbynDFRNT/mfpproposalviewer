@@ -1,3 +1,6 @@
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/mfp/src/app/lib/sectionMachine.ts
+ */
 export type SectionId =
   | 'customer-info-section'
   | 'pool-selection-section'

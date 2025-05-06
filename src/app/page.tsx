@@ -1,3 +1,6 @@
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/mfp/src/app/page.tsx
+ */
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link'; // Import Link

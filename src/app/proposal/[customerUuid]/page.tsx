@@ -1,28 +1,29 @@
 /**
- * React-Server Component wrapper – fetches data, then streams the
- * heavy viewer as a client-only bundle.
+ * File: /Users/tehbynnova/Code/MyProjects/Web/mfp/src/app/proposal/[customerUuid]/page.tsx
+ * React-Server Component wrapper – fetches data from SQL view directly,
+ * then streams the heavy viewer as a client-only bundle.
  */
-import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot';
-import type { Snapshot }        from '@/app/lib/types/snapshot';
-import ProposalViewer       from './ProposalViewer.client';
+// point explicitly at the server helper
+import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
 
-// Next 15: `params` is now a *Promise* – so we await it first.
+// give us the type if you want to annotate the result
+import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+
+import ProposalViewer from './ProposalViewer.client';
+
 export default async function ProposalPage({
   params,
 }: {
-  /** awaited later ↓                                    */
-  params: Promise<{ customerUuid: string }>;
+  params: { customerUuid: string };
 }) {
-  const { customerUuid } = await params;          // ✅ no console warning
+  const { customerUuid } = params;
   
   // Add server-side logging
-  console.log(`Fetching proposal snapshot for UUID: ${customerUuid}`);
+  console.log(`Fetching proposal snapshot for project ID: ${customerUuid}`);
   
   try {
-    const snapshot: Snapshot = await getProposalSnapshot(customerUuid);
+    const snapshot = await getProposalSnapshot(customerUuid);
     console.log('Server-side snapshot retrieved successfully:', {
-      hasPoolProject: !!snapshot.poolProject,
-      hasPoolSpec: !!snapshot.poolSpecification,
       timestamp: snapshot.timestamp
     });
     

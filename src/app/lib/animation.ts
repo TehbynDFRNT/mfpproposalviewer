@@ -1,3 +1,6 @@
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/mfp/src/app/lib/animation.ts
+ */
 /* ─── timing constants ──────────────────────────────────────────────── */
 export const F_OUT   = 0.35;      // section & visual fade-out
 export const F_IN    = 0.45;      // fade-in duration

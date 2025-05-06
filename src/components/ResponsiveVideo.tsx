@@ -1,3 +1,7 @@
+/**
+ * File: src/components/ResponsiveVideo.tsx
+ */
+
 // components/ResponsiveVideo.tsx
 import React, { useEffect, useRef } from 'react';
 
@@ -32,8 +36,8 @@ export function ResponsiveVideo({
       loop
       playsInline
     >
-      <source src={`/_vid/${baseName}-720.webm`}  type="video/webm" />
-      <source src={`/_vid/${baseName}-1080.mp4`} type="video/mp4" />
+      <source src={`/Unique3D/${baseName}-720.webm`}  type="video/webm" />
+      <source src={`/Unique3D/${baseName}-1080.mp4`} type="video/mp4" />
       Sorry, your browser doesn&apos;t support embedded video.
     </video>
   );
