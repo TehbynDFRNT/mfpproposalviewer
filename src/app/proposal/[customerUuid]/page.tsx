@@ -2,14 +2,36 @@
  * File: /Users/tehbynnova/Code/MyProjects/Web/mfp/src/app/proposal/[customerUuid]/page.tsx
  * React-Server Component wrapper – fetches data from SQL view directly,
  * then streams the heavy viewer as a client-only bundle.
+ * Now includes PIN verification before showing the proposal.
  */
 // point explicitly at the server helper
 import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
 
 // give us the type if you want to annotate the result
 import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import type { Metadata, ResolvingMetadata } from 'next';
 
-import ProposalViewer from './ProposalViewer.client';
+import PinVerification from './PinVerification.client';
+
+// Generate dynamic metadata based on snapshot data
+export async function generateMetadata(
+  { params }: { params: { customerUuid: string } },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  // Fetch the snapshot data
+  const snapshot = await getProposalSnapshot(params.customerUuid);
+
+  // Build title using owner names
+  const ownerNames = snapshot.owner2
+    ? `${snapshot.owner1.split(' ')[0]} & ${snapshot.owner2.split(' ')[0]}`
+    : snapshot.owner1;
+
+  // Create metadata object
+  return {
+    title: `${ownerNames} | Your Pool Proposal - MFP Pools`,
+    description: `Pool proposal for ${ownerNames} featuring a ${snapshot.spec_name || 'custom'} pool.`,
+  };
+}
 
 export default async function ProposalPage({
   params,
@@ -17,17 +39,18 @@ export default async function ProposalPage({
   params: { customerUuid: string };
 }) {
   const { customerUuid } = params;
-  
+
   // Add server-side logging
   console.log(`Fetching proposal snapshot for project ID: ${customerUuid}`);
-  
+
   try {
     const snapshot = await getProposalSnapshot(customerUuid);
     console.log('Server-side snapshot retrieved successfully:', {
       timestamp: snapshot.timestamp
     });
-    
-    return <ProposalViewer snapshot={snapshot} />;
+
+    // Return the PIN verification component which will show the proposal viewer after verification
+    return <PinVerification snapshot={snapshot} />;
   } catch (error) {
     console.error('Error fetching proposal snapshot:', error);
     throw error; // Let Next.js error handling take over

@@ -3,7 +3,7 @@
  */
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Mail, MessageSquare, Phone } from 'lucide-react';
+import { Phone } from 'lucide-react';
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -20,17 +20,14 @@ export default function Header({ children }: HeaderProps) {
       {/* Optional children for SectionJumpSelect on mobile */}
       {children}
       
-      {/* Contact Icons */}
-      <div className="flex items-center space-x-2">
-        <Button variant="secondary" size="icon" aria-label="Email Us">
-          <Mail className="h-5 w-5" />
-        </Button>
-        <Button variant="secondary" size="icon" aria-label="Chat With Us">
-          <MessageSquare className="h-5 w-5" />
-        </Button>
-        <Button variant="secondary" size="icon" aria-label="Call Us">
-          <Phone className="h-5 w-5" />
-        </Button>
+      {/* Contact Phone */}
+      <div className="flex items-center">
+        <a href="tel:1300306011" aria-label="Call 1300 306 011">
+          <Button variant="secondary" className="flex items-center gap-2" aria-label="Call Us">
+            <Phone className="h-4 w-4" />
+            <span className="hidden sm:inline">1300 306 011</span>
+          </Button>
+        </a>
       </div>
     </header>
   );

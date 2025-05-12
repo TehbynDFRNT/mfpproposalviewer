@@ -23,6 +23,7 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
             <Image src="/VipCards/poolcleaner.webp" alt={snapshot.cleaner_name} width={64} height={64} className="w-16 h-16 rounded-md object-cover mr-4" />
             <div>
               <h3 className="text-base font-semibold">{snapshot.cleaner_name}</h3>
+              <p className="text-xs mb-1">{snapshot.cleaner_name ? `Automatic pool cleaning system` : 'Automatic pool cleaning system'}</p>
               <p className="text-sm font-medium">{fmt(snapshot.cleaner_unit_price)}</p>
             </div>
           </div>

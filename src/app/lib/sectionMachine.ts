@@ -10,7 +10,8 @@ export type SectionId =
   | 'retaining-walls-section'
   | 'water-feature-section'
   | 'add-ons-section'
-  | 'site-requirements-section';
+  | 'site-requirements-section'
+  | 'proposal-summary-section';
 
 /** one *logical* step per scroll tick */
 export type Step = 
@@ -24,10 +25,11 @@ export type Step =
   | { section: 'fencing-section' }
   | { section: 'retaining-walls-section' }
   | { section: 'water-feature-section' }
-  | { section: 'add-ons-section' };
+  | { section: 'add-ons-section' }
+  | { section: 'proposal-summary-section' };
 
 /** ordered array drives progress bar & canGoNext/Prev */
-export const STEPS: Step[] = [
+export const STEPS: ReadonlyArray<Step> = [
   { section: 'customer-info-section' },
 
   { section: 'pool-selection-section', sub: 0 },
@@ -43,6 +45,7 @@ export const STEPS: Step[] = [
   { section: 'retaining-walls-section' },
   { section: 'water-feature-section' },
   { section: 'add-ons-section' },
+  { section: 'proposal-summary-section' },
 ];
 
 export type State = { index: number }            // index in STEPS array

@@ -24,41 +24,44 @@ import {
   WaterFeatureCards, 
   AddOnCards,
   PoolSelectionCards,
-  SiteRequirementsCards
+  SiteRequirementsCards,
+  ProposalSummaryCards
 } from '@/components';
 import { fadeOut, contentIn } from '@/app/lib/animation';
 import { lastDir, SECTIONS_WITH_SUBSECTIONS } from '@/app/lib/layoutConstants';
 import { CATEGORY_IDS, CATEGORY_NAMES } from '@/app/lib/constants';
-import { isSectionEmpty } from '@/app/lib/utils';
+import { isSectionEmpty, findNextAvailableStepIndex, findPrevAvailableStepIndex, getAvailableSectionsForSelect } from '@/app/lib/utils';
 
-export interface ProposalViewerProps { snapshot: ProposalSnapshot }
-export default function ProposalViewer({ snapshot }: ProposalViewerProps) {
+export interface ProposalViewerProps {
+  snapshot: ProposalSnapshot;
+  onSnapshotUpdate?: () => Promise<void>;
+}
 
+export default function ProposalViewer({ snapshot, onSnapshotUpdate }: ProposalViewerProps) {
+  // Current proposal data
+  const [currentSnapshot, setCurrentSnapshot] = useState<ProposalSnapshot>(snapshot);
   const [machineState, setMachineState] = useState<SM.State>(SM.initialState);
   const [, setDir] = useState<1 | -1>(1);   // +1 = forward, -1 = back, state needed for handlers
+  // Always show only non-null sections
+  const showOnlyNonNullSections = true;
   const currentStep = SM.current(machineState);
   const activeSection = currentStep.section;
   const sub = 'sub' in currentStep ? currentStep.sub : 0;
   const scrollColumnRef = useRef<HTMLDivElement | null>(null); // Ref for the scrollable container
 
-  // Prepare data for the select dropdown (unique sections)
+  // Update local snapshot when prop changes
+  useEffect(() => {
+    setCurrentSnapshot(snapshot);
+  }, [snapshot]);
+
+  // Prepare data for the select dropdown (unique sections), only showing non-null sections
   const uniqueSections = React.useMemo(() => {
-    const sectionMap = new Map<string, string>();
-    SM.STEPS.forEach(step => {
-      // Use the section ID from the step
-      const sectionId = step.section;
-      if (!sectionMap.has(sectionId)) {
-        // Use CATEGORY_NAMES for display, fall back to the ID if not found
-        sectionMap.set(sectionId, CATEGORY_NAMES[sectionId] || sectionId);
-      }
-    });
-    // Convert the map to an array of objects for easier mapping
-    return Array.from(sectionMap, ([id, name]) => ({ id, name }));
-  }, []); // Empty dependency array means this runs only once
+    return getAvailableSectionsForSelect(currentSnapshot, SM.STEPS, CATEGORY_NAMES, showOnlyNonNullSections);
+  }, [currentSnapshot, showOnlyNonNullSections]); // Recompute if snapshot changes
 
   // Get address info from snapshot
-  const fullAddress = snapshot.site_address ?? snapshot.home_address;
-  const homeAddress = snapshot.home_address;
+  const fullAddress = currentSnapshot.site_address ?? currentSnapshot.home_address;
+  const homeAddress = currentSnapshot.home_address;
   const formattedAddress = (fullAddress ?? '').trim().replace(/\s+/g, ' ');
   
   // Load Google Maps API
@@ -160,6 +163,41 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
     return () => clearTimeout(t);
   }, [machineState.index]);
 
+  // Handle proposal acceptance
+  const handleProposalAccepted = useCallback(async () => {
+    console.log('Proposal accepted successfully');
+
+    // Refresh snapshot data from server if callback provided
+    if (onSnapshotUpdate) {
+      try {
+        await onSnapshotUpdate();
+      } catch (error) {
+        console.error('Error refreshing snapshot after acceptance:', error);
+      }
+    }
+  }, [onSnapshotUpdate]);
+
+  // Handle change request success events
+  useEffect(() => {
+    const handleChangeRequestSuccess = (event: CustomEvent) => {
+      // You could add a toast notification library here,
+      // or implement a simple notification system
+      console.log('Change request submitted successfully:', event.detail.message);
+
+      // For now, we'll use a simple alert
+      // In a production app, you'd want to use a proper notification component
+      alert(event.detail.message);
+    };
+
+    // Add event listener
+    window.addEventListener('requestChangesSuccess', handleChangeRequestSuccess as EventListener);
+
+    // Clean up
+    return () => {
+      window.removeEventListener('requestChangesSuccess', handleChangeRequestSuccess as EventListener);
+    };
+  }, []);
+
   // Compute section-based progress using machine state
   const progressPercent = ((machineState.index + 1) / SM.STEPS.length) * 100;
   
@@ -215,6 +253,7 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                             {(id === CATEGORY_IDS.FENCING || id === CATEGORY_IDS.CONCRETE_PAVING || 
                                id === CATEGORY_IDS.WATER_FEATURE || id === CATEGORY_IDS.RETAINING_WALLS) && 'Poolscape Options'}
                             {id === CATEGORY_IDS.ADD_ONS && 'Extras & Upgrades'}
+                            {/* No specific pill for summary, or create a new one if needed */}
                           </span>
                         </div>
                         
@@ -224,7 +263,8 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                             'Your Selected Pool' : 
                             id === CATEGORY_IDS.CONCRETE_PAVING ? 
                               'Concrete & Paving' : 
-                              CATEGORY_NAMES[id]
+                              // Default to CATEGORY_NAMES for all others including Proposal Summary
+                              CATEGORY_NAMES[id] 
                           }
                         </h2>
                         
@@ -236,6 +276,7 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                             {(id === CATEGORY_IDS.FENCING || id === CATEGORY_IDS.CONCRETE_PAVING || 
                                id === CATEGORY_IDS.WATER_FEATURE || id === CATEGORY_IDS.RETAINING_WALLS) && 'Poolscape Options'}
                             {id === CATEGORY_IDS.ADD_ONS && 'Extras & Upgrades'}
+                            {/* No specific pill for summary */}
                           </span>
                         </div>
                       </div>
@@ -286,6 +327,8 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                         <WaterFeatureCards snapshot={snapshot} />
                       ) : id === CATEGORY_IDS.ADD_ONS ? (
                         <AddOnCards snapshot={snapshot} />
+                      ) : id === CATEGORY_IDS.PROPOSAL_SUMMARY ? (
+                        <ProposalSummaryCards snapshot={snapshot} />
                       ) : (
                         // Generic placeholder for other single-content sections
                         (<Card className="w-full h-full p-5 overflow-y-auto">
@@ -319,13 +362,24 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                   className="rounded-full bg-white" 
                   onClick={() => {
                     if (SM.canGoPrev(machineState)) {
-                      // Use setMachineState directly for direct index handling
                       setDir(-1);
                       lastDir.current = -1;
-                      setMachineState(SM.prev(machineState));
+                      
+                      if (showOnlyNonNullSections) {
+                        // Find previous non-empty section
+                        const prevIndex = findPrevAvailableStepIndex(machineState.index, snapshot, SM.STEPS);
+                        if (prevIndex !== -1) {
+                          setMachineState({ index: prevIndex });
+                        }
+                      } else {
+                        // Regular prev navigation
+                        setMachineState(SM.prev(machineState));
+                      }
                     }
                   }}
-                  disabled={!SM.canGoPrev(machineState)}
+                  disabled={showOnlyNonNullSections 
+                    ? findPrevAvailableStepIndex(machineState.index, snapshot, SM.STEPS) === -1 
+                    : !SM.canGoPrev(machineState)}
                 >
                   <ChevronUp className="h-5 w-5 text-[#DB9D6A]" />
                 </Button>
@@ -335,13 +389,24 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
                   className="rounded-full bg-white" 
                   onClick={() => {
                     if (SM.canGoNext(machineState)) {
-                      // Use setMachineState directly for direct index handling
                       setDir(1);
                       lastDir.current = 1;
-                      setMachineState(SM.next(machineState));
+                      
+                      if (showOnlyNonNullSections) {
+                        // Find next non-empty section
+                        const nextIndex = findNextAvailableStepIndex(machineState.index, snapshot, SM.STEPS);
+                        if (nextIndex !== -1) {
+                          setMachineState({ index: nextIndex });
+                        }
+                      } else {
+                        // Regular next navigation
+                        setMachineState(SM.next(machineState));
+                      }
                     }
                   }}
-                  disabled={!SM.canGoNext(machineState)}
+                  disabled={showOnlyNonNullSections 
+                    ? findNextAvailableStepIndex(machineState.index, snapshot, SM.STEPS) === -1 
+                    : !SM.canGoNext(machineState)}
                 >
                   <ChevronDown className="h-5 w-5 text-[#DB9D6A]" />
                 </Button>
@@ -360,30 +425,63 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
           mapCenter={mapCenter}
           snapshot={snapshot}
           resetScroll={resetScroll}
+          use3DVisuals={snapshot.render_ready === true}
         />
       </main>
       {/* --- Footer --- */}
       <Footer
+        snapshot={currentSnapshot}
         activeSection={activeSection}
         uniqueSections={uniqueSections}
         handleSectionSelectChange={handleSectionSelectChange}
         progressPercent={progressPercent}
         machineState={machineState}
-        canGoPrev={SM.canGoPrev}
-        canGoNext={SM.canGoNext}
-        handlePrev={() => { 
-          if (SM.canGoPrev(machineState)) { 
-            lastDir.current=-1; 
-            setDir(-1); 
-            setMachineState(SM.prev(machineState)); 
-          } 
+        onProposalAccepted={handleProposalAccepted}
+        canGoPrev={(state) => {
+          if (showOnlyNonNullSections) {
+            return findPrevAvailableStepIndex(state.index, currentSnapshot, SM.STEPS) !== -1;
+          }
+          return SM.canGoPrev(state);
         }}
-        handleNext={() => { 
-          if (SM.canGoNext(machineState)) { 
-            lastDir.current=1; 
-            setDir(1); 
-            setMachineState(SM.next(machineState)); 
-          } 
+        canGoNext={(state) => {
+          if (showOnlyNonNullSections) {
+            return findNextAvailableStepIndex(state.index, currentSnapshot, SM.STEPS) !== -1;
+          }
+          return SM.canGoNext(state);
+        }}
+        handlePrev={() => {
+          if (SM.canGoPrev(machineState)) {
+            lastDir.current=-1;
+            setDir(-1);
+
+            if (showOnlyNonNullSections) {
+              // Find previous non-empty section
+              const prevIndex = findPrevAvailableStepIndex(machineState.index, currentSnapshot, SM.STEPS);
+              if (prevIndex !== -1) {
+                setMachineState({ index: prevIndex });
+              }
+            } else {
+              // Regular prev navigation
+              setMachineState(SM.prev(machineState));
+            }
+          }
+        }}
+        handleNext={() => {
+          if (SM.canGoNext(machineState)) {
+            lastDir.current=1;
+            setDir(1);
+
+            if (showOnlyNonNullSections) {
+              // Find next non-empty section
+              const nextIndex = findNextAvailableStepIndex(machineState.index, currentSnapshot, SM.STEPS);
+              if (nextIndex !== -1) {
+                setMachineState({ index: nextIndex });
+              }
+            } else {
+              // Regular next navigation
+              setMachineState(SM.next(machineState));
+            }
+          }
         }}
       />
     </div>

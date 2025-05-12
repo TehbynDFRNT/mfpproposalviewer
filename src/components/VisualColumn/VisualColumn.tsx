@@ -3,7 +3,8 @@
  */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSitePlan } from './useSitePlan';
 import Image from 'next/image';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,15 +12,17 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ResponsiveVideo } from '@/components/ResponsiveVideo';
 import { CATEGORY_IDS } from '@/app/lib/constants';
-import type { VisualColumnProps, Visual } from './VisualColumn.types';
+import { supabase } from '@/app/lib/supabaseClient';
+import { isSectionEmpty } from '@/app/lib/utils';
+import type { VisualColumnProps, Visual, RenderVisual } from './VisualColumn.types';
 
 // Import animation variants from shared module
 import { fadeOut, visualIn } from '@/app/lib/animation';
 
-// Helper for left-column visuals based on section and sub-section
-const getLeftColumnVisual = (
-  sectionId: string | null, 
-  subIndex: number, 
+// Helper for getting default/fallback visuals based on section and sub-section
+const getDefaultVisual = (
+  sectionId: string | null,
+  subIndex: number,
   snapshot: VisualColumnProps['snapshot']
 ): Visual => {
   switch (sectionId) {
@@ -30,6 +33,160 @@ const getLeftColumnVisual = (
       };
     case CATEGORY_IDS.POOL_SELECTION:
       // Always show the Sheffield video for all sub-indices in pool selection
+      return {
+        type: 'placeholder',
+        name: 'Loading 3D Pool Model...',
+        fallbackType: 'video',
+        fallbackSrc: 'Sheffield'
+      };
+    case CATEGORY_IDS.FILTRATION_MAINTENANCE:
+      return {
+        type: 'placeholder',
+        name: 'Loading Filtration Visualization...',
+        fallbackType: 'video',
+        fallbackSrc: 'fire'
+      };
+    case CATEGORY_IDS.CONCRETE_PAVING:
+      return {
+        type: 'placeholder',
+        name: 'Loading Paving Visualization...',
+        fallbackType: 'image',
+        fallbackSrc: '/Unique3D/paving.webp'
+      };
+    case CATEGORY_IDS.FENCING:
+      return {
+        type: 'placeholder',
+        name: 'Loading Fencing Visualization...',
+        fallbackType: 'image',
+        fallbackSrc: '/Unique3D/fencing.webp'
+      };
+    case CATEGORY_IDS.RETAINING_WALLS:
+      return {
+        type: 'placeholder',
+        name: 'Loading Retaining Wall Visualization...',
+        fallbackType: 'image',
+        fallbackSrc: '/Unique3D/RetainingWallImagery.webp'
+      };
+    case CATEGORY_IDS.WATER_FEATURE:
+      return {
+        type: 'placeholder',
+        name: 'Loading Water Feature Visualization...',
+        fallbackType: 'video',
+        fallbackSrc: 'waterfeature'
+      };
+    case CATEGORY_IDS.ADD_ONS:
+      return {
+        type: 'placeholder',
+        name: 'Loading Extras Visualization...',
+        fallbackType: 'image',
+        fallbackSrc: '/Unique3D/lighting.webp'
+      };
+    case CATEGORY_IDS.SITE_REQUIREMENTS:
+      // Always directly return the FrannaCrane video - never show a placeholder for Site Requirements
+      return {
+        type: 'video',
+        videoName: 'FrannaCrane',
+        alt: 'Pool Installation'
+      };
+    case CATEGORY_IDS.PROPOSAL_SUMMARY:
+      // Use Sheffield video for the proposal summary
+      return {
+        type: 'placeholder',
+        name: 'Loading Summary Visualization...',
+        fallbackType: 'video',
+        fallbackSrc: 'Sheffield'
+      };
+    default:
+      return { type: 'placeholder', name: 'Loading...' };
+  }
+};
+
+// Helper to get 3D render for a section
+const find3DRender = (
+  sectionId: string | null,
+  renders: Array<{
+    video_type: string;
+    video_path: string;
+    created_at: string;
+  }> | null,
+  snapshot: VisualColumnProps['snapshot']
+): RenderVisual | null => {
+  // Early return if requirements aren't met
+  if (!sectionId || !renders || !Array.isArray(renders) || renders.length === 0) {
+    return null;
+  }
+
+  // Check if section is empty - only process non-empty sections or core sections
+  if (sectionId !== CATEGORY_IDS.POOL_SELECTION &&
+      sectionId !== CATEGORY_IDS.FILTRATION_MAINTENANCE &&
+      sectionId !== CATEGORY_IDS.PROPOSAL_SUMMARY &&
+      isSectionEmpty(sectionId, snapshot)) {
+    // Don't process empty optional sections
+    return null;
+  }
+
+  const render = renders.find(r => r.video_type === sectionId);
+  if (!render) {
+    return null;
+  }
+
+  return {
+    type: '3d',
+    videoPath: render.video_path,
+    videoType: render.video_type,
+    createdAt: render.created_at,
+    alt: `3D ${sectionId} Visualization`
+  };
+};
+
+// Helper for left-column visuals based on section and sub-section
+const getLeftColumnVisual = (
+  sectionId: string | null,
+  subIndex: number,
+  snapshot: VisualColumnProps['snapshot'],
+  use3DVisuals: boolean,
+  threeDRenders: Array<{
+    video_type: string;
+    video_path: string;
+    created_at: string;
+  }> | null
+): Visual => {
+  // Special case for Site Requirements (always use FrannaCrane video)
+  if (sectionId === CATEGORY_IDS.SITE_REQUIREMENTS) {
+    return {
+      type: 'video',
+      videoName: 'FrannaCrane',
+      alt: 'Pool Installation'
+    };
+  }
+
+  // If 3D visuals are enabled, check if we have a 3D render for this section (except Customer Info)
+  if (use3DVisuals && sectionId && sectionId !== CATEGORY_IDS.CUSTOMER_INFO) {
+    const render = find3DRender(sectionId, threeDRenders, snapshot);
+    if (render) {
+      return render;
+    }
+  }
+
+  // Otherwise use default visuals
+  // Special case for customer info (always use map)
+  if (sectionId === CATEGORY_IDS.CUSTOMER_INFO) {
+    return {
+      type: 'map',
+      address: snapshot.site_address ?? snapshot.home_address ?? ''
+    };
+  }
+
+  // For other sections, if 3D is enabled but no render is found, use placeholder
+  // Otherwise use the normal defaults
+  if (use3DVisuals && sectionId) {
+    // Return placeholders with fallbacks when 3D is enabled but no render exists
+    return getDefaultVisual(sectionId, subIndex, snapshot);
+  }
+
+  // When 3D is disabled, use the original visual content
+  switch (sectionId) {
+    case CATEGORY_IDS.POOL_SELECTION:
       return { type: 'video', videoName: 'Sheffield' };
     case CATEGORY_IDS.FILTRATION_MAINTENANCE:
       return { type: 'video', videoName: 'fire', alt: 'Pool Filtration' };
@@ -45,9 +202,8 @@ const getLeftColumnVisual = (
       return { type: 'video', videoName: 'waterfeature', alt: 'Water Feature' };
     case CATEGORY_IDS.ADD_ONS:
       return { type: 'image', src: '/Unique3D/lighting.webp', alt: 'Extras & Upgrades' };
-    case CATEGORY_IDS.SITE_REQUIREMENTS:
-      // Always show the FrannaCrane video for all sub-indices in site requirements
-      return { type: 'video', videoName: 'FrannaCrane', alt: 'Pool Installation' };
+    case CATEGORY_IDS.PROPOSAL_SUMMARY:
+      return { type: 'video', videoName: 'Sheffield', alt: 'Proposal Summary' };
     default:
       return { type: 'placeholder', name: 'Loading...' };
   }
@@ -59,22 +215,102 @@ export default function VisualColumn({
   isLoaded,
   mapCenter,
   snapshot,
-  resetScroll
+  resetScroll,
+  use3DVisuals = false
 }: VisualColumnProps) {
+  // Fetch site plan data if available
+  const { sitePlanVisual } = useSitePlan(snapshot.project_id);
   const [priceCardExpanded, setPriceCardExpanded] = useState<boolean>(false);
   const [sitePlanExpanded, setSitePlanExpanded] = useState<boolean>(false);
-  
+  const [threeDRenders, setThreeDRenders] = useState<Array<{
+    video_type: string;
+    video_path: string;
+    created_at: string;
+  }> | null>(snapshot.videos_json || null);
+
+  // Fetch 3D renders from Supabase if they're not available in the snapshot
+  useEffect(() => {
+    if (use3DVisuals && snapshot.project_id && (!threeDRenders || threeDRenders.length === 0)) {
+      const fetchRenders = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('3d')
+            .select('video_type, video_path, created_at')
+            .eq('pool_project_id', snapshot.project_id);
+
+          if (error) {
+            console.error('Error fetching 3D renders:', error);
+            return;
+          }
+
+          if (data) {
+            setThreeDRenders(data);
+          }
+        } catch (err) {
+          console.error('Error in fetchRenders:', err);
+        }
+      };
+
+      fetchRenders();
+    }
+  }, [use3DVisuals, snapshot.project_id, threeDRenders]);
+
+  // Main visual to display based on section
   const visual = React.useMemo(
-    () => getLeftColumnVisual(activeSection, subIndex, snapshot),
-    [activeSection, subIndex, snapshot]   // safe; snapshot is stable
+    () => getLeftColumnVisual(activeSection, subIndex, snapshot, use3DVisuals, threeDRenders),
+    [activeSection, subIndex, snapshot, use3DVisuals, threeDRenders]
   );
-  
+
+  // Calculate 3D video URL ahead of time to avoid hook issues
+  const render3DContent = React.useMemo(() => {
+    if (visual.type !== '3d') return null;
+
+    let videoUrl = '';
+    const { videoType, videoPath } = visual;
+
+    // Skip URL processing if section is empty (except for core sections)
+    if (videoType !== CATEGORY_IDS.POOL_SELECTION &&
+        videoType !== CATEGORY_IDS.FILTRATION_MAINTENANCE &&
+        videoType !== CATEGORY_IDS.PROPOSAL_SUMMARY &&
+        isSectionEmpty(videoType, snapshot)) {
+      console.log(`Skipping URL lookup for empty section: ${videoType}`);
+      // Return null for empty sections, we'll handle this in renderVisual
+      return {
+        videoUrl: null,
+        isEmpty: true
+      };
+    }
+
+    // If path already starts with http, use it directly
+    if (videoPath.startsWith('http')) {
+      videoUrl = videoPath;
+    } else {
+      try {
+        // Get the public URL from Supabase
+        const { data } = supabase
+          .storage
+          .from('3d-renders')
+          .getPublicUrl(videoPath);
+
+        videoUrl = data?.publicUrl || '';
+      } catch (error) {
+        console.error(`Error getting public URL for ${videoPath}:`, error);
+        videoUrl = '';
+      }
+    }
+
+    return {
+      videoUrl,
+      isEmpty: false
+    };
+  }, [visual, snapshot]);
+
   function renderVisual() {
     switch (visual.type) {
       case 'map':
         // Use coordinates from visual if available
         const mapCoordinates = visual.coordinates || mapCenter;
-        
+
         return (
           <motion.div
             key="map"
@@ -113,7 +349,56 @@ export default function VisualColumn({
             )}
           </motion.div>
         );
-        
+
+      case '3d':
+        // Use the precomputed render3DContent from the useMemo hook
+        return (
+          <motion.div
+            key={`3d-${visual.videoType}-${visual.createdAt}`}
+            variants={{ ...fadeOut, ...visualIn }}
+            initial="initial"
+            animate="enter"
+            exit="exit"
+            className="w-full h-full flex justify-center items-start"
+          >
+            {/* Section is empty and not included */}
+            {render3DContent?.isEmpty && (
+              <div className="w-full h-full flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="text-white text-center p-8">
+                  <h3 className="text-xl font-medium mb-2">Section not included</h3>
+                  <p className="text-white/60">
+                    This optional section is not active in the proposal
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Section has a valid URL */}
+            {!render3DContent?.isEmpty && render3DContent?.videoUrl && (
+              <video
+                src={render3DContent.videoUrl}
+                className="w-full h-full object-cover object-top"
+                autoPlay
+                muted
+                playsInline
+                loop
+              />
+            )}
+
+            {/* Section should have content but URL is missing */}
+            {!render3DContent?.isEmpty && !render3DContent?.videoUrl && (
+              <div className="w-full h-full flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="text-white text-center p-8">
+                  <h3 className="text-xl font-medium mb-2">3D visual not available</h3>
+                  <p className="text-white/60">
+                    Using default visual content instead
+                  </p>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        );
+
       case 'video':
         return (
           <motion.div
@@ -124,14 +409,16 @@ export default function VisualColumn({
             exit="exit"
             className="w-full h-full flex justify-center items-start"
           >
-            <ResponsiveVideo 
+            <ResponsiveVideo
               baseName={visual.videoName}
               className="w-full h-full object-cover object-top"
               autoPlay={true}
+              controls={false}
+              loop={true}
             />
           </motion.div>
         );
-        
+
       case 'image':
         return (
           <motion.div
@@ -151,9 +438,9 @@ export default function VisualColumn({
             />
           </motion.div>
         );
-        
+
       case 'placeholder':
-      default:
+        // Improved placeholder that can show fallback content while waiting for 3D
         return (
           <motion.div
             key={`placeholder-${visual.name}`}
@@ -161,11 +448,39 @@ export default function VisualColumn({
             initial="initial"
             animate="enter"
             exit="exit"
-            className="w-full h-full flex items-center justify-center"
+            className="w-full h-full relative"
           >
-            <div className="text-white text-center p-8">
-              <h3 className="text-xl font-medium mb-2">{visual.name}</h3>
-              <p className="text-white/60">Visual content is being prepared</p>
+            {/* Show fallback content in the background */}
+            {visual.fallbackType === 'video' && visual.fallbackSrc && (
+              <div className="absolute inset-0 z-0 opacity-40">
+                <ResponsiveVideo
+                  baseName={visual.fallbackSrc}
+                  className="w-full h-full object-cover object-top"
+                  autoPlay={true}
+                />
+              </div>
+            )}
+
+            {visual.fallbackType === 'image' && visual.fallbackSrc && (
+              <div className="absolute inset-0 z-0 opacity-40">
+                <Image
+                  src={visual.fallbackSrc}
+                  alt="Fallback Visual"
+                  className="w-full h-full object-cover object-top"
+                  width={800}
+                  height={600}
+                />
+              </div>
+            )}
+
+            {/* Loading overlay */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+              <div className="text-white text-center p-8">
+                <h3 className="text-xl font-medium mb-2">{visual.name}</h3>
+                <p className="text-white/60">
+                  {use3DVisuals ? "Loading custom 3D visualization..." : "Visual content is being prepared"}
+                </p>
+              </div>
             </div>
           </motion.div>
         );
@@ -200,13 +515,15 @@ export default function VisualColumn({
             onClick={() => setSitePlanExpanded(!sitePlanExpanded)}
           >
             <div>
-              <Image 
-                src="/Unique2D/siteplan.webp" 
-                alt="Property Site Plan" 
-                className={`rounded ${sitePlanExpanded ? 'w-96' : 'w-48'} transition-all duration-300`}
-                width={sitePlanExpanded ? 384 : 192}
-                height={sitePlanExpanded ? 288 : 144}
-              />
+              <div className={`relative rounded overflow-hidden ${sitePlanExpanded ? 'w-96 h-72' : 'w-48 h-36'} transition-all duration-300`}>
+                <Image
+                  src={sitePlanVisual?.publicUrl || "/Unique2D/siteplan.webp"}
+                  alt="Property Site Plan"
+                  className="object-contain"
+                  fill
+                  sizes={sitePlanExpanded ? "384px" : "192px"}
+                />
+              </div>
               {sitePlanExpanded && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -214,9 +531,12 @@ export default function VisualColumn({
                   transition={{ duration: 0.3, delay: 0.1 }}
                   className="mt-2 text-sm text-black"
                 >
-                  <p className="font-medium">Property Site Plan</p>
+                  <p className="font-medium">Property Site Plan {sitePlanVisual?.version ? `(v${sitePlanVisual.version})` : ''}</p>
                   <p className="text-xs mt-1 text-gray-700">Scale: 1:200 | Property orientation: North-facing</p>
                   <p className="text-xs mt-1 text-gray-700">Proposed pool location shown in blue outline</p>
+                  {sitePlanVisual && (
+                    <p className="text-xs mt-1 text-gray-700">Last updated: {new Date(sitePlanVisual.createdAt).toLocaleDateString()}</p>
+                  )}
                   
                   {/* Mobile helper */}
                   <div className="hidden lg:block text-xs text-neutral-400 mt-4">
@@ -314,8 +634,10 @@ export default function VisualColumn({
                   const waterFeatureTotal = snapshot.water_feature_total_cost || 0;
                   
                   // Extras & add-ons
-                  const extrasTotal = (snapshot.cleaner_cost_price || 0) + 
-                    (snapshot.heating_total_cost || 0);
+                  const cleanerCost = snapshot.cleaner_cost_price || 0;
+                  const heatPumpCost = (snapshot.heat_pump_cost || 0) + (snapshot.heat_pump_install_cost || 0);
+                  const blanketRollerCost = (snapshot.blanket_roller_cost || 0) + (snapshot.br_install_cost || 0);
+                  const extrasTotal = cleanerCost + heatPumpCost + blanketRollerCost;
                   
                   // Calculate grand total
                   const grandTotal = basePoolPrice + 
@@ -443,8 +765,12 @@ export default function VisualColumn({
                       
                       const fencingTotal = snapshot.fencing_total_cost || 0;
                       const waterFeatureTotal = snapshot.water_feature_total_cost || 0;
-                      const extrasTotal = (snapshot.cleaner_cost_price || 0) + 
-                        (snapshot.heating_total_cost || 0);
+                      
+                      // Calculate extras total using the same method as in other components
+                      const cleanerCost = snapshot.cleaner_cost_price || 0;
+                      const heatPumpCost = (snapshot.heat_pump_cost || 0) + (snapshot.heat_pump_install_cost || 0);
+                      const blanketRollerCost = (snapshot.blanket_roller_cost || 0) + (snapshot.br_install_cost || 0);
+                      const extrasTotal = cleanerCost + heatPumpCost + blanketRollerCost;
                       
                       const grandTotal = basePoolPrice + 
                         installationTotal + 

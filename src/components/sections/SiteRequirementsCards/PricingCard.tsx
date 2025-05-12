@@ -69,10 +69,6 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
 
             {/* Site preparation costs */}
             <div className="space-y-3">
-              <div className="mb-2">
-                <p className="text-sm font-medium">Site Preparation</p>
-              </div>
-              
               {craneLabel && (
                 <div className="flex justify-between">
                   <div>

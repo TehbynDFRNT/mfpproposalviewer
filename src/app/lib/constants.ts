@@ -15,6 +15,7 @@ export const CATEGORY_IDS = {
   WATER_FEATURE: 'water-feature-section',
   ADD_ONS: 'add-ons-section',
   SITE_REQUIREMENTS: 'site-requirements-section',
+  PROPOSAL_SUMMARY: 'proposal-summary-section',
 };
 
 // Mapping IDs to names
@@ -28,4 +29,5 @@ export const CATEGORY_NAMES: { [key: string]: string } = {
   [CATEGORY_IDS.FENCING]: 'Fencing',
   [CATEGORY_IDS.WATER_FEATURE]: 'Water Feature',
   [CATEGORY_IDS.ADD_ONS]: 'Extras & Upgrades',
+  [CATEGORY_IDS.PROPOSAL_SUMMARY]: 'Proposal Summary',
 };

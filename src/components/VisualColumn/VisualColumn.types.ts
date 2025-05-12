@@ -23,12 +23,34 @@ export type ImageVisual = {
   alt?: string;
 };
 
+// New type for 3D renders from Supabase
+export type RenderVisual = {
+  type: '3d';
+  videoPath: string; // Supabase storage path
+  videoType: string; // Category ID
+  createdAt: string; // Timestamp for freshness
+  alt?: string;
+};
+
+// Type for site plans from Supabase
+export type SitePlanVisual = {
+  type: 'siteplan';
+  planPath: string; // Supabase storage path
+  publicUrl: string; // Public URL from Supabase storage
+  version: number; // Site plan version
+  createdAt: string; // Timestamp for freshness
+  alt?: string;
+};
+
+// Modified to represent local fallback content
 export type PlaceholderVisual = {
   type: 'placeholder';
   name: string;
+  fallbackType?: 'video' | 'image';
+  fallbackSrc?: string; // Local path to fallback content
 };
 
-export type Visual = MapVisual | VideoVisual | ImageVisual | PlaceholderVisual;
+export type Visual = MapVisual | VideoVisual | ImageVisual | PlaceholderVisual | RenderVisual | SitePlanVisual;
 
 export interface VisualColumnProps {
   activeSection: string;
@@ -37,4 +59,5 @@ export interface VisualColumnProps {
   mapCenter: { lat: number; lng: number } | null;
   snapshot: ProposalSnapshot;
   resetScroll: () => void;
+  use3DVisuals?: boolean;                 // Toggle for using 3D renders from Supabase
 }

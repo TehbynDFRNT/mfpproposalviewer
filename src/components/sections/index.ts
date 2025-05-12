@@ -10,3 +10,4 @@ export { default as WaterFeatureCards } from './WaterFeatureCards';
 export { default as AddOnCards } from './AddOnCards';
 export { default as PoolSelectionCards } from './PoolSelectionCards';
 export { default as SiteRequirementsCards } from './SiteRequirementsCards';
+export { default as ProposalSummaryCards } from './ProposalSummaryCards';

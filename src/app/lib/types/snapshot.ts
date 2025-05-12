@@ -233,4 +233,28 @@ export interface ProposalSnapshot {
   
   // Added by getProposalSnapshot function
   timestamp: string;
+
+  /* 3D VIDEOS & VISUALS */
+  videos_json?: Array<{
+    video_type: string;
+    video_path: string;
+    created_at: string;
+  }>;
+
+  /* Proposal Status Fields (from pool_proposal_status table) */
+  proposal_status?: string;
+  render_ready?: boolean;
+  last_viewed?: string;
+  accepted_datetime?: string;
+  accepted_ip?: string;
+  last_change_requested?: string;
+  version?: number;
+  pin?: string;
+
+  /* Change Request History (aggregated from change_requests table) */
+  change_requests_json?: Array<{
+    id: string;
+    payload: any;
+    created_at: string;
+  }>;
 }

@@ -18,9 +18,9 @@ export function DetailsCard() {
       initial="initial"
       animate="enter"
       exit="exit"
-      className="w-full min-h-[80vh] pb-4"
+      className="w-full min-h-[80vh] py-4"
     >
-      <div className="space-y-6">
+      <div className="space-y-6 h-full overflow-y-auto">
         {/* Installation Details Card */}
         <Card className="w-full shadow-lg">
           <CardContent className="p-5 space-y-5">
@@ -33,8 +33,8 @@ export function DetailsCard() {
             
             <div className="space-y-5">
               <div className="flex items-start gap-4">
-                <div className="h-10 w-10 mt-0.5 rounded-md bg-[#DB9D6A]/10 flex items-center justify-center">
-                  <Layers className="h-6 w-6 text-[#DB9D6A]" />
+                <div className="h-12 w-12 mt-0.5 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center">
+                  <Layers className="h-7 w-7 text-[#DB9D6A]" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Council Certification & CAD Plans</p>
@@ -45,8 +45,8 @@ export function DetailsCard() {
               <Separator />
               
               <div className="flex items-start gap-4">
-                <div className="h-10 w-10 mt-0.5 rounded-md bg-[#DB9D6A]/10 flex items-center justify-center">
-                  <ShieldCheck className="h-6 w-6 text-[#DB9D6A]" />
+                <div className="h-12 w-12 mt-0.5 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center">
+                  <ShieldCheck className="h-7 w-7 text-[#DB9D6A]" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Engineer Sign-off to AS1839-2021</p>
@@ -57,8 +57,8 @@ export function DetailsCard() {
               <Separator />
               
               <div className="flex items-start gap-4">
-                <div className="h-10 w-10 mt-0.5 rounded-md bg-[#DB9D6A]/10 flex items-center justify-center">
-                  <Square className="h-6 w-6 text-[#DB9D6A]" />
+                <div className="h-12 w-12 mt-0.5 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center">
+                  <Square className="h-7 w-7 text-[#DB9D6A]" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Temporary Safety Fencing (8 Weeks)</p>
@@ -69,8 +69,8 @@ export function DetailsCard() {
               <Separator />
               
               <div className="flex items-start gap-4">
-                <div className="h-10 w-10 mt-0.5 rounded-md bg-[#DB9D6A]/10 flex items-center justify-center">
-                  <Handshake className="h-6 w-6 text-[#DB9D6A]" />
+                <div className="h-12 w-12 mt-0.5 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center">
+                  <Handshake className="h-7 w-7 text-[#DB9D6A]" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Professional Handover & Training</p>
