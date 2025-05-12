@@ -10,62 +10,94 @@ import Image from 'next/image';
 import { useState } from 'react';
 import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
 
+// Define proper wall type to help TypeScript
+interface RetainingWall {
+  id: number;
+  type: string;
+  height1: number;
+  height2?: number;
+  length: number;
+  totalCost: number;
+}
+
 export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Helper function to calculate wall area using height1, height2, and length
-  const calculateWallArea = (height1: number, height2: number, length: number) => {
+  const calculateWallArea = (height1: number, height2: number | undefined, length: number) => {
     // If height2 is provided, use average height
     const avgHeight = height2 ? (height1 + height2) / 2 : height1;
     return avgHeight * length;
   };
 
-  // Get available walls from the snapshot
-  const availableWalls = [
-    snapshot.retaining_wall1_type && { 
-      id: 1, 
+  // Create wall objects from snapshot with type safety
+  const wallsArray: (RetainingWall | null)[] = [
+    snapshot.retaining_wall1_type &&
+    typeof snapshot.retaining_wall1_height1 === 'number' &&
+    typeof snapshot.retaining_wall1_length === 'number' &&
+    typeof snapshot.retaining_wall1_total_cost === 'number' ?
+    {
+      id: 1,
       type: snapshot.retaining_wall1_type,
       height1: snapshot.retaining_wall1_height1,
       height2: snapshot.retaining_wall1_height2,
       length: snapshot.retaining_wall1_length,
       totalCost: snapshot.retaining_wall1_total_cost
-    },
-    snapshot.retaining_wall2_type && { 
-      id: 2, 
+    } : null,
+
+    snapshot.retaining_wall2_type &&
+    typeof snapshot.retaining_wall2_height1 === 'number' &&
+    typeof snapshot.retaining_wall2_length === 'number' &&
+    typeof snapshot.retaining_wall2_total_cost === 'number' ?
+    {
+      id: 2,
       type: snapshot.retaining_wall2_type,
       height1: snapshot.retaining_wall2_height1,
       height2: snapshot.retaining_wall2_height2,
       length: snapshot.retaining_wall2_length,
       totalCost: snapshot.retaining_wall2_total_cost
-    },
-    snapshot.retaining_wall3_type && { 
-      id: 3, 
+    } : null,
+
+    snapshot.retaining_wall3_type &&
+    typeof snapshot.retaining_wall3_height1 === 'number' &&
+    typeof snapshot.retaining_wall3_length === 'number' &&
+    typeof snapshot.retaining_wall3_total_cost === 'number' ?
+    {
+      id: 3,
       type: snapshot.retaining_wall3_type,
       height1: snapshot.retaining_wall3_height1,
       height2: snapshot.retaining_wall3_height2,
       length: snapshot.retaining_wall3_length,
       totalCost: snapshot.retaining_wall3_total_cost
-    },
-    snapshot.retaining_wall4_type && { 
-      id: 4, 
+    } : null,
+
+    snapshot.retaining_wall4_type &&
+    typeof snapshot.retaining_wall4_height1 === 'number' &&
+    typeof snapshot.retaining_wall4_length === 'number' &&
+    typeof snapshot.retaining_wall4_total_cost === 'number' ?
+    {
+      id: 4,
       type: snapshot.retaining_wall4_type,
       height1: snapshot.retaining_wall4_height1,
       height2: snapshot.retaining_wall4_height2,
       length: snapshot.retaining_wall4_length,
       totalCost: snapshot.retaining_wall4_total_cost
-    }
-  ].filter(Boolean);
+    } : null
+  ];
+  
+  // Type-safe filter for non-null walls
+  const availableWalls: RetainingWall[] = wallsArray.filter((wall): wall is RetainingWall => wall !== null);
+
+  // State to track which wall is selected - define before conditional returns
+  const [selectedWallId, setSelectedWallId] = useState(availableWalls.length > 0 ? availableWalls[0].id : 0);
 
   // If no retaining walls, don't render anything
   if (availableWalls.length === 0) return null;
 
   // Calculate the total cost of all retaining walls
   const totalRetainingWallCost = availableWalls.reduce((sum, wall) => sum + wall.totalCost, 0);
-  
-  // State to track which wall is selected
-  const [selectedWallId, setSelectedWallId] = useState(availableWalls[0].id);
-  
+
   // Get the currently selected wall
-  const selectedWall = availableWalls.find(wall => wall.id === selectedWallId);
-  
+  const selectedWall = availableWalls.find(wall => wall.id === selectedWallId) || availableWalls[0];
+
   // Calculate area using both height values
   const area = calculateWallArea(selectedWall.height1, selectedWall.height2, selectedWall.length);
 
@@ -90,7 +122,7 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
                 <p className="text-xs font-semibold">Wall Dimensions</p>
                 <p className="text-xs">
                   H: {selectedWall.height1.toFixed(2)}
-                  {selectedWall.height2 ? `-${selectedWall.height2.toFixed(2)}` : ''} m × 
+                  {selectedWall.height2 ? `-${selectedWall.height2.toFixed(2)}` : ''} m ×
                   L: {selectedWall.length.toFixed(2)} m
                 </p>
               </div>
@@ -106,8 +138,8 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
           {availableWalls.length > 1 && (
             <div className="mb-4">
               <p className="font-medium mb-2">Select Retaining Wall:</p>
-              <Select 
-                value={selectedWallId.toString()} 
+              <Select
+                value={selectedWallId.toString()}
                 onValueChange={(value) => setSelectedWallId(parseInt(value, 10))}
               >
                 <SelectTrigger className="w-full">

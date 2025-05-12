@@ -6,68 +6,81 @@ import { Separator } from '@/components/ui/separator';
 import Image from "next/image";
 import type { ProposalSnapshot } from "@/app/lib/types/snapshot";
 
+// Define specific item types for clarity
+interface PavingItem {
+  label: string;
+  detail: string;
+  sqm?: number;
+  cost: number;
+}
+
 export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSnapshot }) {
   const fmt = (n: number) => n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
 
   // Calculate combined paving costs and square meters
   const totalPavingCost = (snapshot.extra_paving_cost || 0) + (snapshot.existing_paving_cost || 0);
   const hasPaving = totalPavingCost > 0;
-  
+
   // build concrete & paving line items from flat snapshot
-  const items = [
+  const items: (PavingItem | null)[] = [
     // Combined paving line item
-    hasPaving ? 
-      { 
-        label: 'Extra Paving', 
+    hasPaving ?
+      {
+        label: 'Extra Paving',
         detail: 'On new and existing concrete',
         sqm: (snapshot.extra_paving_sqm || 0) + (snapshot.existing_paving_sqm || 0),
         cost: totalPavingCost
       } : null,
-    
-    snapshot.extra_concreting_saved_total > 0 ? 
-      { 
-        label: 'Extra Concreting', 
+
+    (snapshot.extra_concreting_saved_total && snapshot.extra_concreting_saved_total > 0) ?
+      {
+        label: 'Extra Concreting',
         detail: snapshot.extra_concreting_type
           ? snapshot.extra_concreting_type
               .replace(/-/g, ' ')
               .replace(/\b\w/g, c => c.toUpperCase())
-          : '',
-        sqm: snapshot.extra_concreting_sqm,
+          : 'Standard finish',
+        sqm: snapshot.extra_concreting_sqm || 0,
         cost: snapshot.extra_concreting_saved_total
       } : null,
-      
+
     // Moved down below separator
-    snapshot.concrete_cuts_cost > 0 ? 
-      { 
-        label: 'Concrete Cuts', 
+    (snapshot.concrete_cuts_cost && snapshot.concrete_cuts_cost > 0) ?
+      {
+        label: 'Concrete Cuts',
         detail: 'For expansion joints and pathways',
-        cost: snapshot.concrete_cuts_cost 
+        cost: snapshot.concrete_cuts_cost
       } : null,
-    
+
     // Always show Concrete Pump if needed, even if cost is zero
     snapshot.concrete_pump_needed ?
-      { 
-        label: 'Concrete Pump', 
-        detail: snapshot.concrete_pump_quantity 
-          ? `Needed for ${snapshot.concrete_pump_quantity} Day${snapshot.concrete_pump_quantity !== 1 ? 's' : ''}` 
-          : '',
-        cost: snapshot.concrete_pump_total_cost || 0 
+      {
+        label: 'Concrete Pump',
+        detail: snapshot.concrete_pump_quantity
+          ? `Needed for ${snapshot.concrete_pump_quantity} Day${snapshot.concrete_pump_quantity !== 1 ? 's' : ''}`
+          : 'Required for installation',
+        cost: snapshot.concrete_pump_total_cost || 0
       } : null,
-    
-    snapshot.uf_strips_cost > 0 ? 
-      { 
-        label: 'Under-Fence Strips', 
-        detail: 'Concrete strips under fence line',
-        cost: snapshot.uf_strips_cost 
-      } : null,
-  ].filter((i): i is { 
-    label: string; 
-    detail?: string; 
-    sqm?: number; 
-    cost: number 
-  } => i !== null && i.label !== undefined);
 
-  const totalCost = items.reduce((sum, i) => sum + i.cost, 0);
+    (snapshot.uf_strips_cost && snapshot.uf_strips_cost > 0) ?
+      {
+        label: 'Under-Fence Strips',
+        detail: 'Concrete strips under fence line',
+        cost: snapshot.uf_strips_cost
+      } : null,
+  ];
+
+  // Properly type-narrow the filtered array
+  const validItems: PavingItem[] = items
+    .filter((item): item is PavingItem => item !== null)
+    .map(item => ({
+      label: item.label,
+      detail: item.detail || '', // Ensure detail is always a string
+      ...(item.sqm !== undefined ? { sqm: item.sqm } : {}),
+      cost: item.cost
+    }));
+
+  const totalCost = validItems.reduce((sum, item) => sum + item.cost, 0);
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -78,14 +91,14 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
             <h3 className="text-base font-semibold">Concrete & Paving</h3>
             <p className="text-sm text-muted-foreground">Premium surfaces and finishes for your pool area</p>
           </div>
-          
+
           <Separator className="mb-4" />
-          
+
           {/* Concrete & Paving cost breakdown */}
           <div className="space-y-3">
             {/* First group: Paving and Concreting items */}
             <div className="space-y-3">
-              {items.slice(0, 2).map(item => (
+              {validItems.slice(0, 2).map(item => (
                 <div key={item.label} className="flex justify-between">
                   <div>
                     <p className="font-medium">{item.label}</p>
@@ -100,13 +113,13 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
                 </div>
               ))}
             </div>
-            
+
             {/* Separator between groups */}
             <Separator className="mt-2 mb-3" />
-            
+
             {/* Second group: Concrete Cuts, Pump, and Under-Fence */}
             <div className="space-y-3">
-              {items.slice(2).map(item => (
+              {validItems.slice(2).map(item => (
                 <div key={item.label} className="flex justify-between">
                   <div>
                     <p className="font-medium">{item.label}</p>
@@ -122,9 +135,9 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
               ))}
             </div>
           </div>
-          
+
           <Separator className="mb-3" />
-          
+
           {/* Grand total */}
           <div className="flex justify-between items-baseline mt-1">
             <p className="font-semibold">Total Cost</p>
@@ -134,7 +147,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
           </div>
         </CardContent>
       </Card>
-      
+
       {/* 3DStone Paver VIP Card */}
       <Card className="p-4 overflow-y-auto shadow-lg">
         <CardContent className="px-2 flex items-center h-full">
@@ -149,7 +162,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
                 height={64}
               />
             </div>
-            
+
             {/* Right: copy & value points */}
             <div className="flex-grow">
               <h3 className="text-base font-semibold mb-1 flex items-center">
@@ -158,7 +171,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
                   VIP
                 </span>
               </h3>
-              
+
               <p className="text-sm mb-1">Natural stone texture with superior durability</p>
               <p className="mt-2 text-sm font-bold">
                 Valued At <span className="text-green-700">$1,850</span>
