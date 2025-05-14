@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Read Google Maps API key from environment variables
+  // Read environment variables
   env: {
     NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    NEXT_PUBLIC_JITSU_WRITE_KEY: process.env.NEXT_PUBLIC_JITSU_WRITE_KEY,
+    JITSU_WRITE_KEY: process.env.JITSU_WRITE_KEY,
   },
   // Temporarily ignore ESLint errors during build
   // You can remove this once you've cleaned up the ESLint issues

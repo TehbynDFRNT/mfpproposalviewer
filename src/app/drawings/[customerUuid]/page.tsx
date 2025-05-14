@@ -6,7 +6,7 @@
 import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
 import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
 import type { Metadata, ResolvingMetadata } from 'next';
-import DrawingsViewer from './DrawingsViewer.client';
+import DrawingsViewer from "@/app/drawings/[customerUuid]/DrawingsViewer.client";
 
 // Generate dynamic metadata based on snapshot data
 export async function generateMetadata(

@@ -4,14 +4,14 @@
  */
 import { useState } from 'react';
 import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
-import { enableRenderReady, disableRenderReady } from '../lib/renderStatusHandler';
+import { enableRenderReady, disableRenderReady } from "@/app/drawings/[customerUuid]/lib/renderStatusHandler";
 
 // Import button without referencing components barrel
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2 } from 'lucide-react';
-import { cn } from '../lib/utils';
-import { ConfirmToggleDialog } from './ConfirmToggleDialog';
-import { SuccessDialog } from './SuccessDialog';
+import { cn } from "@/app/drawings/[customerUuid]/lib/utils";
+import { ConfirmToggleDialog } from "@/app/drawings/[customerUuid]/components/ConfirmToggleDialog";
+import { SuccessDialog } from "@/app/drawings/[customerUuid]/components/SuccessDialog";
 
 interface SimpleFooterProps {
   snapshot: ProposalSnapshot;

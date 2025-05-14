@@ -1,6 +1,6 @@
 import * as React from "react";
-import { cn } from "../lib/utils";
-import { FileUploadStatus, UploadStatus } from './FileUploadStatus';
+import { cn } from "@/app/drawings/[customerUuid]/lib/utils";
+import { FileUploadStatus, UploadStatus } from "@/app/drawings/[customerUuid]/components/FileUploadStatus";
  
 // Local Label component
 const Label = ({ 

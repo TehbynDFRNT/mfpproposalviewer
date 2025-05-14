@@ -2,11 +2,13 @@
  * File: src/components/Footer/Footer.tsx
  */
 import { Button } from '@/components/ui/button';
-import SectionJumpSelect from '../SectionJumpSelect/SectionJumpSelect';
+import SectionJumpSelect from "@/components/SectionJumpSelect/SectionJumpSelect";
 import { ChevronUp, ChevronDown, CheckCircle, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import RequestChangesDialog from '@/components/modals/RequestChangesDialog';
 import AcceptProposalDialog from '@/components/modals/AcceptProposalDialog';
+import AcceptProposalSuccessDialog from '@/components/modals/AcceptProposalSuccessDialog';
 import type { ProposalSnapshot } from '@/app/lib/types/snapshot'; // <-- Import ProposalSnapshot type
 
 interface FooterProps {
@@ -22,6 +24,9 @@ interface FooterProps {
   children?: React.ReactNode;
   snapshot: ProposalSnapshot; // <-- Add snapshot to props
   onProposalAccepted?: () => void; // Callback when proposal is accepted
+  onChangeRequestSuccess?: () => Promise<void>; // Callback for change request success
+  onAcceptedStatusClick?: () => void; // Callback for accepted status button click
+  onChangeRequestedStatusClick?: () => void; // Callback for change requested status button click
 }
 
 export default function Footer({
@@ -37,7 +42,35 @@ export default function Footer({
   children,
   snapshot, // <-- Destructure snapshot prop
   onProposalAccepted,
+  onChangeRequestSuccess,
+  onAcceptedStatusClick,
+  onChangeRequestedStatusClick,
 }: FooterProps) {
+  // Lift success dialog state to the Footer level
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [successDialogStatus, setSuccessDialogStatus] = useState<'success' | 'error'>('success');
+  const [successDialogMessage, setSuccessDialogMessage] = useState('');
+
+  // Handler for when proposal is accepted
+  const handleAcceptSuccess = () => {
+    // Show success dialog
+    setSuccessDialogStatus('success');
+    setSuccessDialogMessage('Your proposal has been accepted! We will be in touch shortly to discuss next steps.');
+    setSuccessDialogOpen(true);
+    
+    // Call parent callback
+    if (onProposalAccepted) {
+      onProposalAccepted();
+    }
+  };
+  
+  // Handler for when proposal acceptance fails
+  const handleAcceptError = (errorMessage: string) => {
+    // Show error dialog
+    setSuccessDialogStatus('error');
+    setSuccessDialogMessage(errorMessage || 'There was an error accepting your proposal. Please try again.');
+    setSuccessDialogOpen(true);
+  };
   return (
     <footer className="fixed bottom-0 left-0 right-0 z-50 flex h-16
                  items-center justify-center lg:justify-end space-x-2 border-t
@@ -95,12 +128,17 @@ export default function Footer({
             return (
               <>
                 {/* Show status indicator for accepted proposals */}
-                <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-md">
+                <Button 
+                  variant="outline"
+                  className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 cursor-pointer"
+                  onClick={onAcceptedStatusClick}
+                  aria-label="View acceptance details"
+                >
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <span className="text-sm font-medium text-green-800">
                     Proposal Accepted on {new Date(snapshot.accepted_datetime || '').toLocaleDateString()}
                   </span>
-                </div>
+                </Button>
               </>
             );
 
@@ -108,12 +146,17 @@ export default function Footer({
             return (
               <>
                 {/* Show status indicator for change requested proposals */}
-                <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-md">
+                <Button 
+                  variant="outline"
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-md hover:bg-amber-100 cursor-pointer"
+                  onClick={onChangeRequestedStatusClick}
+                  aria-label="View change request details"
+                >
                   <AlertTriangle className="h-5 w-5 text-amber-600" />
                   <span className="text-sm font-medium text-amber-800">
                     Changes Requested on {new Date(snapshot.last_change_requested || '').toLocaleDateString()}
                   </span>
-                </div>
+                </Button>
 
                 {/* Hide the Accept Button for consistency with how we hide Request Changes button */}
               </>
@@ -124,17 +167,30 @@ export default function Footer({
             return (
               <>
                 {/* Show Request Changes button */}
-                <RequestChangesDialog sections={uniqueSections} snapshot={snapshot} />
+                <RequestChangesDialog
+                  sections={uniqueSections}
+                  snapshot={snapshot}
+                  onChangeRequestSuccess={onChangeRequestSuccess}
+                />
 
                 {/* Show Accept Proposal dialog */}
                 <AcceptProposalDialog
                   snapshot={snapshot}
-                  onAcceptSuccess={onProposalAccepted || (() => {})}
+                  onAcceptSuccess={handleAcceptSuccess}
+                  onAcceptError={handleAcceptError}
                 />
               </>
             );
         }
       })()}
+      
+      {/* Success Dialog - Always rendered at Footer level */}
+      <AcceptProposalSuccessDialog
+        isOpen={successDialogOpen}
+        onClose={() => setSuccessDialogOpen(false)}
+        status={successDialogStatus}
+        message={successDialogMessage}
+      />
     </footer>
   );
 }

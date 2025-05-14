@@ -10,22 +10,22 @@ import { supabase } from '@/app/lib/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
 import { Download, ExternalLink, Upload, Camera, Image as ImageIcon, FileVideo, MapPin, LayoutGrid, Grid3X3, Loader2, Map } from 'lucide-react';
-import { InputFile } from './components/InputFile';
+import { InputFile } from "@/app/drawings/[customerUuid]/components/InputFile";
 // Import motion from framer-motion
 import { motion } from 'framer-motion';
 // Import directly from source to avoid the barrel file
 import Header from '@/components/Header/Header';
 // Import from local components folder
-import SimpleFooter from './components/SimpleFooter';
+import SimpleFooter from "@/app/drawings/[customerUuid]/components/SimpleFooter";
 import Image from 'next/image';
-import { handleUpload, processAllUploads } from './lib/uploadHandler';
+import { handleUpload, processAllUploads } from "@/app/drawings/[customerUuid]/lib/uploadHandler";
 // Import application constants
 import { CATEGORY_IDS, CATEGORY_NAMES } from '@/app/lib/constants';
 import { isSectionEmpty } from '@/app/lib/utils';
-import { UploadStatus } from './components/FileUploadStatus';
-import { VideoPreview } from './components/VideoPreview';
-import { SitePlanPreview } from './components/SitePlanPreview';
-import { cn } from './lib/utils';
+import { UploadStatus } from "@/app/drawings/[customerUuid]/components/FileUploadStatus";
+import { VideoPreview } from "@/app/drawings/[customerUuid]/components/VideoPreview";
+import { SitePlanPreview } from "@/app/drawings/[customerUuid]/components/SitePlanPreview";
+import { cn } from "@/app/drawings/[customerUuid]/lib/utils";
 
 export interface DrawingsViewerProps {
   snapshot: ProposalSnapshot;

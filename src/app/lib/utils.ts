@@ -3,13 +3,21 @@
  */
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { CATEGORY_IDS } from "./constants"
-import type { ProposalSnapshot } from "./types/snapshot"
-import type { Step } from "./sectionMachine"; // Make sure Step is exported from sectionMachine.ts
+import { CATEGORY_IDS } from "@/app/lib/constants"
+import type { ProposalSnapshot } from "@/app/lib/types/snapshot"
+import type { Step } from "@/app/lib/sectionMachine"; // Make sure Step is exported from sectionMachine.ts
                                           // and SM.STEPS in sectionMachine.ts is typed as ReadonlyArray<Step>
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/**
+ * Check if code is running on client-side (browser)
+ * @returns boolean indicating if code is running in browser
+ */
+export function isClient(): boolean {
+  return typeof window !== 'undefined'
 }
 
 /**

@@ -29,11 +29,15 @@ export async function POST(request: Request) {
 
     // 2) Insert into change_requests, but use your real FK column name
     const changeRequestId = randomUUID()
-    const changeRequestJson = JSON.stringify({
+    // Create the change request object first
+    const changeRequestObj = {
       sections: changes.selectedSections,
       answers: changes.answers,
       timestamp: new Date().toISOString(),
-    })
+    }
+    
+    // Then stringify it for database storage - this is stored as jsonb in PostgreSQL
+    const changeRequestJson = JSON.stringify(changeRequestObj)
 
     const { data: newCR, error: insertError } = await supabaseServer
       .from('change_requests')

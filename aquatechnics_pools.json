@@ -1,0 +1,149 @@
+{
+  "pools": [
+    {
+      "name": "QLD Infinity 4.0",
+      "dimensions": "4m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2023/06/infinity4-thumb.jpg"
+    },
+    {
+      "name": "QLD Infinity 3.0m",
+      "dimensions": "3m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/01/infinity3-thumb3-1.webp"
+    },
+    {
+      "name": "QLD-Verona – 4.5m x 2.5m",
+      "dimensions": "4.5m x 2.5m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/verona-thumb.jpg"
+    },
+    {
+      "name": "QLD Latina – 4.5m x 3.5m",
+      "dimensions": "4.5m x 3.5m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2019/09/latina-6x4jpg.jpg"
+    },
+    {
+      "name": "QLD Sovereign – 5m x 2.7m",
+      "dimensions": "5m x 2.7m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/sovereign-thumb.jpg"
+    },
+    {
+      "name": "QLD-Portofino – 5.5m x 2.5m",
+      "dimensions": "5.5m x 2.5m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/portofino-thumb.jpg"
+    },
+    {
+      "name": "QLD Empire – 6m x 3m",
+      "dimensions": "6m x 3m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/empire-thumb-1.jpg"
+    },
+    {
+      "name": "QLD Avellino – 6m x 4m",
+      "dimensions": "6m x 4m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/01/avellinoamann4hamptonsblue_at.jpg"
+    },
+    {
+      "name": "QLD Istana – 6.2m x 3.3m",
+      "dimensions": "6.2m x 3.3m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2019/10/istana-thumb.jpg"
+    },
+    {
+      "name": "QLD Florentina – 6.5m x 2.5m",
+      "dimensions": "6.5m x 2.5m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/florentia-thumb.jpg"
+    },
+    {
+      "name": "QLD Bellino – 6.5m x 3.6m",
+      "dimensions": "6.5m x 3.6m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/bellino-thumb01.jpg"
+    },
+    {
+      "name": "QLD Oxford – 7m x 3m",
+      "dimensions": "7m x 3m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/oxford-thumb-1.jpg"
+    },
+    {
+      "name": "QLD Imperial – 7m x 4m",
+      "dimensions": "7m x 4m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/imperial-thumb.jpg"
+    },
+    {
+      "name": "QLD Palazzo – 7m x 3.5m",
+      "dimensions": "7m x 3.5m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2019/10/palazzo-thumb.jpg"
+    },
+    {
+      "name": "QLD Terazza – 7.3m x 3.3m",
+      "dimensions": "7.3m x 3.3m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2019/10/terazza-9x6-1.jpg"
+    },
+    {
+      "name": "QLD Bellagio – 7.5m x 2.5m",
+      "dimensions": "7.5m x 2.5m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/bellagio-thumb.jpg"
+    },
+    {
+      "name": "QLD Castello – 7.5m x 3.6m",
+      "dimensions": "7.5m x 3.6m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/castello-thumb.jpg"
+    },
+    {
+      "name": "QLD Bedarra – 7.5m x 3.8m",
+      "dimensions": "7.5m x 3.8m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/12/bedarra-thumb.jpg"
+    },
+    {
+      "name": "QLD Saint-Remy – 7.6m x 3.6m",
+      "dimensions": "7.6m x 3.6m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2019/10/saint-remy-thumb.jpg"
+    },
+    {
+      "name": "QLD Sheffield – 8m x 3m",
+      "dimensions": "8m x 3m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2024/08/sheffield-thumb.webp"
+    },
+    {
+      "name": "QLD Valentina – 8m x 4m",
+      "dimensions": "8m x 4m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2019/10/valentina-thumb.jpg"
+    },
+    {
+      "name": "QLD Grandeur – 8.25m x 4m",
+      "dimensions": "8.25m x 4m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/grandeur-thumb.jpg"
+    },
+    {
+      "name": "QLD Elysian– 8.3m x 3.3m",
+      "dimensions": "8.3m x 3.3m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/01/elysian-thumb.jpg"
+    },
+    {
+      "name": "QLD Hayman – 8.5m x 3.8m",
+      "dimensions": "8.5m x 3.8m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/12/hayman-thumb.jpg"
+    },
+    {
+      "name": "QLD Westminster – 9m x 4m",
+      "dimensions": "9m x 4m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/12/westminster-thumb.jpg"
+    },
+    {
+      "name": "QLD Amalfi – 9m x 3.6m",
+      "dimensions": "9m x 3.6m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2020/06/amalfi-thumb.jpg"
+    },
+    {
+      "name": "QLD Saint-Louis – 9.5m x 4m",
+      "dimensions": "9.5m x 4m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2021/04/saint-louis-thumb.jpg"
+    },
+    {
+      "name": "QLD-Kensington – 11m x 4m",
+      "dimensions": "11m x 4m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2023/06/kensington-thumb.jpg"
+    },
+    {
+      "name": "QLD Saint-Grande – 11.48m x 4.45m",
+      "dimensions": "11.48m x 4.45m",
+      "imageUrl": "https://www.aquatechnics.com.au/eastern-states/wp-content/uploads/2022/07/saint-grande-thumb.webp"
+    }
+  ]
+}

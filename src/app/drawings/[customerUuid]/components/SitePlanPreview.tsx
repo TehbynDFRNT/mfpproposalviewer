@@ -6,10 +6,10 @@
  */
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { useSitePlan } from '../lib/useSitePlan';
+import { useSitePlan } from "@/app/drawings/[customerUuid]/lib/useSitePlan";
 import { Button } from '@/components/ui/button';
 import { Maximize, Calendar, Loader2, AlertCircle } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn } from "@/app/drawings/[customerUuid]/lib/utils";
 
 interface SitePlanPreviewProps {
   projectId: string;

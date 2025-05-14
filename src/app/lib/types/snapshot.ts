@@ -250,6 +250,9 @@ export interface ProposalSnapshot {
   last_change_requested?: string;
   version?: number;
   pin?: string;
+  
+  /* Latest Change Request JSON (from the most recent change request) */
+  change_request_json?: any;
 
   /* Change Request History (aggregated from change_requests table) */
   change_requests_json?: Array<{

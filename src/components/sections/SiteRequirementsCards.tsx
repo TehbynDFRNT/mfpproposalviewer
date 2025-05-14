@@ -5,8 +5,8 @@
 
 // 🎯  new pattern: single enriched snapshot prop
 import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
-import { PricingCard }  from './SiteRequirementsCards/PricingCard';
-import { DetailsCard }  from './SiteRequirementsCards/DetailsCard';
+import { PricingCard }  from "@/components/sections/SiteRequirementsCards/PricingCard";
+import { DetailsCard }  from "@/components/sections/SiteRequirementsCards/DetailsCard";
 
 interface Props {
   subIndex : number;

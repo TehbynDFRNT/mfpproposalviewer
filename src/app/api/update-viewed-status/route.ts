@@ -7,18 +7,6 @@ import { supabaseServer } from '@/app/lib/supabaseClient'
 
 export async function POST(request: Request) {
   try {
-    // Check request origin for security
-    const origin = request.headers.get('origin')
-    // Allow only requests from our own domain in production
-    const allowedOrigins = [process.env.NEXT_PUBLIC_APP_URL || '']
-    // In development, allow localhost
-    if (process.env.NODE_ENV === 'development') {
-      allowedOrigins.push('http://localhost:3000')
-    }
-
-    if (origin && !allowedOrigins.includes(origin)) {
-      return NextResponse.json({ error: 'Unauthorized origin' }, { status: 403 })
-    }
 
     const { customerUuid, pin } = await request.json()
 

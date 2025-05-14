@@ -2,8 +2,8 @@
  * File: src/app/lib/flows.ts
  * Type definitions for question flows, keyed by CATEGORY_IDS
  */
-import { FlowQuestion } from './types/questionnaire';
-import { CATEGORY_IDS } from './constants';
+import { FlowQuestion } from "@/app/lib/types/questionnaire";
+import { CATEGORY_IDS } from "@/app/lib/constants";
 
 export const flows: Record<string, FlowQuestion[]> = {
   [CATEGORY_IDS.POOL_SELECTION]: [

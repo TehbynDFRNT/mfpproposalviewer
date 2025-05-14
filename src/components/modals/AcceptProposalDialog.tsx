@@ -23,14 +23,15 @@ import { Loader2, ThumbsUp, CheckCircle2, CheckCircle } from 'lucide-react';
 import { ProposalSnapshot } from '@/app/lib/types/snapshot';
 import { isSectionEmpty } from '@/app/lib/utils';
 import { CATEGORY_IDS } from '@/app/lib/constants';
-import AcceptProposalSuccessDialog from './AcceptProposalSuccessDialog';
+import { trackProposalAccepted } from '@/app/lib/jitsuClient';
 
 interface AcceptProposalDialogProps {
   snapshot: ProposalSnapshot;
-  onAcceptSuccess: () => void; // Callback to notify ProposalViewer of acceptance
+  onAcceptSuccess: () => Promise<void> | void; // Callback to notify ProposalViewer of acceptance
+  onAcceptError?: (errorMessage: string) => void; // Optional callback for error handling
 }
 
-export default function AcceptProposalDialog({ snapshot, onAcceptSuccess }: AcceptProposalDialogProps) {
+export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcceptError }: AcceptProposalDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [pin, setPin] = useState('');
@@ -38,9 +39,6 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess }: Acce
   const [isPinError, setIsPinError] = useState(false);  // Track PIN error state for styling
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [successDialogStatus, setSuccessDialogStatus] = useState<'success' | 'error'>('success');
-  const [successDialogMessage, setSuccessDialogMessage] = useState('');
   const [proposalAccepted, setProposalAccepted] = useState(false);
 
   const handleOpenChange = (open: boolean) => {
@@ -118,28 +116,43 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess }: Acce
         throw new Error(`${errorMessage}${errorDetails}`);
       }
 
-      // Don't close the main dialog yet - let the success dialog appear over it
-      // setIsOpen(false);
+      // Track the proposal acceptance in Jitsu
+      const { totalPrice, subtotals } = calculatePrices();
+      trackProposalAccepted(snapshot.project_id, {
+        customer_name: snapshot.customer_name,
+        consultant_name: snapshot.consultant_name,
+        pool_model: snapshot.spec_name,
+        total_price: totalPrice,
+        proposal_created_at: snapshot.created_at,
+        proposal_last_modified: snapshot.updated_at,
+        includes_extras: !isSectionEmpty(CATEGORY_IDS.ADD_ONS, snapshot),
+        includes_fencing: !isSectionEmpty(CATEGORY_IDS.FENCING, snapshot),
+        includes_water_feature: !isSectionEmpty(CATEGORY_IDS.WATER_FEATURE, snapshot),
+        includes_retaining_walls: !isSectionEmpty(CATEGORY_IDS.RETAINING_WALLS, snapshot)
+      });
+
+      // Close the main dialog
+      setIsOpen(false);
 
       // Mark the proposal as accepted
       setProposalAccepted(true);
 
-      // Show success dialog
-      setSuccessDialogStatus('success');
-      setSuccessDialogMessage('Your proposal has been accepted! We will be in touch shortly to discuss next steps.');
-      setSuccessDialogOpen(true);
-
-      // Notify parent component to update UI
-      onAcceptSuccess();
+      // Notify parent component to update UI and show the success dialog
+      // Since success dialog is now in parent, it won't be unmounted
+      if (onAcceptSuccess) {
+        onAcceptSuccess();
+      }
     } catch (error) {
       console.error('Error accepting proposal:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to accept proposal';
       setSubmitError(errorMessage);
 
-      // Show error in dialog as well
-      setSuccessDialogStatus('error');
-      setSuccessDialogMessage(errorMessage);
-      setSuccessDialogOpen(true);
+      // Call the error handler if provided
+      if (onAcceptError) {
+        onAcceptError(errorMessage);
+      } else {
+        console.error('Not calling onAcceptSuccess due to error state');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -285,190 +298,172 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess }: Acce
   const { totalPrice, subtotals } = calculatePrices();
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
-          <Button
-            size="lg"
-            disabled={snapshot.proposal_status === 'accepted'}
-          >
-            Accept Quote
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[500px] flex flex-col h-[600px] min-h-[550px] max-h-[85vh]">
-          <DialogHeader className="flex-none">
-            <DialogTitle className="text-lg leading-none font-semibold">
-              Accept Pool Proposal
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground text-sm mt-2">
-              Please review the details before accepting your proposal.
-            </DialogDescription>
-          </DialogHeader>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button
+          size="lg"
+          disabled={snapshot.proposal_status === 'accepted'}
+        >
+          Accept Quote
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px] flex flex-col h-[600px] min-h-[550px] max-h-[85vh]">
+        <DialogHeader className="flex-none">
+          <DialogTitle className="text-lg leading-none font-semibold">
+            Accept Pool Proposal
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground text-sm mt-2">
+            Please review the details before accepting your proposal.
+          </DialogDescription>
+        </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto pr-2">
-            <div className="space-y-4 my-4">
-            <div className="bg-muted p-4 rounded-md">
-              <h3 className="font-medium text-sm text-muted-foreground mb-1">
-                Project Details
-              </h3>
-              <p className="font-medium">
-                {snapshot.proposal_name || 'Pool Project'}
-              </p>
-              <p className="text-sm mb-2">
-                {snapshot.site_address || snapshot.home_address || 'N/A'}
-              </p>
+        <div className="flex-1 overflow-y-auto pr-2">
+          <div className="space-y-4 my-4">
+          <div className="bg-muted p-4 rounded-md">
+            <h3 className="font-medium text-sm text-muted-foreground mb-1">
+              Project Details
+            </h3>
+            <p className="font-medium">
+              {snapshot.proposal_name || 'Pool Project'}
+            </p>
+            <p className="text-sm mb-2">
+              {snapshot.site_address || snapshot.home_address || 'N/A'}
+            </p>
 
-              <div className="border-t border-border pt-3 space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Selected Pool:</span>
-                  <span className="font-medium">{snapshot.spec_name}</span>
-                </div>
-
-                {/* Always show core sections first */}
-                {["basePool", "installation", "filtration"].map((key) => {
-                  const item = subtotals[key as keyof typeof subtotals];
-                  return item && item.show && (
-                    <div key={key} className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">{item.label}:</span>
-                      <span className="text-sm">{fmt(item.value)}</span>
-                    </div>
-                  );
-                })}
-
-                {/* Then show optional sections if they're not empty (according to isSectionEmpty) */}
-                {["concrete", "fencing", "waterFeature", "retainingWalls", "extras"].map((key) => {
-                  const item = subtotals[key as keyof typeof subtotals];
-                  return item && item.show && (
-                    <div key={key} className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">{item.label}:</span>
-                      <span className="text-sm">{fmt(item.value)}</span>
-                    </div>
-                  );
-                })}
-
-                <div className="border-t border-border mt-2 pt-2 flex justify-between items-center">
-                  <span className="text-sm font-medium">Total Investment:</span>
-                  <span className="font-medium text-base">{totalPrice}</span>
-                </div>
+            <div className="border-t border-border pt-3 space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Selected Pool:</span>
+                <span className="font-medium">{snapshot.spec_name}</span>
               </div>
-            </div>
 
-            {snapshot.pin && (
-              <div className="space-y-3">
-                <Separator className="my-3" />
-
-                <Label htmlFor="pin-code" className="block text-center">
-                  Please enter your 4-digit PIN code
-                </Label>
-                <div className="flex justify-center my-3">
-                  <InputOTP
-                    maxLength={4}
-                    value={pin}
-                    onChange={handlePinChange}
-                    containerClassName="group"
-                    disabled={isPinValid || isSubmitting}
-                  >
-                    <InputOTPGroup>
-                      <InputOTPSlot
-                        index={0}
-                        className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
-                      />
-                      <InputOTPSlot
-                        index={1}
-                        className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
-                      />
-                      <InputOTPSlot
-                        index={2}
-                        className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
-                      />
-                      <InputOTPSlot
-                        index={3}
-                        className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
-                      />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
-                {isPinValid && (
-                  <div className="flex items-center justify-center gap-1 mt-1">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <p className="text-xs text-green-600 font-medium">PIN verified</p>
+              {/* Always show core sections first */}
+              {["basePool", "installation", "filtration"].map((key) => {
+                const item = subtotals[key as keyof typeof subtotals];
+                return item && item.show && (
+                  <div key={key} className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">{item.label}:</span>
+                    <span className="text-sm">{fmt(item.value)}</span>
                   </div>
-                )}
-                <p className="text-xs text-muted-foreground text-center">
-                  Enter the same PIN used to view the Proposal to Accept the Proposal.
-                </p>
+                );
+              })}
 
-                <Separator className="my-3" />
+              {/* Then show optional sections if they're not empty (according to isSectionEmpty) */}
+              {["concrete", "fencing", "waterFeature", "retainingWalls", "extras"].map((key) => {
+                const item = subtotals[key as keyof typeof subtotals];
+                return item && item.show && (
+                  <div key={key} className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">{item.label}:</span>
+                    <span className="text-sm">{fmt(item.value)}</span>
+                  </div>
+                );
+              })}
+
+              <div className="border-t border-border mt-2 pt-2 flex justify-between items-center">
+                <span className="text-sm font-medium">Total Investment:</span>
+                <span className="font-medium text-base">{totalPrice}</span>
               </div>
-            )}
-
-            <div className="flex items-start space-x-2">
-              <Checkbox
-                id="terms"
-                checked={termsAccepted}
-                onCheckedChange={(checked) => {
-                  if (typeof checked === 'boolean') {
-                    setTermsAccepted(checked);
-                  }
-                }}
-              />
-              <Label
-                htmlFor="terms"
-                className="text-sm font-normal leading-relaxed"
-              >
-                I accept the terms and conditions and understand that this constitutes a legally
-                binding agreement. My pool project will proceed based on the details in this proposal.
-              </Label>
             </div>
+          </div>
 
-            {submitError && (
-              <div className="p-3 text-sm bg-red-50 border border-red-200 rounded-md text-red-800">
-                {submitError}
+          {snapshot.pin && (
+            <div className="space-y-3">
+              <Separator className="my-3" />
+
+              <Label htmlFor="pin-code" className="block text-center">
+                Please enter your 4-digit PIN code
+              </Label>
+              <div className="flex justify-center my-3">
+                <InputOTP
+                  maxLength={4}
+                  value={pin}
+                  onChange={handlePinChange}
+                  containerClassName="group"
+                  disabled={isPinValid || isSubmitting}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot
+                      index={0}
+                      className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
+                    />
+                    <InputOTPSlot
+                      index={1}
+                      className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
+                    />
+                    <InputOTPSlot
+                      index={2}
+                      className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
+                    />
+                    <InputOTPSlot
+                      index={3}
+                      className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
+                    />
+                  </InputOTPGroup>
+                </InputOTP>
               </div>
-            )}
-          </div>
-          </div>
-
-          <DialogFooter className="flex-none flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAcceptProposal}
-              className="bg-green-600 hover:bg-green-700 text-white font-medium"
-              disabled={isSubmitting || !termsAccepted || (Boolean(snapshot.pin) && !isPinValid)}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <ThumbsUp className="mr-2 h-4 w-4" />
-                  Accept Proposal
-                </>
+              {isPinValid && (
+                <div className="flex items-center justify-center gap-1 mt-1">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <p className="text-xs text-green-600 font-medium">PIN verified</p>
+                </div>
               )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <p className="text-xs text-muted-foreground text-center">
+                Enter the same PIN used to view the Proposal to Accept the Proposal.
+              </p>
 
-      {/* Success/Error Dialog */}
-      <AcceptProposalSuccessDialog
-        isOpen={successDialogOpen}
-        onClose={() => {
-          setSuccessDialogOpen(false);
+              <Separator className="my-3" />
+            </div>
+          )}
 
-          // Only close the main dialog after user dismisses the success dialog
-          // and only if the proposal was accepted successfully
-          if (proposalAccepted) {
-            setIsOpen(false);
-          }
-        }}
-        status={successDialogStatus}
-        message={successDialogMessage}
-      />
-    </>
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="terms"
+              checked={termsAccepted}
+              onCheckedChange={(checked) => {
+                if (typeof checked === 'boolean') {
+                  setTermsAccepted(checked);
+                }
+              }}
+            />
+            <Label
+              htmlFor="terms"
+              className="text-sm font-normal leading-relaxed"
+            >
+              I accept the terms and conditions and understand that this constitutes a legally
+              binding agreement. My pool project will proceed based on the details in this proposal.
+            </Label>
+          </div>
+
+          {submitError && (
+            <div className="p-3 text-sm bg-red-50 border border-red-200 rounded-md text-red-800">
+              {submitError}
+            </div>
+          )}
+        </div>
+        </div>
+
+        <DialogFooter className="flex-none flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-4">
+          <Button variant="outline" onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAcceptProposal}
+            className="bg-green-600 hover:bg-green-700 text-white font-medium"
+            disabled={isSubmitting || !termsAccepted || (Boolean(snapshot.pin) && !isPinValid)}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <ThumbsUp className="mr-2 h-4 w-4" />
+                Accept Proposal
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

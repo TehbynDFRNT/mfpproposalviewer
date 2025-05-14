@@ -4,7 +4,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSitePlan } from './useSitePlan';
+import { useSitePlan } from "@/components/VisualColumn/useSitePlan";
 import Image from 'next/image';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,7 +14,7 @@ import { ResponsiveVideo } from '@/components/ResponsiveVideo';
 import { CATEGORY_IDS } from '@/app/lib/constants';
 import { supabase } from '@/app/lib/supabaseClient';
 import { isSectionEmpty } from '@/app/lib/utils';
-import type { VisualColumnProps, Visual, RenderVisual } from './VisualColumn.types';
+import type { VisualColumnProps, Visual, RenderVisual } from "@/components/VisualColumn/VisualColumn.types";
 
 // Import animation variants from shared module
 import { fadeOut, visualIn } from '@/app/lib/animation';

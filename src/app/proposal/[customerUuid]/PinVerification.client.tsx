@@ -7,8 +7,9 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeOut, contentIn } from '@/app/lib/animation';
 import { ProposalSnapshot } from '@/app/lib/types/snapshot';
-import ProposalViewer from './ProposalViewer.client';
+import ProposalViewer from "@/app/proposal/[customerUuid]/ProposalViewer.client";
 import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
+import { trackProposalViewed, identify } from '@/app/lib/jitsuClient';
 
 interface PinVerificationProps {
   snapshot: ProposalSnapshot;
@@ -62,6 +63,22 @@ export default function PinVerification({ snapshot: initialSnapshot }: PinVerifi
       } else {
         setIsVerified(true);
       }
+      
+      // First identify the user if customer email is available
+      const customerEmail = snapshot.customer_email;
+      if (customerEmail) {
+        // This is the real user identity for Jitsu
+        identify(customerEmail, {
+          name: snapshot.customer_name,
+          consultant: snapshot.consultant_name,
+          phone: snapshot.customer_phone,
+          address: snapshot.home_address
+        });
+      }
+      
+      // NOTE: We no longer track the proposal viewed event here
+      // Instead, we track it in the ProposalViewer component
+      // This prevents duplicate events
     } catch (error) {
       console.error('Error updating proposal status:', error);
       // Even if the API call fails, we still want to show the proposal

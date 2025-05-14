@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/app/lib/supabaseClient';
-import type { SitePlanVisual } from './VisualColumn.types';
+import type { SitePlanVisual } from "@/components/VisualColumn/VisualColumn.types";
 
 /**
  * Hook to fetch the latest site plan for a project

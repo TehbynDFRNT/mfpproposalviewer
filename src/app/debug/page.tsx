@@ -4,7 +4,7 @@
 // Server Component for fetching data using the flat SQL view structure
 // We load data server-side and pass it to the client component
 
-import DebugClient from './debug-client';
+import DebugClient from "@/app/debug/debug-client";
 import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
 
 interface DebugPageProps {

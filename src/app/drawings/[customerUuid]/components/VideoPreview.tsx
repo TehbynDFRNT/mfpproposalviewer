@@ -7,9 +7,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Maximize, X, Upload, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '../lib/utils';
+import { cn } from "@/app/drawings/[customerUuid]/lib/utils";
 import { supabase } from '@/app/lib/supabaseClient';
-import { FileUploadStatus, UploadStatus } from './FileUploadStatus';
+import { FileUploadStatus, UploadStatus } from "@/app/drawings/[customerUuid]/components/FileUploadStatus";
 
 interface VideoData {
   video_type: string;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, AlertCircle, FileIcon, Loader2 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn } from "@/app/drawings/[customerUuid]/lib/utils";
 
 export type UploadStatus = 'idle' | 'success' | 'error' | 'selected' | 'loading';
 

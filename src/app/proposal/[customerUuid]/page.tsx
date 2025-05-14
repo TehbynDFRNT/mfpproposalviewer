@@ -11,7 +11,7 @@ import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
 import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
 import type { Metadata, ResolvingMetadata } from 'next';
 
-import PinVerification from './PinVerification.client';
+import PinVerification from "@/app/proposal/[customerUuid]/PinVerification.client";
 
 // Generate dynamic metadata based on snapshot data
 export async function generateMetadata(

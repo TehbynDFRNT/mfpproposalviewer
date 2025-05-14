@@ -9,7 +9,8 @@ import { flows } from '@/app/lib/flows';
 import { FlowQuestion } from '@/app/lib/types/questionnaire';
 import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
 import { CATEGORY_IDS, CATEGORY_NAMES } from '@/app/lib/constants';
-import ChangeRequestSuccessDialog from './ChangeRequestSuccessDialog';
+import ChangeRequestSuccessDialog from "@/components/modals/ChangeRequestSuccessDialog";
+import { trackChangeRequest } from '@/app/lib/jitsuClient';
 
 interface Section {
   id: string;
@@ -19,9 +20,10 @@ interface Section {
 interface ChangeRequestDialogProps {
   sections: Section[];
   snapshot: ProposalSnapshot | null;
+  onChangeRequestSuccess?: () => Promise<void>; // Add callback for refreshing data
 }
 
-export default function ChangeRequestDialog({ sections, snapshot }: ChangeRequestDialogProps) {
+export default function ChangeRequestDialog({ sections, snapshot, onChangeRequestSuccess }: ChangeRequestDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<'select'|'questions'>('select');
   const [selectedSections, setSelectedSections] = useState<string[]>([]);
@@ -230,10 +232,35 @@ export default function ChangeRequestDialog({ sections, snapshot }: ChangeReques
       // Close the request changes dialog
       setIsOpen(false);
 
-      // Show success dialog instead of dispatching an event
+      // Track the change request in Jitsu
+      if (snapshot?.project_id) {
+        try {
+          trackChangeRequest(snapshot.project_id, {
+            customer_name: snapshot.customer_name,
+            consultant_name: snapshot.consultant_name, 
+            sections_changed: selectedSections,
+            pool_model: snapshot.spec_name,
+            answers_summary: Object.keys(answers).length
+          });
+        } catch (trackingError) {
+          console.error('Error tracking change request in Jitsu:', trackingError);
+          // Non-critical error, continue with the flow
+        }
+      }
+
+      // Show success dialog
       setSuccessDialogStatus('success');
       setSuccessDialogMessage('Your change request has been submitted successfully. Our team will review your request and get back to you soon.');
       setSuccessDialogOpen(true);
+
+      // Refresh snapshot data if callback is provided
+      if (onChangeRequestSuccess) {
+        try {
+          await onChangeRequestSuccess();
+        } catch (refreshError) {
+          console.error('Error refreshing data after change request:', refreshError);
+        }
+      }
     } catch (error) {
       console.error('Error submitting change request:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit change request';

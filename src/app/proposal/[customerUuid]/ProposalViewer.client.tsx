@@ -3,7 +3,7 @@
  */
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import * as SM from '@/app/lib/sectionMachine';
 import { useJsApiLoader } from '@react-google-maps/api';
 import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Zap, Filter, Droplet, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { trackProposalViewed, identify } from '@/app/lib/jitsuClient';
 import {
   Header,
   Footer,
@@ -27,6 +28,8 @@ import {
   SiteRequirementsCards,
   ProposalSummaryCards
 } from '@/components';
+import AcceptProposalSuccessDialog from '@/components/modals/AcceptProposalSuccessDialog';
+import ChangeRequestSuccessDialog from '@/components/modals/ChangeRequestSuccessDialog';
 import { fadeOut, contentIn } from '@/app/lib/animation';
 import { lastDir, SECTIONS_WITH_SUBSECTIONS } from '@/app/lib/layoutConstants';
 import { CATEGORY_IDS, CATEGORY_NAMES } from '@/app/lib/constants';
@@ -42,6 +45,19 @@ export default function ProposalViewer({ snapshot, onSnapshotUpdate }: ProposalV
   const [currentSnapshot, setCurrentSnapshot] = useState<ProposalSnapshot>(snapshot);
   const [machineState, setMachineState] = useState<SM.State>(SM.initialState);
   const [, setDir] = useState<1 | -1>(1);   // +1 = forward, -1 = back, state needed for handlers
+  
+  // Success dialog states
+  const [acceptSuccessDialogOpen, setAcceptSuccessDialogOpen] = useState(false);
+  const [acceptSuccessDialogStatus, setAcceptSuccessDialogStatus] = useState<'success' | 'error'>('success');
+  const [acceptSuccessDialogMessage, setAcceptSuccessDialogMessage] = useState('');
+  // Track if user has manually dismissed the dialog to prevent auto-reopening
+  const [acceptDialogDismissed, setAcceptDialogDismissed] = useState(false);
+  
+  const [changeSuccessDialogOpen, setChangeSuccessDialogOpen] = useState(false);
+  const [changeSuccessDialogStatus, setChangeSuccessDialogStatus] = useState<'success' | 'error'>('success');
+  const [changeSuccessDialogMessage, setChangeSuccessDialogMessage] = useState('');
+  // Track if user has manually dismissed the dialog to prevent auto-reopening
+  const [changeDialogDismissed, setChangeDialogDismissed] = useState(false);
   // Always show only non-null sections
   const showOnlyNonNullSections = true;
   const currentStep = SM.current(machineState);
@@ -53,9 +69,56 @@ export default function ProposalViewer({ snapshot, onSnapshotUpdate }: ProposalV
   useEffect(() => {
     setCurrentSnapshot(snapshot);
   }, [snapshot]);
+  
+  // Store snapshot in a ref to avoid dependency issues
+  const snapshotRef = useRef(snapshot);
+  
+  // Use a ref to track if we've already sent the view event
+  const hasTrackedRef = useRef(false);
+  
+  // Update ref when snapshot changes
+  useEffect(() => {
+    snapshotRef.current = snapshot;
+  }, [snapshot]);
+  
+  // Track proposal view event only once on initial mount
+  useEffect(() => {
+    // Only track the view event once per session
+    if (!hasTrackedRef.current) {
+      hasTrackedRef.current = true;
+      
+      const currentSnapshot = snapshotRef.current;
+      
+      // First identify the user if customer email is available
+      const customerEmail = currentSnapshot.customer_email;
+      if (customerEmail) {
+        // This is the real user identity for Jitsu
+        identify(customerEmail, {
+          name: currentSnapshot.customer_name,
+          consultant: currentSnapshot.consultant_name,
+          phone: currentSnapshot.customer_phone,
+          address: currentSnapshot.home_address
+        });
+      }
+      
+      // Track the proposal viewed event in Jitsu
+      trackProposalViewed(currentSnapshot.project_id, {
+        pin_verified: true, // PIN was already verified if we're at this component
+        customer_name: currentSnapshot.customer_name,
+        consultant_name: currentSnapshot.consultant_name,
+        pool_model: currentSnapshot.spec_name,
+        proposal_created_at: currentSnapshot.created_at,
+        proposal_last_modified: currentSnapshot.updated_at,
+        source: 'proposal_viewer_mount', // Indicate this came from the ProposalViewer component
+        proposal_status: currentSnapshot.proposal_status
+      }, customerEmail); // Pass customer email as userId if available
+      
+      console.log('Tracked proposal view event');
+    }
+  }, []); // Empty dependency array ensures this only runs once on mount
 
   // Prepare data for the select dropdown (unique sections), only showing non-null sections
-  const uniqueSections = React.useMemo(() => {
+  const uniqueSections = useMemo(() => {
     return getAvailableSectionsForSelect(currentSnapshot, SM.STEPS, CATEGORY_NAMES, showOnlyNonNullSections);
   }, [currentSnapshot, showOnlyNonNullSections]); // Recompute if snapshot changes
 
@@ -166,6 +229,12 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
   // Handle proposal acceptance
   const handleProposalAccepted = useCallback(async () => {
     console.log('Proposal accepted successfully');
+    
+    // Show success dialog
+    setAcceptSuccessDialogStatus('success');
+    setAcceptSuccessDialogMessage('Your proposal has been accepted! We will be in touch shortly to discuss next steps.');
+    setAcceptDialogDismissed(false); // Reset dismissal flag when a new action is performed
+    setAcceptSuccessDialogOpen(true);
 
     // Refresh snapshot data from server if callback provided
     if (onSnapshotUpdate) {
@@ -176,6 +245,44 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
       }
     }
   }, [onSnapshotUpdate]);
+
+  // Handle proposal acceptance error
+  const handleAcceptError = useCallback((errorMessage: string) => {
+    // Show error dialog
+    setAcceptSuccessDialogStatus('error');
+    setAcceptSuccessDialogMessage(errorMessage || 'There was an error accepting your proposal. Please try again.');
+    setAcceptDialogDismissed(false); // Reset dismissal flag for error dialogs too
+    setAcceptSuccessDialogOpen(true);
+  }, []);
+
+  // Handle change request success - uses same refresh mechanism as acceptance
+  const handleChangeRequestSuccess = useCallback(async () => {
+    console.log('Change request submitted successfully');
+    
+    // Show success dialog
+    setChangeSuccessDialogStatus('success');
+    setChangeSuccessDialogMessage('Your change request has been submitted successfully. Our team will review your request and get back to you soon.');
+    setChangeDialogDismissed(false); // Reset dismissal flag when a new action is performed
+    setChangeSuccessDialogOpen(true);
+
+    // Refresh snapshot data from server if callback provided
+    if (onSnapshotUpdate) {
+      try {
+        await onSnapshotUpdate();
+      } catch (error) {
+        console.error('Error refreshing snapshot after change request:', error);
+      }
+    }
+  }, [onSnapshotUpdate]);
+
+  // Handle change request error
+  const handleChangeRequestError = useCallback((errorMessage: string) => {
+    // Show error dialog
+    setChangeSuccessDialogStatus('error');
+    setChangeSuccessDialogMessage(errorMessage || 'There was an error submitting your change request. Please try again.');
+    setChangeDialogDismissed(false); // Reset dismissal flag for error dialogs too
+    setChangeSuccessDialogOpen(true);
+  }, []);
 
   // Handle change request success events
   useEffect(() => {
@@ -208,6 +315,54 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
     // mobile / fallback
     if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
   };
+  
+  // Functions to handle status indicator button clicks in the footer
+  const handleAcceptedStatusClick = useCallback(() => {
+    setAcceptSuccessDialogStatus('success');
+    setAcceptSuccessDialogMessage('Your proposal has been accepted! We will be in touch shortly to discuss next steps.');
+    setAcceptDialogDismissed(false); // Reset dismissal flag when explicitly clicked from footer
+    setAcceptSuccessDialogOpen(true);
+  }, []);
+  
+  const handleChangeRequestedStatusClick = useCallback(() => {
+    setChangeSuccessDialogStatus('success');
+    setChangeSuccessDialogMessage('Your change request has been submitted successfully. Our team will review your request and get back to you soon.');
+    setChangeDialogDismissed(false); // Reset dismissal flag when explicitly clicked from footer
+    setChangeSuccessDialogOpen(true);
+  }, []);
+  
+  // Automatically show success dialog when proposal status is accepted or change_requested
+  // The dismissal flags prevent the dialogs from reopening after the user manually closes them
+  useEffect(() => {
+    // Only show the accepted dialog if:
+    // 1. The proposal has been accepted
+    // 2. The dialog is not already open
+    // 3. The user has not manually dismissed the dialog
+    if (currentSnapshot.proposal_status === 'accepted' && !acceptSuccessDialogOpen && !acceptDialogDismissed) {
+      // Set a short delay to avoid immediate popup when page loads
+      const timer = setTimeout(() => {
+        setAcceptSuccessDialogStatus('success');
+        setAcceptSuccessDialogMessage('Your proposal has been accepted! We will be in touch shortly to discuss next steps.');
+        setAcceptSuccessDialogOpen(true);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    } 
+    // Only show the change request dialog if:
+    // 1. A change has been requested
+    // 2. The dialog is not already open
+    // 3. The user has not manually dismissed the dialog
+    else if (currentSnapshot.proposal_status === 'change_requested' && !changeSuccessDialogOpen && !changeDialogDismissed) {
+      // Set a short delay to avoid immediate popup when page loads
+      const timer = setTimeout(() => {
+        setChangeSuccessDialogStatus('success');
+        setChangeSuccessDialogMessage('Your change request has been submitted successfully. Our team will review your request and get back to you soon.');
+        setChangeSuccessDialogOpen(true);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentSnapshot.proposal_status, acceptSuccessDialogOpen, changeSuccessDialogOpen, acceptDialogDismissed, changeDialogDismissed]);
 
   return (
     <div className="relative flex min-h-screen flex-col bg-[#07032D] proposal-background"> {/* Changed to flex-col for header/main/footer layout */}
@@ -437,6 +592,8 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
         progressPercent={progressPercent}
         machineState={machineState}
         onProposalAccepted={handleProposalAccepted}
+        onAcceptedStatusClick={handleAcceptedStatusClick}
+        onChangeRequestedStatusClick={handleChangeRequestedStatusClick}
         canGoPrev={(state) => {
           if (showOnlyNonNullSections) {
             return findPrevAvailableStepIndex(state.index, currentSnapshot, SM.STEPS) !== -1;
@@ -483,6 +640,30 @@ const handleSectionSelectChange = useCallback((newSectionId: string) => {
             }
           }
         }}
+      />
+      
+      {/* Success Dialogs */}
+      <AcceptProposalSuccessDialog
+        isOpen={acceptSuccessDialogOpen}
+        onClose={() => {
+          setAcceptSuccessDialogOpen(false);
+          // Mark as dismissed to prevent auto-reopening when closed by user
+          setAcceptDialogDismissed(true);
+        }}
+        status={acceptSuccessDialogStatus}
+        message={acceptSuccessDialogMessage}
+      />
+      
+      <ChangeRequestSuccessDialog
+        isOpen={changeSuccessDialogOpen}
+        onClose={() => {
+          setChangeSuccessDialogOpen(false);
+          // Mark as dismissed to prevent auto-reopening when closed by user
+          setChangeDialogDismissed(true);
+        }}
+        status={changeSuccessDialogStatus}
+        message={changeSuccessDialogMessage}
+        snapshot={currentSnapshot}
       />
     </div>
   );
