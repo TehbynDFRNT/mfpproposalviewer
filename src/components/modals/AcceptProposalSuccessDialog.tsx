@@ -38,42 +38,38 @@ export default function AcceptProposalSuccessDialog({
         {status === 'success' ? (
           <>
             <DialogHeader className="flex-none pb-2">
-              <DialogTitle className="text-lg leading-none font-semibold flex items-center gap-2">
+              <DialogTitle className="text-xl leading-none font-semibold flex items-center gap-2">
                 <PartyPopper className="h-5 w-5 text-green-500" />
                 <span className="text-green-700">Congratulations!</span>
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground text-base mt-2">
-                Your pool proposal has been accepted successfully.
+              <DialogDescription className="text-muted-foreground text-base mt-2 text-left">
+                We have received your request to proceed with your pool project.
               </DialogDescription>
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 mt-1 mb-2 shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.05)_inset] pt-2">
               <div className="bg-green-50 p-5 rounded-md border border-green-100 text-center">
                 <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-2" />
-                <h3 className="text-xl font-semibold text-green-800 mb-1">Your Pool Journey Begins!</h3>
+                <h3 className="text-xl font-semibold text-green-800 mb-1">Your Pool Project is Underway!</h3>
                 <p className="text-green-700">
-                  We've received your acceptance and will be in touch shortly to begin the next steps of your pool project.
+                  We will now begin creating your construction contract and site plan to move your project forward.
                 </p>
               </div>
 
               <div className="p-4 bg-muted rounded-md">
-                <h4 className="font-medium mb-2">What happens next?</h4>
-                <ul className="space-y-3 text-base">
-                  <li className="flex items-center gap-3">
-                    <span className="flex-shrink-0 h-6 w-6 bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium text-base">1</span>
+                <h4 className="text-lg font-semibold mb-2">What happens next?</h4>
+                <ul className="space-y-4 text-base">
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 h-7 w-7 min-h-[28px] min-w-[28px] bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium">1</span>
                     <p>Our team will contact you within 1-2 business days</p>
                   </li>
-                  <li className="flex items-center gap-3">
-                    <span className="flex-shrink-0 h-6 w-6 bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium text-base">2</span>
-                    <p>We'll schedule a final consultation to review your project details</p>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 h-7 w-7 min-h-[28px] min-w-[28px] bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium">2</span>
+                    <p>We'll prepare your construction contract and site plan</p>
                   </li>
-                  <li className="flex items-center gap-3">
-                    <span className="flex-shrink-0 h-6 w-6 bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium text-base">3</span>
-                    <p>Construction planning and timeline will be prepared</p>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="flex-shrink-0 h-6 w-6 bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium text-base">4</span>
-                    <p>Your dream pool journey officially begins!</p>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 h-7 w-7 min-h-[28px] min-w-[28px] bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium">3</span>
+                    <p>Once documents are finalised, signed and deposit paid, construction can begin</p>
                   </li>
                 </ul>
               </div>
@@ -83,11 +79,11 @@ export default function AcceptProposalSuccessDialog({
         ) : (
           <>
             <DialogHeader className="flex-none pb-2">
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="text-xl leading-none font-semibold flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
                 <span className="text-amber-700">{title}</span>
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-muted-foreground text-base mt-2 text-left">
                 {message}
               </DialogDescription>
             </DialogHeader>
@@ -111,7 +107,7 @@ export default function AcceptProposalSuccessDialog({
                   <span>1300 306 011</span>
                 </Button>
               </a>
-              <p className="text-xs text-muted-foreground mt-2 text-center">Call us if you have any questions about your pool project</p>
+              <p className="text-base text-muted-foreground mt-2 text-center">Call us if you have any questions about your construction contract or site plan</p>
             </div>
           ) : (
             <Button onClick={onClose}>Try Again</Button>

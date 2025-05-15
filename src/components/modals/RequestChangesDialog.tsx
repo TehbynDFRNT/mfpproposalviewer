@@ -283,14 +283,14 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
         </DialogTrigger>
         <DialogContent className="sm:max-w-[600px] flex flex-col h-[600px] min-h-[550px] max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle className="text-lg leading-none font-semibold">Request Project Changes</DialogTitle>
+          <DialogTitle className="text-xl leading-none font-semibold">Request Project Changes</DialogTitle>
           {step === 'select' && (
-            <DialogDescription className="text-muted-foreground text-sm">
+            <DialogDescription className="text-muted-foreground text-base">
               Select sections of your proposal you'd like to request changes for.
             </DialogDescription>
           )}
           {step === 'questions' && (
-            <DialogDescription className="text-muted-foreground text-sm">
+            <DialogDescription className="text-muted-foreground text-base">
               {currentQ?.id === 'final_submission' ?
                 'Review your selected changes' :
                 'Requesting changes for selected sections'}
@@ -302,7 +302,7 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
         {step === 'select' && (
           <div className="flex-none">
             <div className="mb-2">
-              <h3 className="text-base font-medium text-foreground mb-1">What would you like to change about your proposal?</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-1">What would you like to change about your proposal?</h3>
             </div>
           </div>
         )}
@@ -341,7 +341,7 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
               {/* Fixed header with question and current selection */}
               <div className="flex-none">
                 <div className="mb-2">
-                  <h3 className="text-base font-medium text-foreground mb-1">{currentQ.text}</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-1">{currentQ.text}</h3>
                 </div>
                 
                 {/* Display current pool model if we're on the pool model selection question */}
@@ -351,7 +351,7 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
                       <div className="bg-[#F9F4F0] border border-[#DB9D6A]/20 rounded-md p-3 w-full">
                         <div className="flex items-center">
                           <span className="flex-1 text-left">
-                            <span className="block text-xs text-muted-foreground mb-1">Current Selection</span>
+                            <span className="block text-base text-muted-foreground mb-1">Current Selection</span>
                             <span className="font-medium">{snapshot.spec_name}</span>
                           </span>
                         </div>
@@ -367,28 +367,28 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
                     <div className="mb-2">
                       <div className="bg-[#F9F4F0] border border-[#DB9D6A]/20 rounded-md p-3 w-full">
                         <div className="flex flex-col">
-                          <span className="block text-xs text-muted-foreground mb-1">Current Add-ons</span>
+                          <span className="block text-base text-muted-foreground mb-1">Current Add-ons</span>
                           <div className="space-y-1">
                             {snapshot.cleaner_included && (
                               <div className="flex items-center">
                                 <CheckIcon className="h-3.5 w-3.5 text-[#1DA1F2] mr-1" />
-                                <span className="text-sm">Pool Cleaner: {snapshot.cleaner_name}</span>
+                                <span className="text-base">Pool Cleaner: {snapshot.cleaner_name}</span>
                               </div>
                             )}
                             {snapshot.include_heat_pump && (
                               <div className="flex items-center">
                                 <CheckIcon className="h-3.5 w-3.5 text-[#1DA1F2] mr-1" />
-                                <span className="text-sm">Heat Pump: {snapshot.heat_pump_description}</span>
+                                <span className="text-base">Heat Pump: {snapshot.heat_pump_description}</span>
                               </div>
                             )}
                             {snapshot.include_blanket_roller && (
                               <div className="flex items-center">
                                 <CheckIcon className="h-3.5 w-3.5 text-[#1DA1F2] mr-1" />
-                                <span className="text-sm">Pool Blanket & Roller: {snapshot.blanket_roller_description}</span>
+                                <span className="text-base">Pool Blanket & Roller: {snapshot.blanket_roller_description}</span>
                               </div>
                             )}
                             {!snapshot.cleaner_included && !snapshot.include_heat_pump && !snapshot.include_blanket_roller && (
-                              <span className="text-sm">No add-ons currently selected</span>
+                              <span className="text-base">No add-ons currently selected</span>
                             )}
                           </div>
                         </div>
@@ -424,16 +424,16 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
                           </div>
                         </div>
                         <div className="p-4 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
-                          <p className="text-base mb-1 font-semibold">You are about to request changes to your proposal.</p>
-                          <p className="text-sm">
+                          <p className="text-lg mb-1 font-semibold">You are about to request changes to your proposal.</p>
+                          <p className="text-base">
                             Your change request will be sent to the MFP team for review. This may affect your quote and timeline.
                           </p>
                         </div>
 
                         {submitError && (
                           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-800">
-                            <p className="text-sm font-medium">Error: {submitError}</p>
-                            <p className="text-xs mt-1">Please try again or contact support if the issue persists.</p>
+                            <p className="text-base font-medium">Error: {submitError}</p>
+                            <p className="text-base mt-1">Please try again or contact support if the issue persists.</p>
                           </div>
                         )}
                       </>
@@ -534,7 +534,7 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
                     Submitting...
                   </>
                 ) : (
-                  index >= flow.length - 1 || currentQ?.id.includes('notes') || currentQ?.id.includes('feedback') || currentQ?.id === 'final_submission' ? 'Submit Changes' : 'Next'
+                  currentQ?.id === 'final_submission' ? 'Submit Changes' : 'Next'
                 )}
               </Button>
             </>

@@ -16,17 +16,17 @@ export default function WaterFeatureCards({
         <div className="w-full relative">
           <div className="overflow-hidden h-48">
             <Image 
-              src="/CardHero/water-feature-hero.webp" 
+              src="/CardHero/WaterFeature.webp" 
               alt="Water Feature" 
-              className="w-full h-full object-cover object-top" 
+              className="w-full h-full object-cover object-center" 
               width={800}
               height={450}
             />
             {/* Overlay diagram - bottom right positioning */}
             <div className="absolute bottom-0 right-0 p-4">
               <div className="bg-white/90 p-2 rounded-md">
-                <p className="text-xs font-semibold">Feature Dimensions</p>
-                <p className="text-xs">
+                <p className="text-sm font-semibold">Feature Dimensions</p>
+                <p className="text-sm">
                   {snapshot.water_feature_size.split(' - ')[0]}
                 </p>
               </div>
@@ -40,7 +40,7 @@ export default function WaterFeatureCards({
         </div>
 
         <CardContent className="p-5 flex flex-col">
-          <p className="text-sm mb-4">
+          <p className="text-base text-muted-foreground mb-4">
             Custom water feature with LED lighting, creating a stunning visual and soothing audio experience for your pool area.
           </p>
           
@@ -113,9 +113,9 @@ export default function WaterFeatureCards({
           <Separator className="mb-3" />
 
           {/* TOTAL */}
-          <div className="flex justify-between items-baseline mt-1">
-            <p className="font-semibold">Total Feature Price</p>
-            <p className="text-xl font-bold">
+          <div className="flex justify-between items-center mt-1">
+            <p className="text-xl font-semibold">Total Cost</p>
+            <p className="text-xl font-semibold">
               ${snapshot.water_feature_total_cost.toLocaleString()}
             </p>
           </div>

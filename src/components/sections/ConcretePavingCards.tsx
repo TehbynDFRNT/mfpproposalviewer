@@ -88,8 +88,8 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
       <Card className="w-full shadow-lg">
         <CardContent className="p-5 space-y-6">
           <div className="mb-2">
-            <h3 className="text-base font-semibold">Concrete & Paving</h3>
-            <p className="text-sm text-muted-foreground">Premium surfaces and finishes for your pool area</p>
+            <h3 className="text-xl font-semibold">Concrete & Paving</h3>
+            <p className="text-base text-muted-foreground">Premium surfaces and finishes for your pool area</p>
           </div>
 
           <Separator className="mb-4" />
@@ -97,19 +97,19 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
           {/* Concrete & Paving cost breakdown */}
           <div className="space-y-3">
             {/* First group: Paving and Concreting items */}
-            <div className="space-y-3">
+            <div className="space-y-8">
               {validItems.slice(0, 2).map(item => (
-                <div key={item.label} className="flex justify-between">
-                  <div>
+                <div key={item.label} className="mb-4">
+                  <div className="flex justify-between">
                     <p className="font-medium">{item.label}</p>
-                    {item.detail && (
-                      <p className="text-sm text-muted-foreground">
-                        {item.detail}
-                        {item.sqm ? ` (${item.sqm.toFixed(2)} m²)` : ''}
-                      </p>
-                    )}
+                    <p className="font-medium whitespace-nowrap">{fmt(item.cost)}</p>
                   </div>
-                  <p className="font-medium whitespace-nowrap">{fmt(item.cost)}</p>
+                  {item.detail && (
+                    <p className="text-base text-muted-foreground mt-0.5">
+                      {item.detail}
+                      {item.sqm ? ` (${item.sqm.toFixed(2)} m²)` : ''}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -118,19 +118,19 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
             <Separator className="mt-2 mb-3" />
 
             {/* Second group: Concrete Cuts, Pump, and Under-Fence */}
-            <div className="space-y-3">
+            <div className="space-y-8">
               {validItems.slice(2).map(item => (
-                <div key={item.label} className="flex justify-between">
-                  <div>
+                <div key={item.label} className="mb-4">
+                  <div className="flex justify-between">
                     <p className="font-medium">{item.label}</p>
-                    {item.detail && (
-                      <p className="text-sm text-muted-foreground">
-                        {item.detail}
-                        {item.sqm ? ` (${item.sqm.toFixed(2)} m²)` : ''}
-                      </p>
-                    )}
+                    <p className="font-medium whitespace-nowrap">{fmt(item.cost)}</p>
                   </div>
-                  <p className="font-medium whitespace-nowrap">{fmt(item.cost)}</p>
+                  {item.detail && (
+                    <p className="text-base text-muted-foreground mt-0.5">
+                      {item.detail}
+                      {item.sqm ? ` (${item.sqm.toFixed(2)} m²)` : ''}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -139,9 +139,9 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
           <Separator className="mb-3" />
 
           {/* Grand total */}
-          <div className="flex justify-between items-baseline mt-1">
-            <p className="font-semibold">Total Cost</p>
-            <p className="text-xl font-bold">
+          <div className="flex justify-between items-center">
+            <p className="font-semibold text-xl">Total Cost</p>
+            <p className="text-xl font-semibold">
               {fmt(totalCost)}
             </p>
           </div>
@@ -153,29 +153,33 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
         <CardContent className="px-2 flex items-center h-full">
           <div className="flex flex-row items-center w-full">
             {/* Left: VIP graphic */}
-            <div className="flex-shrink-0 pr-4 flex items-center justify-center h-full">
+            <div className="flex-shrink-0 pr-6 flex items-center justify-center h-full w-20 sm:w-20 lg:w-20">
               <Image
                 src="/VipCards/3dstone.webp"
                 alt="Premium 3DStone Paver"
-                className="w-16 h-16 rounded-md object-contain"
-                width={64}
+                className="w-full h-16 rounded-md object-contain"
+                width={80}
                 height={64}
               />
             </div>
 
             {/* Right: copy & value points */}
             <div className="flex-grow">
-              <h3 className="text-base font-semibold mb-1 flex items-center">
-                Premium&nbsp;<i>3D Stone</i>&nbsp;Paver
-                <span className="ml-2 inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-400/80 text-yellow-900">
+              <div className="mb-1">
+                <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-400/80 text-yellow-900 mb-1 lg:hidden">
                   VIP
                 </span>
-              </h3>
+                <div className="flex items-center">
+                  <h3 className="text-base font-semibold">Premium 3D Stone Paver</h3>
+                  <span className="ml-2 hidden lg:inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-400/80 text-yellow-900">
+                    VIP
+                  </span>
+                </div>
+              </div>
 
-              <p className="text-sm mb-1">Natural stone texture with superior durability</p>
-              <p className="mt-2 text-sm font-bold">
-                Valued At <span className="text-green-700">$1,850</span>
-                <span className="block text-xs font-normal text-muted-foreground">Included at No Extra Charge</span>
+              <p className="text-base mb-1">Natural stone texture with superior durability</p>
+              <p className="mt-2 text-base font-semibold text-green-700">
+                Premium Paver Upgrade
               </p>
             </div>
           </div>

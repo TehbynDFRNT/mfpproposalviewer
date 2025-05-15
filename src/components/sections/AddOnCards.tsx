@@ -4,6 +4,7 @@
 import Image from "next/image";
 import type { ProposalSnapshot } from "@/types/snapshot";
 import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot }) {
   const fmt = (n: number) => n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
@@ -14,56 +15,120 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
   const blanketRollerCost = snapshot.blanket_roller_cost + snapshot.br_install_cost;
   const totalCost = cleanerCost + heatPumpCost + blanketRollerCost;
 
+  // Check if any heating options are included
+  const hasHeatingOptions = snapshot.include_heat_pump || snapshot.include_blanket_roller;
+  // Check if cleaning options are included
+  const hasCleaningOptions = snapshot.cleaner_included;
+
   return (
     <div className="space-y-6 h-full overflow-y-auto">
-      {/* Cleaner Card */}
-      {snapshot.cleaner_included && (
-        <Card className="overflow-hidden shadow-lg">
-          <div className="p-4 flex items-center">
-            <Image src="/VipCards/poolcleaner.webp" alt={snapshot.cleaner_name} width={64} height={64} className="w-16 h-16 rounded-md object-cover mr-4" />
-            <div>
-              <h3 className="text-base font-semibold">{snapshot.cleaner_name}</h3>
-              <p className="text-xs mb-1">{snapshot.cleaner_name ? `Automatic pool cleaning system` : 'Automatic pool cleaning system'}</p>
-              <p className="text-sm font-medium">{fmt(snapshot.cleaner_unit_price)}</p>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Heat Pump Card */}
-      {snapshot.include_heat_pump && (
-        <Card className="overflow-hidden shadow-lg">
-          <div className="p-4 flex items-center">
-            <Image src="/VipCards/oasis.webp" alt={snapshot.heat_pump_description} width={64} height={64} className="w-16 h-16 rounded-md object-cover mr-4" />
-            <div>
-              <h3 className="text-base font-semibold">{snapshot.heat_pump_description}</h3>
-              <p className="text-xs mb-1">{snapshot.heat_pump_install_inclusions}</p>
-              <p className="text-sm font-medium">{fmt(heatPumpCost)}</p>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Blanket Roller Card */}
-      {snapshot.include_blanket_roller && (
-        <Card className="overflow-hidden shadow-lg">
-          <div className="p-4 flex items-center">
-            <Image src="/VipCards/poolblanket.webp" alt={snapshot.blanket_roller_description} width={64} height={64} className="w-16 h-16 rounded-md object-cover mr-4" />
-            <div>
-              <h3 className="text-base font-semibold">{snapshot.blanket_roller_description}</h3>
-              <p className="text-xs mb-1">{snapshot.br_install_inclusions}</p>
-              <p className="text-sm font-medium">{fmt(blanketRollerCost)}</p>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Extras & Upgrades Summary Card */}
+      {/* Main Extras & Upgrades Card */}
       <Card className="w-full shadow-lg">
-        <CardContent className="p-5">
-          <div className="flex justify-between items-baseline">
-            <p className="font-semibold">Extras & Upgrades Total</p>
-            <p className="text-xl font-bold">{fmt(totalCost)}</p>
+        <CardContent className="p-5 space-y-6">
+          <header>
+            <h3 className="text-xl font-semibold mb-1">Extras & Upgrades</h3>
+            <p className="text-base text-muted-foreground">Additional features to enhance your pool experience</p>
+          </header>
+
+          <Separator className="mb-4" />
+          
+          {/* Cleaning Options Section */}
+          {hasCleaningOptions && (
+            <div className="space-y-3">
+              <div className="mb-2">
+                <p className="text-lg font-semibold">Pool Cleaning</p>
+              </div>
+              
+              {snapshot.cleaner_included && (
+                <div className="mb-4">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 pr-6 flex items-center justify-center h-full w-20">
+                      <Image 
+                        src="/VipCards/poolcleaner.webp" 
+                        alt={snapshot.cleaner_name} 
+                        width={80} 
+                        height={64} 
+                        className="w-full h-16 rounded-md object-contain" 
+                      />
+                    </div>
+                    <div className="flex-grow">
+                      <div className="flex justify-between">
+                        <p className="font-medium">{snapshot.cleaner_name}</p>
+                        <p className="font-medium whitespace-nowrap">{fmt(snapshot.cleaner_unit_price)}</p>
+                      </div>
+                      <p className="text-base text-muted-foreground mt-0.5">Effortlessly keep your pool pristine with an advanced robotic cleaning system</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Heating Options Section */}
+          {hasHeatingOptions && (
+            <>
+              {hasCleaningOptions && <Separator className="my-3" />}
+              
+              <div className="space-y-3">
+                <div className="mb-2">
+                  <p className="text-lg font-semibold">Heating & Insulation</p>
+                </div>
+                
+                {snapshot.include_heat_pump && (
+                  <div className="mb-4">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 pr-6 flex items-center justify-center h-full w-20">
+                        <Image 
+                          src="/VipCards/oasis.webp" 
+                          alt={snapshot.heat_pump_description} 
+                          width={80} 
+                          height={64} 
+                          className="w-full h-16 rounded-md object-contain" 
+                        />
+                      </div>
+                      <div className="flex-grow">
+                        <div className="flex justify-between">
+                          <p className="font-medium">{snapshot.heat_pump_description}</p>
+                          <p className="font-medium whitespace-nowrap">{fmt(heatPumpCost)}</p>
+                        </div>
+                        <p className="text-base text-muted-foreground mt-0.5">Enjoy extended swimming seasons with energy-efficient heating technology</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {snapshot.include_blanket_roller && (
+                  <div className="mb-4">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 pr-6 flex items-center justify-center h-full w-20">
+                        <Image 
+                          src="/VipCards/poolblanket.webp" 
+                          alt={snapshot.blanket_roller_description} 
+                          width={80} 
+                          height={64} 
+                          className="w-full h-16 rounded-md object-contain" 
+                        />
+                      </div>
+                      <div className="flex-grow">
+                        <div className="flex justify-between">
+                          <p className="font-medium">Premium Thermal Pool Blanket & Roller</p>
+                          <p className="font-medium whitespace-nowrap">{fmt(blanketRollerCost)}</p>
+                        </div>
+                        <p className="text-base text-muted-foreground mt-0.5">Premium thermal blanket that reduces evaporation and retains heat for a warmer pool</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          <Separator className="mb-3" />
+
+          {/* Grand total */}
+          <div className="flex justify-between items-center">
+            <p className="font-semibold text-xl">Total Cost</p>
+            <p className="text-xl font-semibold">{fmt(totalCost)}</p>
           </div>
         </CardContent>
       </Card>

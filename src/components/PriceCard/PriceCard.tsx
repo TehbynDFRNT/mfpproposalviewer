@@ -38,7 +38,7 @@ export default function PriceCard({
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             >
               <div className="flex justify-between items-center mb-3">
-                <h3 className="text-lg font-semibold">Your Complete Quote</h3>
+                <h3 className="text-xl font-semibold">Your Complete Quote</h3>
                 <motion.button 
                   onClick={onToggle}
                   className="w-6 h-6 rounded-full bg-[#DB9D6A]/10 flex items-center justify-center text-[#DB9D6A] hover:bg-[#DB9D6A]/20 transition-colors"
@@ -56,48 +56,48 @@ export default function PriceCard({
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
                 <div className="flex justify-between items-baseline">
-                  <span className="text-sm text-muted-foreground">Base Pool</span>
+                  <span className="font-medium">Base Pool</span>
                   <span className="font-medium">{fmt(breakdown.basePoolPrice)}</span>
                 </div>
                 <div className="flex justify-between items-baseline">
-                  <span className="text-sm text-muted-foreground">Installation</span>
+                  <span className="font-medium">Installation</span>
                   <span className="font-medium">{fmt(breakdown.installationTotal)}</span>
                 </div>
                 <div className="flex justify-between items-baseline">
-                  <span className="text-sm text-muted-foreground">Filtration & Equipment</span>
+                  <span className="font-medium">Filtration</span>
                   <span className="font-medium">{fmt(breakdown.filtrationTotal)}</span>
                 </div>
                 <div className="flex justify-between items-baseline">
-                  <span className="text-sm text-muted-foreground">Concrete & Paving</span>
+                  <span className="font-medium">Concrete & Paving</span>
                   <span className="font-medium">{fmt(breakdown.concreteTotal)}</span>
                 </div>
                 {breakdown.fencingTotal > 0 && (
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm text-muted-foreground">Fencing & Safety</span>
+                    <span className="font-medium">Fencing</span>
                     <span className="font-medium">{fmt(breakdown.fencingTotal)}</span>
                   </div>
                 )}
                 {breakdown.waterFeatureTotal > 0 && (
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm text-muted-foreground">Water Features</span>
+                    <span className="font-medium">Water Features</span>
                     <span className="font-medium">{fmt(breakdown.waterFeatureTotal)}</span>
                   </div>
                 )}
                 {breakdown.extrasTotal > 0 && (
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm text-muted-foreground">Extras & Add-ons</span>
+                    <span className="font-medium">Extras & Add-ons</span>
                     <span className="font-medium">{fmt(breakdown.extrasTotal)}</span>
                   </div>
                 )}
                 
                 <Separator className="my-3" />
                 <div className="flex justify-between items-baseline">
-                  <span className="font-medium">Total Quote</span>
-                  <span className="text-xl font-bold">{fmt(breakdown.grandTotal)}</span>
+                  <span className="text-xl font-semibold">Total Quote</span>
+                  <span className="text-xl font-semibold">{fmt(breakdown.grandTotal)}</span>
                 </div>
               </motion.div>
               
-              <p className="text-xs text-muted-foreground mt-2">Includes all materials, installation, and site works</p>
+              <p className="text-base text-muted-foreground mt-2">Includes all materials, installation, and site works</p>
             </motion.div>
           ) : (
             <motion.div
@@ -108,9 +108,9 @@ export default function PriceCard({
               transition={{ duration: 0.2 }}
               className="flex justify-between items-center w-full"
             >
-              <span className="font-medium text-lg">Total Quote:</span>
+              <span className="text-xl font-semibold">Total Quote:</span>
               <div className="flex items-center gap-3">
-                <span className="text-xl font-bold">
+                <span className="text-xl font-semibold">
                   {fmt(grandTotal)}
                 </span>
                 <motion.button 

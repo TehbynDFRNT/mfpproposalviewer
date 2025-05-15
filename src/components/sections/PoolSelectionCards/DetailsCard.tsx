@@ -101,10 +101,10 @@ export function DetailsCard({ snapshot }: { snapshot: ProposalSnapshot }) {
             </div>
           </div>
           <CardContent className="p-5 flex flex-col">
-            <p className="text-sm mb-4">{description}</p>
+            <p className="text-base text-muted-foreground mb-4">{description}</p>
             <Separator className="my-4" />
-            <p className="text-sm font-medium mb-3">Dimensions (m)</p>
-            <div className="grid grid-cols-4 gap-4 text-sm">
+            <p className="text-base font-medium mb-3">Dimensions (m)</p>
+            <div className="grid grid-cols-4 gap-4 text-base">
               <div>
                 <span className="font-medium block">Length</span>
                 <span>{spec_length_m.toFixed(2)} m</span>
@@ -128,9 +128,9 @@ export function DetailsCard({ snapshot }: { snapshot: ProposalSnapshot }) {
         {/* Pool Price Summary Card */}
         <Card className="w-full shadow-lg">
           <CardContent className="p-5">
-            <div className="flex justify-between items-baseline">
-              <p className="font-semibold">{snapshot.spec_name} Base Price</p>
-              <p className="text-xl font-bold">{formattedPrice}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-xl font-semibold">{snapshot.spec_name} Base Price</p>
+              <p className="text-xl font-semibold">{formattedPrice}</p>
             </div>
           </CardContent>
         </Card>

@@ -244,10 +244,10 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] flex flex-col h-[600px] min-h-[550px] max-h-[85vh]">
         <DialogHeader className="flex-none">
-          <DialogTitle className="text-lg leading-none font-semibold">
+          <DialogTitle className="text-xl leading-none font-semibold">
             Accept Pool Proposal
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-sm mt-2">
+          <DialogDescription className="text-muted-foreground text-base mt-2 text-left">
             Please review the details before accepting your proposal.
           </DialogDescription>
         </DialogHeader>
@@ -255,19 +255,19 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
         <div className="flex-1 overflow-y-auto pr-2">
           <div className="space-y-4 my-4">
           <div className="bg-muted p-4 rounded-md">
-            <h3 className="font-medium text-sm text-muted-foreground mb-1">
+            <h3 className="font-medium text-base text-muted-foreground mb-1">
               Project Details
             </h3>
             <p className="font-medium">
               {snapshot.proposal_name || 'Pool Project'}
             </p>
-            <p className="text-sm mb-2">
+            <p className="text-base mb-2">
               {snapshot.site_address || snapshot.home_address || 'N/A'}
             </p>
 
             <div className="border-t border-border pt-3 space-y-1.5">
               <div className="flex justify-between items-center">
-                <span className="text-sm">Selected Pool:</span>
+                <span className="text-base">Selected Pool:</span>
                 <span className="font-medium">{snapshot.spec_name}</span>
               </div>
 
@@ -276,8 +276,8 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
                 const item = subtotals[key as keyof typeof subtotals];
                 return item && item.show && (
                   <div key={key} className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">{item.label}:</span>
-                    <span className="text-sm">{fmt(item.value)}</span>
+                    <span className="text-base text-muted-foreground">{item.label}:</span>
+                    <span className="text-base">{fmt(item.value)}</span>
                   </div>
                 );
               })}
@@ -287,71 +287,25 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
                 const item = subtotals[key as keyof typeof subtotals];
                 return item && item.show && (
                   <div key={key} className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">{item.label}:</span>
-                    <span className="text-sm">{fmt(item.value)}</span>
+                    <span className="text-base text-muted-foreground">{item.label}:</span>
+                    <span className="text-base">{fmt(item.value)}</span>
                   </div>
                 );
               })}
 
               <div className="border-t border-border mt-2 pt-2 flex justify-between items-center">
-                <span className="text-sm font-medium">Total Investment:</span>
+                <span className="text-base font-medium">Total Investment:</span>
                 <span className="font-medium text-base">{totalPrice}</span>
               </div>
             </div>
           </div>
 
-          {snapshot.pin && (
-            <div className="space-y-3">
-              <Separator className="my-3" />
-
-              <Label htmlFor="pin-code" className="block text-center">
-                Please enter your 4-digit PIN code
-              </Label>
-              <div className="flex justify-center my-3">
-                <InputOTP
-                  maxLength={4}
-                  value={pin}
-                  onChange={handlePinChange}
-                  containerClassName="group"
-                  disabled={isPinValid || isSubmitting}
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot
-                      index={0}
-                      className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
-                    />
-                    <InputOTPSlot
-                      index={1}
-                      className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
-                    />
-                    <InputOTPSlot
-                      index={2}
-                      className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
-                    />
-                    <InputOTPSlot
-                      index={3}
-                      className={isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}
-                    />
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
-              {isPinValid && (
-                <div className="flex items-center justify-center gap-1 mt-1">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <p className="text-xs text-green-600 font-medium">PIN verified</p>
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground text-center">
-                Enter the same PIN used to view the Proposal to Accept the Proposal.
-              </p>
-
-              <Separator className="my-3" />
-            </div>
-          )}
-
+          <Separator className="mb-4" />
+          
           <div className="flex items-start space-x-2">
             <Checkbox
               id="terms"
+              className="mt-1.5"
               checked={termsAccepted}
               onCheckedChange={(checked) => {
                 if (typeof checked === 'boolean') {
@@ -361,15 +315,63 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
             />
             <Label
               htmlFor="terms"
-              className="text-sm font-normal leading-relaxed"
+              className="text-base font-normal leading-relaxed"
             >
-              I accept the terms and conditions and understand that this constitutes a legally
-              binding agreement. My pool project will proceed based on the details in this proposal.
+              I understand I am requesting MFP to create a construction contract and construction site plan.
             </Label>
           </div>
+          
+          {snapshot.pin && (
+            <div className="mt-4">
+              <Separator className="mb-4" />
+              
+              <div className="bg-muted p-4 rounded-md space-y-3">
+                <Label htmlFor="pin-code" className="block text-center text-base">
+                  Please enter your 4-digit PIN code
+                </Label>
+                <div className="flex justify-center my-3">
+                  <InputOTP
+                    maxLength={4}
+                    value={pin}
+                    onChange={handlePinChange}
+                    containerClassName="group"
+                    disabled={isPinValid || isSubmitting}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot
+                        index={0}
+                        className={`bg-white ${isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}`}
+                      />
+                      <InputOTPSlot
+                        index={1}
+                        className={`bg-white ${isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}`}
+                      />
+                      <InputOTPSlot
+                        index={2}
+                        className={`bg-white ${isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}`}
+                      />
+                      <InputOTPSlot
+                        index={3}
+                        className={`bg-white ${isPinError ? 'border-red-500' : isPinValid ? 'border-green-500' : ''}`}
+                      />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                {isPinValid && (
+                  <div className="flex items-center justify-center gap-1 mt-1">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <p className="text-base text-green-600 font-medium">PIN verified</p>
+                  </div>
+                )}
+                <p className="text-base text-muted-foreground text-center">
+                  Enter the same PIN used to view the Proposal to Accept the Proposal.
+                </p>
+              </div>
+            </div>
+          )}
 
           {submitError && (
-            <div className="p-3 text-sm bg-red-50 border border-red-200 rounded-md text-red-800">
+            <div className="p-3 text-base bg-red-50 border border-red-200 rounded-md text-red-800">
               {submitError}
             </div>
           )}

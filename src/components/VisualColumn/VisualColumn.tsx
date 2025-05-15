@@ -119,12 +119,12 @@ export default function VisualColumn({
                 delay: 0
               }
             }}
-            className={`hidden lg:block absolute bottom-4 left-4 z-50 bg-white ${sitePlanExpanded ? 'p-3' : 'p-1.5'} rounded-lg shadow-md border border-[#DB9D6A]/10 transition-all duration-300`}
+            className={`hidden lg:block absolute bottom-4 left-4 z-50 bg-white ${sitePlanExpanded ? 'pb-3 px-3 pt-2' : 'p-1.5'} rounded-lg shadow-md border border-[#DB9D6A]/10 transition-all duration-300`}
             style={{ cursor: 'pointer' }}
             onClick={() => setSitePlanExpanded(!sitePlanExpanded)}
           >
             <div>
-              <div className={`relative rounded overflow-hidden ${sitePlanExpanded ? 'w-96 h-72' : 'w-48 h-36'} transition-all duration-300`}>
+              <div className={`relative overflow-hidden ${sitePlanExpanded ? 'w-96 h-72' : 'w-48 h-36'} transition-all duration-300 rounded-[3px]`}>
                 <Image
                   src={sitePlanVisual?.publicUrl || "/Unique2D/siteplan.webp"}
                   alt="Property Site Plan"
@@ -140,17 +140,8 @@ export default function VisualColumn({
                   transition={{ duration: 0.3, delay: 0.1 }}
                   className="mt-2 text-sm text-black"
                 >
-                  <p className="font-medium">Property Site Plan {sitePlanVisual?.version ? `(v${sitePlanVisual.version})` : ''}</p>
-                  <p className="text-xs mt-1 text-gray-700">Scale: 1:200 | Property orientation: North-facing</p>
-                  <p className="text-xs mt-1 text-gray-700">Proposed pool location shown in blue outline</p>
-                  {sitePlanVisual && (
-                    <p className="text-xs mt-1 text-gray-700">Last updated: {new Date(sitePlanVisual.createdAt).toLocaleDateString()}</p>
-                  )}
-                  
-                  {/* Mobile helper */}
-                  <div className="hidden lg:block text-xs text-neutral-400 mt-4">
-                    Tap image to collapse
-                  </div>
+                  <p className="text-base font-semibold mb-1">2D Site Plan</p>
+                  <p className="text-base text-muted-foreground mb-4 max-w-[24rem]">Your personalised 2D digital siteplan prepared during your Site Inspection</p>
                 </motion.div>
               )}
             </div>

@@ -40,8 +40,8 @@ export default function FiltrationMaintenanceCards(
       <Card className="w-full shadow-lg">
         <CardContent className="p-5 space-y-6">
           <header>
-            <h3 className="text-base font-semibold">{snapshot.spec_name} Filtration Package</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="text-xl font-semibold">{snapshot.spec_name} Filtration Package</h3>
+            <p className="text-base text-muted-foreground">
               Crystal-clear water with minimal maintenance
             </p>
           </header>
@@ -49,11 +49,14 @@ export default function FiltrationMaintenanceCards(
           <Separator className="mb-4" />
 
           {/* equipment list */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-3">
             {items.map((item, idx) => (
-              <div key={idx} className="flex flex-col">
-                <p className="text-sm font-medium leading-tight">{item.name}</p>
-                <p className="text-xs text-muted-foreground">{item.benefit}</p>
+              <div key={idx} className="mb-4">
+                <div className="flex justify-between">
+                  <p className="font-medium">{item.name}</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(item.price)}</p>
+                </div>
+                <p className="text-base text-muted-foreground mt-0.5">{item.benefit}</p>
               </div>
             ))}
           </div>
@@ -61,9 +64,9 @@ export default function FiltrationMaintenanceCards(
           <Separator className="mb-3" />
 
           {/* Grand total */}
-          <div className="flex justify-between items-baseline mt-1">
-            <p className="font-semibold">Filtration Package Price</p>
-            <p className="text-xl font-bold">{fmt(equipmentTotal)}</p>
+          <div className="flex justify-between items-center">
+            <p className="font-semibold text-xl">Total Cost</p>
+            <p className="text-xl font-semibold">{fmt(equipmentTotal)}</p>
           </div>
         </CardContent>
       </Card>
@@ -99,30 +102,33 @@ function VipCard(
     <Card className="p-4 overflow-y-auto shadow-lg">
       <CardContent className="px-2 flex items-center h-full">
         <div className="flex flex-row items-center w-full">
-          <div className="flex-shrink-0 pr-4 flex items-center justify-center">
-            <Image src={img} alt={title} width={64} height={64}
-                   className="w-16 h-16 rounded-md object-contain" />
+          <div className="flex-shrink-0 pr-6 flex items-center justify-center h-full w-20 sm:w-20 lg:w-20">
+            <Image src={img} alt={title} width={80} height={64}
+                   className="w-full h-16 rounded-md object-contain" />
           </div>
 
           <div className="flex-grow">
-            <h3 className="text-base font-semibold mb-1 flex items-center">
-              {title}
-              <span className="ml-2 inline-block text-xs font-bold
-                               px-2 py-0.5 rounded-full bg-yellow-400/80
-                               text-yellow-900">
+            <div className="mb-1">
+              <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-400/80 text-yellow-900 mb-1 lg:hidden">
                 VIP
               </span>
-            </h3>
+              <div className="flex items-center">
+                <h3 className="text-base font-semibold">{title}</h3>
+                <span className="ml-2 hidden lg:inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-400/80 text-yellow-900">
+                  VIP
+                </span>
+              </div>
+            </div>
 
-            <p className="text-sm mb-3">{blurb}</p>
+            <p className="text-base mb-1">{blurb}</p>
 
-            <p className="text-sm font-bold">
-              Valued At&nbsp;
-              <span className="text-green-700">${rrp}</span>
-              <span className="block text-xs font-normal text-muted-foreground">
-                Included at No Extra Charge
-              </span>
-            </p>
+            <div className="mt-2">
+              <p className="text-base font-semibold">
+                <span>RRP </span>
+                <span className="line-through">${rrp}</span>
+              </p>
+              <p className="text-base font-semibold text-green-700">Included FREE</p>
+            </div>
           </div>
         </div>
       </CardContent>

@@ -25,56 +25,56 @@ export function DetailsCard() {
         <Card className="w-full shadow-lg">
           <CardContent className="p-5 space-y-5">
             <div className="mb-2">
-              <h3 className="text-base font-semibold">Installation Standards & Safety</h3>
-              <p className="text-sm text-muted-foreground">Quality assurance and compliance measures</p>
+              <h3 className="text-xl font-semibold">Installation Standards & Safety</h3>
+              <p className="text-base text-muted-foreground">Quality assurance and regulatory compliance</p>
             </div>
             
             <Separator className="mb-4" />
             
             <div className="space-y-5">
               <div className="flex items-start gap-4">
-                <div className="h-12 w-12 mt-0.5 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center">
-                  <Layers className="h-7 w-7 text-[#DB9D6A]" />
+                <div className="h-10 w-10 min-h-[40px] min-w-[40px] flex-shrink-0 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center p-0">
+                  <Layers className="h-6 w-6 text-[#DB9D6A]" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Council Certification & CAD Plans</p>
-                  <p className="text-xs text-muted-foreground mt-1">We handle all required local council certifications and provide detailed CAD plans for approval. All paperwork is managed by our experienced team so you don't have to worry about the administrative details.</p>
+                  <p className="font-medium">Council Certification & CAD Plans</p>
+                  <p className="text-base text-muted-foreground mt-0.5">Our team handles all council certifications and CAD plans for approval, managing all paperwork so you needn't worry about administrative details.</p>
                 </div>
               </div>
               
               <Separator />
               
               <div className="flex items-start gap-4">
-                <div className="h-12 w-12 mt-0.5 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center">
-                  <ShieldCheck className="h-7 w-7 text-[#DB9D6A]" />
+                <div className="h-10 w-10 min-h-[40px] min-w-[40px] flex-shrink-0 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center p-0">
+                  <ShieldCheck className="h-6 w-6 text-[#DB9D6A]" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Engineer Sign-off to AS1839-2021</p>
-                  <p className="text-xs text-muted-foreground mt-1">Your pool is built to meet or exceed the Australian Standard AS1839-2021. Our professional engineers provide complete sign-off documentation to ensure your installation meets all safety and construction requirements.</p>
+                  <p className="font-medium">Engineer Sign-off to AS1839-2021</p>
+                  <p className="text-base text-muted-foreground mt-0.5">Your pool meets or exceeds Australian Standard AS1839-2021. Our engineers provide complete documentation ensuring your installation satisfies all safety and construction requirements.</p>
                 </div>
               </div>
               
               <Separator />
               
               <div className="flex items-start gap-4">
-                <div className="h-12 w-12 mt-0.5 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center">
-                  <Square className="h-7 w-7 text-[#DB9D6A]" />
+                <div className="h-10 w-10 min-h-[40px] min-w-[40px] flex-shrink-0 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center p-0">
+                  <Square className="h-6 w-6 text-[#DB9D6A]" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Temporary Safety Fencing (8 Weeks)</p>
-                  <p className="text-xs text-muted-foreground mt-1">During your pool installation, we provide compliant temporary safety fencing for 8 weeks, ensuring your property remains safe and meets all legal requirements during the construction phase.</p>
+                  <p className="font-medium">Temporary Safety Fencing (8 Weeks)</p>
+                  <p className="text-base text-muted-foreground mt-0.5">We supply compliant temporary safety fencing for 8 weeks during installation, keeping your property secure and meeting all legal requirements throughout construction.</p>
                 </div>
               </div>
               
               <Separator />
               
               <div className="flex items-start gap-4">
-                <div className="h-12 w-12 mt-0.5 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center">
-                  <Handshake className="h-7 w-7 text-[#DB9D6A]" />
+                <div className="h-10 w-10 min-h-[40px] min-w-[40px] flex-shrink-0 rounded-lg bg-[#DB9D6A]/10 flex items-center justify-center p-0">
+                  <Handshake className="h-6 w-6 text-[#DB9D6A]" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Professional Handover & Training</p>
-                  <p className="text-xs text-muted-foreground mt-1">When your pool is complete, we provide professional handover services including thorough cleaning, water chemistry setup, and personalized training on maintenance and equipment operation to ensure you're fully confident with your new pool.</p>
+                  <p className="font-medium">Professional Handover & Training</p>
+                  <p className="text-base text-muted-foreground mt-0.5">Upon completion, we deliver professional handover including thorough cleaning, water chemistry setup and personalised training on maintenance and equipment operation, ensuring your confidence with your new pool.</p>
                 </div>
               </div>
             </div>

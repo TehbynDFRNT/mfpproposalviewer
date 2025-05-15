@@ -164,7 +164,7 @@ export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUp
                   initial="initial"
                   animate="enter"
                   exit="exit"
-                  className="major-section w-full flex flex-col p-8 pb-8 lg:pb-0 overflow-hidden"
+                  className="major-section w-full flex flex-col p-6 pb-10 lg:pb-0 overflow-hidden"
                 >
                   {/* Render Header conditionally */}
                   <div className="transition-opacity duration-300 ease-in-out opacity-100">
@@ -178,7 +178,7 @@ export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUp
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                         {/* Pill on mobile - above heading */}
                         <div className="flex mb-2 lg:hidden">
-                          <span className="inline-block text-xs font-medium px-2 py-1 rounded-full bg-[#DB9D6A]/80 text-white self-start">
+                          <span className="inline-block text-sm font-medium px-2 py-1 rounded-full bg-[#DB9D6A]/80 text-white self-start">
                             {(id === CATEGORY_IDS.POOL_SELECTION || id === CATEGORY_IDS.FILTRATION_MAINTENANCE || 
                                id === CATEGORY_IDS.SITE_REQUIREMENTS) && 'Base Pool & Inclusions'}
                             {(id === CATEGORY_IDS.FENCING || id === CATEGORY_IDS.CONCRETE_PAVING || 
@@ -189,7 +189,7 @@ export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUp
                         </div>
                         
                         {/* Section heading */}
-                        <h2 className="font-bold font-sans text-white text-xl lg:text-3xl">
+                        <h2 className="font-bold font-sans text-white text-2xl lg:text-3xl">
                           {id === CATEGORY_IDS.POOL_SELECTION ? 
                             'Your Selected Pool' : 
                             id === CATEGORY_IDS.CONCRETE_PAVING ? 
@@ -201,7 +201,7 @@ export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUp
                         
                         {/* Pill on desktop - to the right */}
                         <div className="hidden lg:flex">
-                          <span className="inline-block text-xs font-medium px-2 py-1 rounded-full bg-[#DB9D6A]/80 text-white">
+                          <span className="inline-block text-sm font-medium px-2 py-1 rounded-full bg-[#DB9D6A]/80 text-white">
                             {(id === CATEGORY_IDS.POOL_SELECTION || id === CATEGORY_IDS.FILTRATION_MAINTENANCE || 
                                id === CATEGORY_IDS.SITE_REQUIREMENTS) && 'Base Pool & Inclusions'}
                             {(id === CATEGORY_IDS.FENCING || id === CATEGORY_IDS.CONCRETE_PAVING || 

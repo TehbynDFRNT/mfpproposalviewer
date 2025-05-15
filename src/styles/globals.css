@@ -123,9 +123,9 @@ html, body {
   --sidebar-accent-foreground: oklch(1.00 0 0);
   --sidebar-border: oklch(0.15 0.08 276.91);
   --sidebar-ring: oklch(0.57 0.20 283.08);
-  --font-sans: Inter, sans-serif;
-  --font-serif: Inter, sans-serif;
-  --font-mono: Inter, sans-serif;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-serif: var(--font-geist-sans), Georgia, serif;
+  --font-mono: var(--font-geist-mono), monospace;
   --radius: 0.475rem;
   --shadow-2xs: 0px 5px 10px -2px hsl(0 0% 0% / 0.13);
   --shadow-xs: 0px 5px 10px -2px hsl(0 0% 0% / 0.13);

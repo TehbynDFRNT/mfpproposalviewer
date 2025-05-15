@@ -119,8 +119,8 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
             />
             <div className="absolute bottom-0 right-0 p-4">
               <div className="bg-white/90 p-2 rounded-md">
-                <p className="text-xs font-semibold">Wall Dimensions</p>
-                <p className="text-xs">
+                <p className="text-sm font-semibold">Wall Dimensions</p>
+                <p className="text-sm">
                   H: {selectedWall.height1.toFixed(2)}
                   {selectedWall.height2 ? `-${selectedWall.height2.toFixed(2)}` : ''} m ×
                   L: {selectedWall.length.toFixed(2)} m
@@ -156,7 +156,7 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
             </div>
           )}
 
-          <p className="text-sm mb-4">
+          <p className="text-base text-muted-foreground mb-4">
             Premium block wall with decorative cladding for superior durability and elegant appearance.
           </p>
 
@@ -204,9 +204,9 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
           <Separator className="mb-3" />
 
           {/* This wall's price */}
-          <div className="flex justify-between items-baseline mt-1">
-            <p className="font-semibold">Subtotal</p>
-            <p className="text-xl font-bold">{fmt(selectedWall.totalCost)}</p>
+          <div className="flex justify-between items-center mt-1">
+            <p className="text-xl font-semibold">Subtotal</p>
+            <p className="text-xl font-semibold">{fmt(selectedWall.totalCost)}</p>
           </div>
         </CardContent>
       </Card>
@@ -215,9 +215,9 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
       {availableWalls.length > 1 && (
         <Card className="w-full shadow-lg">
           <CardContent className="p-5">
-            <div className="flex justify-between items-baseline">
-              <p className="font-semibold">Total Cost</p>
-              <p className="text-xl font-bold">{fmt(totalRetainingWallCost)}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-xl font-semibold">Total Cost</p>
+              <p className="text-xl font-semibold">{fmt(totalRetainingWallCost)}</p>
             </div>
           </CardContent>
         </Card>

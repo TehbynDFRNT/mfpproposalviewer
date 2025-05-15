@@ -61,7 +61,7 @@ export default function PinVerification({ snapshot: initialSnapshot }: PinVerifi
   // If too many attempts, show locked message
   if (attempts >= maxAttempts) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#07032D] proposal-background">
+      <div className="flex h-screen items-center justify-center bg-[#07032D] proposal-background overflow-hidden">
         <Card className="w-[350px] shadow-lg">
           <CardHeader>
             <CardTitle className="text-center text-xl font-semibold">Access Locked</CardTitle>
@@ -78,7 +78,7 @@ export default function PinVerification({ snapshot: initialSnapshot }: PinVerifi
 
   // Show PIN entry form
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center bg-[#07032D] proposal-background">
+    <div className="flex flex-col h-screen items-center justify-center bg-[#07032D] proposal-background overflow-hidden">
       {/* Logo above the PIN card */}
       <div className="mb-8 flex flex-col items-center">
         <Image

@@ -164,65 +164,59 @@ export default function ChangeRequestSuccessDialog({
         {status === 'success' ? (
           <>
             <DialogHeader className="flex-none pb-2">
-              <DialogTitle className="text-lg leading-none font-semibold flex items-center gap-2">
+              <DialogTitle className="text-xl leading-none font-semibold flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-blue-500" />
                 <span className="text-blue-600">{title}</span>
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground text-base mt-2">
+              <DialogDescription className="text-muted-foreground text-base mt-2 text-left">
                 Your change request has been successfully submitted.
               </DialogDescription>
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 mt-1 mb-2 shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.05)_inset] pt-2">
               <div className="p-5 rounded-md border border-muted">
-                <h3 className="text-base font-semibold mb-3">What happens next?</h3>
-                <ul className="space-y-3 text-base">
-                  <li className="flex items-center gap-3">
-                    <span className="flex-shrink-0 h-6 w-6 bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium text-base">1</span>
+                <h3 className="text-lg font-semibold mb-3">What happens next?</h3>
+                <ul className="space-y-4 text-base">
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 h-7 w-7 min-h-[28px] min-w-[28px] bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium">1</span>
                     <p>Our team will review your change request within 1-2 business days</p>
                   </li>
-                  <li className="flex items-center gap-3">
-                    <span className="flex-shrink-0 h-6 w-6 bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium text-base">2</span>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 h-7 w-7 min-h-[28px] min-w-[28px] bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium">2</span>
                     <p>We'll contact you to discuss the requested modifications</p>
                   </li>
-                  <li className="flex items-center gap-3">
-                    <span className="flex-shrink-0 h-6 w-6 bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium text-base">3</span>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 h-7 w-7 min-h-[28px] min-w-[28px] bg-[#DB9D6A] rounded-full flex items-center justify-center text-white font-medium">3</span>
                     <p>An updated proposal will be prepared reflecting your changes</p>
                   </li>
                 </ul>
               </div>
 
-              <div className="p-4 border border-muted rounded-md">
-                <h4 className="font-medium mb-2 text-muted-foreground text-base">Requested Changes</h4>
-                <div className="space-y-1">
-                  {requestedSections && requestedSections.length > 0 ? (
-                    // Show only the sections from the change request JSON
-                    requestedSections.map((sectionId: string) => (
+              {requestedSections && requestedSections.length > 0 && (
+                <div className="p-4 border border-muted rounded-md">
+                  <h4 className="font-medium mb-2 text-muted-foreground text-base">Requested Changes</h4>
+                  <div className="space-y-1">
+                    {requestedSections.map((sectionId: string) => (
                       <div key={sectionId} className="flex items-center space-x-2 text-base py-1 px-2 rounded-sm hover:bg-muted/50">
                         {getSectionIcon(sectionId)}
                         <span>{CATEGORY_NAMES[sectionId] || 'Unknown Section'}</span>
                       </div>
-                    ))
-                  ) : (
-                    // Fallback message if no sections were specified
-                    <div className="text-sm text-muted-foreground py-1">
-                      General changes requested without specific sections.
-                    </div>
-                  )}
+                    ))}
+                  </div>
+                  <p className="text-base text-muted-foreground mt-3">Note: Changes may affect your quote price and project timeline</p>
                 </div>
-                <p className="text-sm text-muted-foreground mt-3">Note: Changes may affect your quote price and project timeline</p>
-              </div>
+              )}
               
             </div>
           </>
         ) : (
           <>
             <DialogHeader className="flex-none pb-2">
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="text-xl leading-none font-semibold flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
                 <span className="text-amber-700">{title}</span>
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-muted-foreground text-base">
                 {message}
               </DialogDescription>
             </DialogHeader>
@@ -246,7 +240,7 @@ export default function ChangeRequestSuccessDialog({
                   <span>1300 306 011</span>
                 </Button>
               </a>
-              <p className="text-xs text-muted-foreground mt-2 text-center">Call us if you have any questions about your requested changes</p>
+              <p className="text-base text-muted-foreground mt-2 text-center">Call us if you have any questions about your requested changes</p>
             </div>
           ) : (
             <Button onClick={onClose}>Try Again</Button>
