@@ -6,8 +6,8 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from "next/image";
-import { subCardFade } from '@/app/lib/animation';
-import type { ProposalSnapshot } from "@/app/lib/types/snapshot";
+import { subCardFade } from '@/lib/animation';
+import type { ProposalSnapshot } from "@/types/snapshot";
 
 export function ColourGuardCard({ snapshot }: { snapshot?: ProposalSnapshot }) {
   return (

@@ -5,8 +5,8 @@
 import { motion }           from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator }         from '@/components/ui/separator';
-import { subCardFade }       from '@/app/lib/animation';
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import { subCardFade }       from '@/lib/animation';
+import type { ProposalSnapshot } from '@/types/snapshot';
 
 export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Formatting helper

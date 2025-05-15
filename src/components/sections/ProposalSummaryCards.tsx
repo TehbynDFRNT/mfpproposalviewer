@@ -1,78 +1,20 @@
 /**
  * File: src/components/sections/ProposalSummaryCards.tsx
  */
-import type { ProposalSnapshot } from "@/app/lib/types/snapshot";
+import type { ProposalSnapshot } from "@/types/snapshot";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from "@/components/ui/separator";
+import { usePriceCalculator } from "@/hooks/use-price-calculator";
 
 export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalSnapshot }) {
-  // Helper to format currency
-  const fmt = (n: number | undefined | null) => {
+  // Use the centralized price calculator hook
+  const { fmt, breakdown } = usePriceCalculator(snapshot);
+  
+  // Helper to format potentially null/undefined values
+  const safeFormat = (n: number | undefined | null) => {
     if (n === undefined || n === null) return 'N/A';
-    return n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
+    return fmt(n);
   };
-
-  // Recalculate totals (similar to VisualColumn's price card logic)
-  // This is duplicated logic. Ideally, this calculation should be centralized.
-  // For now, we'll repeat it for demonstration.
-  const fixedCosts = 6285;
-  const individualPoolCosts =
-    snapshot.pc_beam +
-    snapshot.pc_coping_supply +
-    snapshot.pc_coping_lay +
-    snapshot.pc_salt_bags +
-    snapshot.pc_trucked_water +
-    snapshot.pc_misc +
-    snapshot.pc_pea_gravel +
-    snapshot.pc_install_fee;
-  const baseCost = snapshot.spec_buy_inc_gst + individualPoolCosts + fixedCosts;
-  const marginPercent = snapshot.pool_margin_pct || 0;
-  const basePoolPrice = marginPercent > 0
-    ? baseCost / (1 - marginPercent / 100)
-    : baseCost;
-
-  const sitePrepCosts = snapshot.crane_cost +
-    snapshot.bobcat_cost +
-    (snapshot.dig_excavation_rate * snapshot.dig_excavation_hours) +
-    (snapshot.dig_truck_rate * snapshot.dig_truck_hours * snapshot.dig_truck_qty) +
-    snapshot.traffic_control_cost +
-    snapshot.elec_total_cost;
-  const installationTotal = marginPercent > 0
-    ? sitePrepCosts / (1 - marginPercent / 100)
-    : sitePrepCosts;
-
-  const filtrationBaseCost =
-    snapshot.fp_pump_price +
-    snapshot.fp_filter_price +
-    snapshot.fp_sanitiser_price +
-    snapshot.fp_light_price +
-    (snapshot.fp_handover_kit_price || 0);
-  const filtrationTotal = marginPercent > 0
-    ? filtrationBaseCost / (1 - marginPercent / 100)
-    : filtrationBaseCost;
-
-  const concreteTotal = (snapshot.concrete_cuts_cost || 0) +
-    (snapshot.extra_paving_cost || 0) +
-    (snapshot.existing_paving_cost || 0) +
-    (snapshot.extra_concreting_saved_total || 0) +
-    (snapshot.concrete_pump_total_cost || 0) +
-    (snapshot.uf_strips_cost || 0);
-
-  const fencingTotal = snapshot.fencing_total_cost || 0;
-  const waterFeatureTotal = snapshot.water_feature_total_cost || 0;
-  // Calculate extras total to match AddOnCards component
-  const cleanerCost = snapshot.cleaner_cost_price || 0;
-  const heatPumpCost = (snapshot.heat_pump_cost || 0) + (snapshot.heat_pump_install_cost || 0);
-  const blanketRollerCost = (snapshot.blanket_roller_cost || 0) + (snapshot.br_install_cost || 0);
-  const extrasTotal = cleanerCost + heatPumpCost + blanketRollerCost;
-
-  const grandTotal = basePoolPrice +
-    installationTotal +
-    filtrationTotal +
-    concreteTotal +
-    fencingTotal +
-    waterFeatureTotal +
-    extrasTotal;
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -95,56 +37,56 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
               <div>
                 <p className="text-sm font-medium">Base {snapshot.spec_name} Pool</p>
               </div>
-              <p className="font-medium whitespace-nowrap">{fmt(basePoolPrice)}</p>
+              <p className="font-medium whitespace-nowrap">{fmt(breakdown.basePoolPrice)}</p>
             </div>
 
             <div className="flex justify-between items-baseline">
               <div>
                 <p className="text-sm font-medium">Installation & Site Works</p>
               </div>
-              <p className="font-medium whitespace-nowrap">{fmt(installationTotal)}</p>
+              <p className="font-medium whitespace-nowrap">{fmt(breakdown.installationTotal)}</p>
             </div>
 
             <div className="flex justify-between items-baseline">
               <div>
                 <p className="text-sm font-medium">Filtration & Equipment</p>
               </div>
-              <p className="font-medium whitespace-nowrap">{fmt(filtrationTotal)}</p>
+              <p className="font-medium whitespace-nowrap">{fmt(breakdown.filtrationTotal)}</p>
             </div>
 
-            {concreteTotal > 0 && (
+            {breakdown.concreteTotal > 0 && (
               <div className="flex justify-between items-baseline">
                 <div>
                   <p className="text-sm font-medium">Concrete & Paving</p>
                 </div>
-                <p className="font-medium whitespace-nowrap">{fmt(concreteTotal)}</p>
+                <p className="font-medium whitespace-nowrap">{fmt(breakdown.concreteTotal)}</p>
               </div>
             )}
 
-            {fencingTotal > 0 && (
+            {breakdown.fencingTotal > 0 && (
               <div className="flex justify-between items-baseline">
                 <div>
                   <p className="text-sm font-medium">Fencing & Safety</p>
                 </div>
-                <p className="font-medium whitespace-nowrap">{fmt(fencingTotal)}</p>
+                <p className="font-medium whitespace-nowrap">{fmt(breakdown.fencingTotal)}</p>
               </div>
             )}
 
-            {waterFeatureTotal > 0 && (
+            {breakdown.waterFeatureTotal > 0 && (
               <div className="flex justify-between items-baseline">
                 <div>
                   <p className="text-sm font-medium">Water Features</p>
                 </div>
-                <p className="font-medium whitespace-nowrap">{fmt(waterFeatureTotal)}</p>
+                <p className="font-medium whitespace-nowrap">{fmt(breakdown.waterFeatureTotal)}</p>
               </div>
             )}
 
-            {extrasTotal > 0 && (
+            {breakdown.extrasTotal > 0 && (
               <div className="flex justify-between items-baseline">
                 <div>
                   <p className="text-sm font-medium">Extras & Add-ons</p>
                 </div>
-                <p className="font-medium whitespace-nowrap">{fmt(extrasTotal)}</p>
+                <p className="font-medium whitespace-nowrap">{fmt(breakdown.extrasTotal)}</p>
               </div>
             )}
           </div>
@@ -154,7 +96,7 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
           {/* Grand total */}
           <div className="flex justify-between items-baseline mt-1">
             <p className="font-semibold">Total Investment</p>
-            <p className="text-xl font-bold">{fmt(grandTotal)}</p>
+            <p className="text-xl font-bold">{fmt(breakdown.grandTotal)}</p>
           </div>
         </CardContent>
       </Card>

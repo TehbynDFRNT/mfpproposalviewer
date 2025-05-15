@@ -3,7 +3,7 @@
  * API endpoint for updating proposal status to viewed when PIN is verified
  */
 import { NextResponse } from 'next/server'
-import { supabaseServer } from '@/app/lib/supabaseClient'
+import { supabaseServer } from '@/lib/supabaseClient'
 
 export async function POST(request: Request) {
   try {

@@ -3,8 +3,8 @@
  */
 'use client';
 
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
-import { POOL_DETAILS, getPoolDetails } from '@/app/lib/types/pool-details';
+import type { ProposalSnapshot } from '@/types/snapshot';
+import { POOL_DETAILS, getPoolDetails } from '@/types/pool-details';
 
 import { DetailsCard }     from "@/components/sections/PoolSelectionCards/DetailsCard";
 import { ColourGuardCard } from "@/components/sections/PoolSelectionCards/ColourGuardCard";

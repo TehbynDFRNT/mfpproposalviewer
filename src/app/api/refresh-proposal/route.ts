@@ -3,7 +3,7 @@
  * API endpoint for refreshing proposal data
  */
 import { NextResponse } from 'next/server'
-import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server'
+import { getProposalSnapshot } from '@/app/api/get-proposal-snapshot/getProposalSnapshot.server'
 
 export async function GET(request: Request) {
   try {

@@ -4,7 +4,7 @@
 'use client';
 
 // 🎯  new pattern: single enriched snapshot prop
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import type { ProposalSnapshot } from '@/types/snapshot';
 import { PricingCard }  from "@/components/sections/SiteRequirementsCards/PricingCard";
 import { DetailsCard }  from "@/components/sections/SiteRequirementsCards/DetailsCard";
 

@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { CheckIcon, Wrench, Square, Layers, BarChart2, Filter, Star, ShieldCheck, Handshake, Droplets, Hammer, Waves, Loader2 } from 'lucide-react';
-import { flows } from '@/app/lib/flows';
-import { FlowQuestion } from '@/app/lib/types/questionnaire';
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
-import { CATEGORY_IDS, CATEGORY_NAMES } from '@/app/lib/constants';
+import { flows } from '@/lib/flows';
+import { FlowQuestion } from '@/types/questionnaire';
+import type { ProposalSnapshot } from '@/types/snapshot';
+import { CATEGORY_IDS, CATEGORY_NAMES } from '@/lib/constants';
 import ChangeRequestSuccessDialog from "@/components/modals/ChangeRequestSuccessDialog";
-import { trackChangeRequest } from '@/app/lib/jitsuClient';
+import { trackChangeRequest } from '@/lib/analytics';
 
 interface Section {
   id: string;
@@ -236,8 +236,8 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
       if (snapshot?.project_id) {
         try {
           trackChangeRequest(snapshot.project_id, {
-            customer_name: snapshot.customer_name,
-            consultant_name: snapshot.consultant_name, 
+            customer_name: snapshot.owner1,
+            consultant_name: snapshot.proposal_name, 
             sections_changed: selectedSections,
             pool_model: snapshot.spec_name,
             answers_summary: Object.keys(answers).length

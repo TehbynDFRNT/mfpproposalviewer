@@ -3,7 +3,7 @@
  * API endpoint for handling proposal change requests
  */
 import { NextResponse } from 'next/server'
-import { supabaseServer } from '@/app/lib/supabaseClient'
+import { supabaseServer } from '@/lib/supabaseClient'
 import { randomUUID } from 'crypto'
 
 export async function POST(request: Request) {

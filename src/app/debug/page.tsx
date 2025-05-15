@@ -5,7 +5,7 @@
 // We load data server-side and pass it to the client component
 
 import DebugClient from "@/app/debug/debug-client";
-import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
+import { getProposalSnapshot } from '@/app/api/get-proposal-snapshot/getProposalSnapshot.server';
 
 interface DebugPageProps {
   searchParams: {

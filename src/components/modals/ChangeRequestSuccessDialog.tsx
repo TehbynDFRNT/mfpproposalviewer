@@ -16,8 +16,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, AlertTriangle, Wrench, Square, Layers, BarChart2, Filter, Star, ShieldCheck, Droplets, Hammer, Waves, Phone } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { CATEGORY_IDS, CATEGORY_NAMES } from '@/app/lib/constants';
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import { CATEGORY_IDS, CATEGORY_NAMES } from '@/lib/constants';
+import type { ProposalSnapshot } from '@/types/snapshot';
 
 interface ChangeRequestSuccessDialogProps {
   isOpen: boolean;
@@ -34,15 +34,19 @@ export default function ChangeRequestSuccessDialog({
   message,
   snapshot
 }: ChangeRequestSuccessDialogProps) {
-  // Enable debugging to help troubleshoot JSON parsing issues
-  console.log('Change request JSON:', snapshot?.change_request_json);
-  console.log('Typeof change_request_json:', typeof snapshot?.change_request_json);
+  // Disable console logging for production
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  // Set title based on status
   const title = status === 'success' ? 'Changes Requested' : 'Submission Error';
 
   // Parse change request JSON if available
   const changeRequest = useMemo(() => {
-    console.log('Change request JSON raw value:', snapshot?.change_request_json);
-    console.log('Raw data type:', typeof snapshot?.change_request_json);
+    // Only log in development
+    if (isDev) {
+      console.log('Change request JSON:', snapshot?.change_request_json);
+      console.log('Typeof change_request_json:', typeof snapshot?.change_request_json);
+    }
     
     if (!snapshot?.change_request_json) return null;
     
@@ -58,38 +62,38 @@ export default function ChangeRequestSuccessDialog({
       
       // First try direct parsing
       try {
-        console.log('Trying direct JSON.parse');
+        if (isDev) console.log('Trying direct JSON.parse');
         const parsed = JSON.parse(jsonStr);
-        console.log('Direct parse succeeded:', parsed);
+        if (isDev) console.log('Direct parse succeeded:', parsed);
         return parsed;
       } catch (parseError) {
-        console.log('Direct parse failed, trying with cleanup');
+        if (isDev) console.log('Direct parse failed, trying with cleanup');
         
         // If parsing fails, check for escaped quotes format
         if (jsonStr.includes('\\\"') || jsonStr.includes('\\"')) {
-          console.log('Found escaped quotes, cleaning string');
+          if (isDev) console.log('Found escaped quotes, cleaning string');
           
           // Replace all escaped quotes with regular quotes
           let cleanedStr = jsonStr.replace(/\\"/g, '"');
           
           // If the string is wrapped in quotes, remove them
           if (cleanedStr.startsWith('"') && cleanedStr.endsWith('"')) {
-            console.log('Removing outer quotes');
+            if (isDev) console.log('Removing outer quotes');
             cleanedStr = cleanedStr.slice(1, -1);
           }
           
           try {
-            console.log('Parsing cleaned string');
+            if (isDev) console.log('Parsing cleaned string');
             const cleaned = JSON.parse(cleanedStr);
-            console.log('Clean parse succeeded:', cleaned);
+            if (isDev) console.log('Clean parse succeeded:', cleaned);
             return cleaned;
           } catch (cleanError) {
-            console.error('Clean parse failed:', cleanError);
+            if (isDev) console.error('Clean parse failed:', cleanError);
             
             // Last attempt: try a regex approach to extract sections
             const sectionsMatch = jsonStr.match(/sections":\[(.*?)\]/);
             if (sectionsMatch && sectionsMatch[1]) {
-              console.log('Using regex fallback to extract sections');
+              if (isDev) console.log('Using regex fallback to extract sections');
               const sectionsStr = sectionsMatch[1];
               // Extract section names from the string
               const sectionNames = sectionsStr.match(/\"([^\"]+)\"/g);
@@ -102,31 +106,25 @@ export default function ChangeRequestSuccessDialog({
           }
         }
         
-        // If all else fails, check if we can find water-feature-section in the string
-        if (jsonStr.includes('water-feature-section')) {
-          console.log('Fallback: Found water-feature-section in string');
-          return {
-            sections: ['water-feature-section']
-          };
-        }
-        
         throw parseError;
       }
     } catch (error) {
-      console.error('All parsing methods failed:', error);
-      console.error('Raw value was:', snapshot?.change_request_json);
+      if (isDev) {
+        console.error('All parsing methods failed:', error);
+        console.error('Raw value was:', snapshot?.change_request_json);
+      }
       return null;
     }
   }, [snapshot?.change_request_json]);
   
   // Extract sections from change request
   const requestedSections = useMemo(() => {
-    console.log('Extracted change request object:', changeRequest);
+    if (isDev) console.log('Extracted change request object:', changeRequest);
     if (!changeRequest?.sections) return [];
     
     // Make sure we're working with an array of section IDs
     const sections = Array.isArray(changeRequest.sections) ? changeRequest.sections : [];
-    console.log('Extracted sections:', sections);
+    if (isDev) console.log('Extracted sections:', sections);
     
     return sections;
   }, [changeRequest]);
@@ -199,7 +197,7 @@ export default function ChangeRequestSuccessDialog({
                 <div className="space-y-1">
                   {requestedSections && requestedSections.length > 0 ? (
                     // Show only the sections from the change request JSON
-                    requestedSections.map(sectionId => (
+                    requestedSections.map((sectionId: string) => (
                       <div key={sectionId} className="flex items-center space-x-2 text-base py-1 px-2 rounded-sm hover:bg-muted/50">
                         {getSectionIcon(sectionId)}
                         <span>{CATEGORY_NAMES[sectionId] || 'Unknown Section'}</span>

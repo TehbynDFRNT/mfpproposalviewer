@@ -3,18 +3,21 @@
  * React-Server Component wrapper – fetches data from SQL view directly,
  * then streams the viewer as a client-only bundle.
  */
-import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import { getProposalSnapshot } from '@/app/api/get-proposal-snapshot/getProposalSnapshot.server';
+import type { ProposalSnapshot } from '@/types/snapshot';
 import type { Metadata, ResolvingMetadata } from 'next';
-import DrawingsViewer from "@/app/drawings/[customerUuid]/DrawingsViewer.client";
+import DrawingsViewer from "@/app/drawings/[customerUuid]/client/DrawingsViewer.client";
 
 // Generate dynamic metadata based on snapshot data
 export async function generateMetadata(
   { params }: { params: { customerUuid: string } },
   parent: ResolvingMetadata
 ): Promise<Metadata> {
+  // Await params before using its properties
+  const { customerUuid } = await params;
+  
   // Fetch the snapshot data
-  const snapshot = await getProposalSnapshot(params.customerUuid);
+  const snapshot = await getProposalSnapshot(customerUuid);
 
   // Build title using owner names
   const ownerNames = snapshot.owner2
@@ -33,7 +36,8 @@ export default async function DrawingsPage({
 }: {
   params: { customerUuid: string };
 }) {
-  const { customerUuid } = params;
+  // Await params before using its properties
+  const { customerUuid } = await params;
 
   // Add server-side logging
   console.log(`Fetching data for 3D render uploads, project ID: ${customerUuid}`);

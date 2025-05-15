@@ -7,9 +7,9 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Image from "next/image";
-import { subCardFade } from '@/app/lib/animation';
-import type { ProposalSnapshot } from "@/app/lib/types/snapshot";
-import { getPoolDetails } from "@/app/lib/types/pool-details";
+import { subCardFade } from '@/lib/animation';
+import type { ProposalSnapshot } from "@/types/snapshot";
+import { getPoolDetails } from "@/types/pool-details";
 
 export function DetailsCard({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Get pool details from the spec_name in the snapshot

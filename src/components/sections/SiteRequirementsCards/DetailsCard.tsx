@@ -7,8 +7,8 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Layers, ShieldCheck, Square, Handshake } from 'lucide-react';
-import { subCardFade } from '@/app/lib/animation';
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import { subCardFade } from '@/lib/animation';
+import type { ProposalSnapshot } from '@/types/snapshot';
 
 // Simple placeholder component without dependencies on old properties
 export function DetailsCard() {

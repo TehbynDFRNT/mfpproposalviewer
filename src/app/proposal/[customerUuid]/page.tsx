@@ -5,21 +5,24 @@
  * Now includes PIN verification before showing the proposal.
  */
 // point explicitly at the server helper
-import { getProposalSnapshot } from '@/app/lib/getProposalSnapshot.server';
+import { getProposalSnapshot } from '@/app/api/get-proposal-snapshot/getProposalSnapshot.server';
 
 // give us the type if you want to annotate the result
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import type { ProposalSnapshot } from '@/types/snapshot';
 import type { Metadata, ResolvingMetadata } from 'next';
 
-import PinVerification from "@/app/proposal/[customerUuid]/PinVerification.client";
+import PinVerification from "./client/PinVerification.client";
 
 // Generate dynamic metadata based on snapshot data
 export async function generateMetadata(
   { params }: { params: { customerUuid: string } },
   parent: ResolvingMetadata
 ): Promise<Metadata> {
+  // Await params before using its properties
+  const { customerUuid } = await params;
+  
   // Fetch the snapshot data
-  const snapshot = await getProposalSnapshot(params.customerUuid);
+  const snapshot = await getProposalSnapshot(customerUuid);
 
   // Build title using owner names
   const ownerNames = snapshot.owner2
@@ -38,7 +41,8 @@ export default async function ProposalPage({
 }: {
   params: { customerUuid: string };
 }) {
-  const { customerUuid } = params;
+  // Await params before using its properties
+  const { customerUuid } = await params;
 
   // Add server-side logging
   console.log(`Fetching proposal snapshot for project ID: ${customerUuid}`);

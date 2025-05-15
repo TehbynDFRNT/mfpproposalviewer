@@ -2,7 +2,7 @@
  * File: src/components/sections/AddOnCards.tsx
  */
 import Image from "next/image";
-import type { ProposalSnapshot } from "@/app/lib/types/snapshot";
+import type { ProposalSnapshot } from "@/types/snapshot";
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot }) {

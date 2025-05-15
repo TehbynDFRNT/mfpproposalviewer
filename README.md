@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MFP Pool Proposal Viewer
+
+A Next.js application for MFP Pools to showcase interactive pool proposals and accept client uploads.
+
+## Overview
+
+This application provides two main features:
+- **Proposal Viewer**: An interactive proposal viewer for clients to review their pool projects
+- **Drawings Viewer**: An admin portal for uploading 3D renders and site plans
 
 ## Getting Started
 
 First, run the development server:
 
 ```bash
-npm run dev
-# or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Proposal Viewer (`/proposal/[customerUuid]`)
+- **Interactive Sections**: Browse through each aspect of the pool proposal
+- **Visual Elements**: 3D renders, maps, images, and videos for each section
+- **Price Calculator**: Dynamic price calculation based on selected options
+- **Acceptance Flow**: Digital proposal acceptance with record keeping
 
-## Learn More
+### Drawings Viewer (`/drawings/[customerUuid]`)
+- **3D Render Upload**: Upload section-specific 3D render videos
+- **Site Plan Display**: View and manage site plans
+- **Render Toggle**: Enable/disable 3D renders for client viewing
+- **Proposal Navigation**: Quick link to view the associated proposal
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The application follows Next.js App Router architecture with a focus on:
+- Server components for data fetching
+- Client components for interactive UI
+- Supabase for data storage
+- TypeScript for type safety
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Recent Improvements
 
-## Deploy on Vercel
+#### Component Architecture
+- **VisualColumn Refactoring**: Extracted pure functions to utility modules
+- **Custom Hooks**: Created specialized hooks for data fetching (useRenders, useSitePlan)
+- **VisualRenderer**: Separated rendering logic by visual type (maps, videos, images)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#### Error Handling & Reliability
+- **Supabase Error Handling**: Added robust error handling in useSitePlan hook
+- **Fallback States**: Proper handling of undefined project IDs and API failures
+- **API Error Prevention**: Fixed 406 "Not Acceptable" errors in production
+- **Type Safety**: Improved TypeScript typing throughout the application
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+#### Navigation Improvements
+- **Cross-Page Navigation**: Added "View Proposal" button to Drawings Viewer
+- **Seamless Experience**: Easy transition between admin and client views
+
+## Data Flow
+
+1. Server components fetch data from Supabase views
+2. Data is passed to client components for rendering
+3. Interactions trigger API routes that update the database
+4. Changes are reflected in real-time UI updates
+
+## Technology Stack
+
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
+- **State Management**: React hooks and XState
+- **Animation**: Framer Motion
+- **Database**: Supabase (PostgreSQL)
+- **Deployment**: Vercel
+
+## Environment Setup
+
+This application requires the following environment variables:
+
+```
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```

@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
 import { useState } from 'react';
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import type { ProposalSnapshot } from '@/types/snapshot';
 
 // Define proper wall type to help TypeScript
 interface RetainingWall {

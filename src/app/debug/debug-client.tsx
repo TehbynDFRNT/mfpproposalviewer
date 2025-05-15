@@ -4,7 +4,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import type { ProposalSnapshot } from '@/types/snapshot';
 
 interface DebugClientProps {
   snapshotData: ProposalSnapshot | null;

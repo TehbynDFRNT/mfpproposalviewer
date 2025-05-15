@@ -4,9 +4,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Mail, Phone, Home, Wrench, Square, Layers, BarChart2, Filter, Star, ShieldCheck, Handshake, Waves, Droplets, Hammer } from 'lucide-react';
-import type { ProposalSnapshot } from "@/app/lib/types/snapshot";
-import { CATEGORY_IDS } from "@/app/lib/constants";
-import { isSectionEmpty } from "@/app/lib/utils";
+import type { ProposalSnapshot } from "@/types/snapshot";
+import { CATEGORY_IDS } from "@/lib/constants";
+import { isSectionEmpty } from "@/lib/utils";
 
 export default function CustomerInfoCards({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Use flat snapshot properties directly instead of nested poolProject

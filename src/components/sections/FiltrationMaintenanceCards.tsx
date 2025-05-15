@@ -6,7 +6,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator }         from '@/components/ui/separator';
 import Image                 from 'next/image';
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import type { ProposalSnapshot } from '@/types/snapshot';
 
 export default function FiltrationMaintenanceCards(
   { snapshot }: { snapshot: ProposalSnapshot }

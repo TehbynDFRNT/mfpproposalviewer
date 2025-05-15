@@ -9,7 +9,7 @@ import { useState } from 'react';
 import RequestChangesDialog from '@/components/modals/RequestChangesDialog';
 import AcceptProposalDialog from '@/components/modals/AcceptProposalDialog';
 import AcceptProposalSuccessDialog from '@/components/modals/AcceptProposalSuccessDialog';
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot'; // <-- Import ProposalSnapshot type
+import type { ProposalSnapshot } from '@/types/snapshot'; // <-- Import ProposalSnapshot type
 
 interface FooterProps {
   activeSection: string;

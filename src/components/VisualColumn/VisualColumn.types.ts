@@ -1,7 +1,7 @@
 /**
  * File: src/components/VisualColumn/VisualColumn.types.ts
  */
-import type { ProposalSnapshot } from '@/app/lib/types/snapshot';
+import type { ProposalSnapshot } from '@/types/snapshot';
 
 // Visual types
 export type MapVisual = {
@@ -52,12 +52,11 @@ export type PlaceholderVisual = {
 
 export type Visual = MapVisual | VideoVisual | ImageVisual | PlaceholderVisual | RenderVisual | SitePlanVisual;
 
+// Simplified props since we're now using hooks for geocoding and other data fetching
 export interface VisualColumnProps {
   activeSection: string;
   subIndex: number;
-  isLoaded: boolean;                       // G-Maps
-  mapCenter: { lat: number; lng: number } | null;
   snapshot: ProposalSnapshot;
   resetScroll: () => void;
-  use3DVisuals?: boolean;                 // Toggle for using 3D renders from Supabase
+  use3DVisuals?: boolean;
 }

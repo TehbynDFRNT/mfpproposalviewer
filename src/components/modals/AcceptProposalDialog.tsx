@@ -20,10 +20,11 @@ import { Label } from '@/components/ui/label';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, ThumbsUp, CheckCircle2, CheckCircle } from 'lucide-react';
-import { ProposalSnapshot } from '@/app/lib/types/snapshot';
-import { isSectionEmpty } from '@/app/lib/utils';
-import { CATEGORY_IDS } from '@/app/lib/constants';
-import { trackProposalAccepted } from '@/app/lib/jitsuClient';
+import { ProposalSnapshot } from '@/types/snapshot';
+import { isSectionEmpty } from '@/lib/utils';
+import { CATEGORY_IDS } from '@/lib/constants';
+import { trackProposalAccepted } from '@/lib/analytics';
+import { usePriceCalculator } from '@/hooks/use-price-calculator';
 
 interface AcceptProposalDialogProps {
   snapshot: ProposalSnapshot;
@@ -40,6 +41,9 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [proposalAccepted, setProposalAccepted] = useState(false);
+
+  // Use the price calculator hook for consistent calculations
+  const { fmt, breakdown } = usePriceCalculator(snapshot);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -117,14 +121,13 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
       }
 
       // Track the proposal acceptance in Jitsu
-      const { totalPrice, subtotals } = calculatePrices();
       trackProposalAccepted(snapshot.project_id, {
-        customer_name: snapshot.customer_name,
-        consultant_name: snapshot.consultant_name,
+        customer_name: snapshot.owner1,
+        consultant_name: snapshot.proposal_name,
         pool_model: snapshot.spec_name,
-        total_price: totalPrice,
-        proposal_created_at: snapshot.created_at,
-        proposal_last_modified: snapshot.updated_at,
+        total_price: breakdown.grandTotal,
+        proposal_created_at: snapshot.timestamp,
+        proposal_last_modified: snapshot.timestamp,
         includes_extras: !isSectionEmpty(CATEGORY_IDS.ADD_ONS, snapshot),
         includes_fencing: !isSectionEmpty(CATEGORY_IDS.FENCING, snapshot),
         includes_water_feature: !isSectionEmpty(CATEGORY_IDS.WATER_FEATURE, snapshot),
@@ -158,121 +161,53 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
     }
   };
 
-  // Helper to format currency
-  const fmt = (n: number | undefined | null) => {
+  // Helper for formatting potentially null/undefined values
+  const safeFormat = (n: number | undefined | null) => {
     if (n === undefined || n === null) return 'N/A';
-    return n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
+    return fmt(n);
   };
 
-  // Calculate the total price and subtotals using the same logic as ProposalSummaryCards
-  const calculatePrices = () => {
+  // Get the total price and subtotals for the proposal dialog
+  const getProposalBreakdown = () => {
     if (!snapshot.project_id) return { totalPrice: 'N/A', subtotals: {} };
 
-    // Fixed costs
-    const fixedCosts = 6285;
-
-    // Individual pool costs
-    const individualPoolCosts =
-      snapshot.pc_beam +
-      snapshot.pc_coping_supply +
-      snapshot.pc_coping_lay +
-      snapshot.pc_salt_bags +
-      snapshot.pc_trucked_water +
-      snapshot.pc_misc +
-      snapshot.pc_pea_gravel +
-      snapshot.pc_install_fee;
-
-    // Base cost and price
-    const baseCost = snapshot.spec_buy_inc_gst + individualPoolCosts + fixedCosts;
-    const marginPercent = snapshot.pool_margin_pct || 0;
-    const basePoolPrice = marginPercent > 0
-      ? baseCost / (1 - marginPercent / 100)
-      : baseCost;
-
-    // Site preparation costs
-    const sitePrepCosts = snapshot.crane_cost +
-      snapshot.bobcat_cost +
-      (snapshot.dig_excavation_rate * snapshot.dig_excavation_hours) +
-      (snapshot.dig_truck_rate * snapshot.dig_truck_hours * snapshot.dig_truck_qty) +
-      snapshot.traffic_control_cost +
-      snapshot.elec_total_cost;
-    const installationTotal = marginPercent > 0
-      ? sitePrepCosts / (1 - marginPercent / 100)
-      : sitePrepCosts;
-
-    // Filtration costs
-    const filtrationBaseCost =
-      snapshot.fp_pump_price +
-      snapshot.fp_filter_price +
-      snapshot.fp_sanitiser_price +
-      snapshot.fp_light_price +
-      (snapshot.fp_handover_kit_price || 0);
-    const filtrationTotal = marginPercent > 0
-      ? filtrationBaseCost / (1 - marginPercent / 100)
-      : filtrationBaseCost;
-
-    // Other costs
-    const concreteTotal = (snapshot.concrete_cuts_cost || 0) +
-      (snapshot.extra_paving_cost || 0) +
-      (snapshot.existing_paving_cost || 0) +
-      (snapshot.extra_concreting_saved_total || 0) +
-      (snapshot.concrete_pump_total_cost || 0) +
-      (snapshot.uf_strips_cost || 0);
-
-    const fencingTotal = snapshot.fencing_total_cost || 0;
-    const waterFeatureTotal = snapshot.water_feature_total_cost || 0;
-
-    // Calculate extras total
-    const cleanerCost = snapshot.cleaner_cost_price || 0;
-    const heatPumpCost = (snapshot.heat_pump_cost || 0) + (snapshot.heat_pump_install_cost || 0);
-    const blanketRollerCost = (snapshot.blanket_roller_cost || 0) + (snapshot.br_install_cost || 0);
-    const extrasTotal = cleanerCost + heatPumpCost + blanketRollerCost;
-
-    // Grand total
-    const grandTotal = basePoolPrice +
-      installationTotal +
-      filtrationTotal +
-      concreteTotal +
-      fencingTotal +
-      waterFeatureTotal +
-      extrasTotal;
-
+    // Use the centralized breakdown from our usePriceCalculator hook
     return {
-      totalPrice: fmt(grandTotal),
+      totalPrice: fmt(breakdown.grandTotal),
       subtotals: {
         basePool: {
           label: 'Base Pool',
-          value: basePoolPrice,
+          value: breakdown.basePoolPrice,
           show: true, // Always show core sections
           sectionId: CATEGORY_IDS.POOL_SELECTION
         },
         installation: {
           label: 'Installation',
-          value: installationTotal,
+          value: breakdown.installationTotal,
           show: true, // Always show core sections
           sectionId: CATEGORY_IDS.SITE_REQUIREMENTS
         },
         filtration: {
           label: 'Filtration',
-          value: filtrationTotal,
+          value: breakdown.filtrationTotal,
           show: true, // Always show core sections
           sectionId: CATEGORY_IDS.FILTRATION_MAINTENANCE
         },
         concrete: {
           label: 'Concrete & Paving',
-          value: concreteTotal,
+          value: breakdown.concreteTotal,
           show: !isSectionEmpty(CATEGORY_IDS.CONCRETE_PAVING, snapshot),
           sectionId: CATEGORY_IDS.CONCRETE_PAVING
         },
         fencing: {
           label: 'Fencing',
-          value: fencingTotal,
+          value: breakdown.fencingTotal,
           show: !isSectionEmpty(CATEGORY_IDS.FENCING, snapshot),
           sectionId: CATEGORY_IDS.FENCING
         },
         waterFeature: {
           label: 'Water Feature',
-          value: waterFeatureTotal,
+          value: breakdown.waterFeatureTotal,
           show: !isSectionEmpty(CATEGORY_IDS.WATER_FEATURE, snapshot),
           sectionId: CATEGORY_IDS.WATER_FEATURE
         },
@@ -287,7 +222,7 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
         },
         extras: {
           label: 'Extras & Add-ons',
-          value: extrasTotal,
+          value: breakdown.extrasTotal,
           show: !isSectionEmpty(CATEGORY_IDS.ADD_ONS, snapshot),
           sectionId: CATEGORY_IDS.ADD_ONS
         }
@@ -295,7 +230,7 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
     };
   };
 
-  const { totalPrice, subtotals } = calculatePrices();
+  const { totalPrice, subtotals } = getProposalBreakdown();
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>

@@ -2,16 +2,12 @@
   when working with code in this repository.
 
   ## Commands
-  - Build: `yarn build` or `npm run build`
-  - Dev server: `yarn dev` or `npm run dev`
-  - Start production: `yarn start` or `npm run start`
-  - Lint: `yarn lint` or `npm run lint`
-  - Typecheck: `yarn tsc` or `npx tsc`
-  - Format: `yarn prettier --write .` or `npx prettier --write 
-  .`
-  - Image optimization: `yarn img:build`
-  - Video optimization: `yarn vid:build`
-  - Media cleanup: `yarn media:clean`
+  - Build: `yarn build`
+  - Dev server: `yarn dev`
+  - Start production: `yarn start`
+  - Lint: `yarn lint`
+  - Typecheck: `yarn tsc`
+  - Format: `yarn prettier --write .`
 
   ## App Architecture Overview
 
