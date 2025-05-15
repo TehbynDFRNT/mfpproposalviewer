@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aquatechnics Pool Proposals",
-  description: "Interactive pool proposal viewer for Aquatechnics customers",
+  title: "MFPEasy | Customer Portal",
+  description: "Customer portal for MFPEasy pool proposals and project information",
   icons: {
     icon: [
       { url: '/Favicon/favicon.ico', type: 'image/x-icon' },
