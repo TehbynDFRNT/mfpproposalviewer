@@ -10,7 +10,7 @@ import { FlowQuestion } from '@/types/questionnaire';
 import type { ProposalSnapshot } from '@/types/snapshot';
 import { CATEGORY_IDS, CATEGORY_NAMES } from '@/lib/constants';
 import ChangeRequestSuccessDialog from "@/components/modals/ChangeRequestSuccessDialog";
-import { trackChangeRequest } from '@/lib/analytics';
+import { useProposalAnalytics } from '@/hooks/use-proposal-analytics';
 
 interface Section {
   id: string;
@@ -35,6 +35,9 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [successDialogStatus, setSuccessDialogStatus] = useState<'success' | 'error'>('success');
   const [successDialogMessage, setSuccessDialogMessage] = useState('');
+  
+  // Use analytics hook for tracking events
+  const analytics = useProposalAnalytics(snapshot || {} as ProposalSnapshot);
 
 
   const filteredSections = useMemo(() =>
@@ -232,16 +235,12 @@ export default function ChangeRequestDialog({ sections, snapshot, onChangeReques
       // Close the request changes dialog
       setIsOpen(false);
 
-      // Track the change request in Jitsu
+      // Track the change request in Jitsu using our centralized analytics hook
       if (snapshot?.project_id) {
         try {
-          trackChangeRequest(snapshot.project_id, {
-            customer_name: snapshot.owner1,
-            consultant_name: snapshot.proposal_name, 
-            sections_changed: selectedSections,
-            pool_model: snapshot.spec_name,
-            answers_summary: Object.keys(answers).length
-          });
+          analytics.trackChange(selectedSections, 
+            // Use message from text area if available
+            answers.change_request_message || 'No additional message provided');
         } catch (trackingError) {
           console.error('Error tracking change request in Jitsu:', trackingError);
           // Non-critical error, continue with the flow

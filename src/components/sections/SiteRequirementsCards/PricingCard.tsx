@@ -120,15 +120,33 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
                     <p className="text-lg font-semibold">Electrical Requirements</p>
                   </div>
                   
-                  {electricalItems.map((item, idx) => (
-                    <div key={idx} className="mb-4">
-                      <div className="flex justify-between">
-                        <p className="font-medium">{item.label}</p>
-                        <p className="font-medium whitespace-nowrap">{fmt(item.cost)}</p>
+                  {electricalItems.map((item, idx) => {
+                    // Custom descriptions that are user-friendly for each electrical item
+                    let description = '';
+                    switch(item.label) {
+                      case 'Standard Power':
+                        description = 'Filtered pump power connection with safety features';
+                        break;
+                      case 'Fence Earthing':
+                        description = 'Safety earthing for metal pool fencing';
+                        break;
+                      case 'Heat Pump Circuit':
+                        description = 'Dedicated high-capacity circuit for pool heating';
+                        break;
+                      default:
+                        description = 'Professional electrical installation';
+                    }
+                    
+                    return (
+                      <div key={idx} className="mb-4">
+                        <div className="flex justify-between">
+                          <p className="font-medium">{item.label}</p>
+                          <p className="font-medium whitespace-nowrap">{fmt(item.cost)}</p>
+                        </div>
+                        <p className="text-base text-muted-foreground mt-0.5">{description}</p>
                       </div>
-                      <p className="text-base text-muted-foreground mt-0.5">Professional installation</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </>
             )}

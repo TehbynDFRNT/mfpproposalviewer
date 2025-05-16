@@ -19,11 +19,30 @@ export async function POST(request: Request) {
       );
     }
 
+    // Try to infer event name from properties if not provided
+    let inferredEventName = 'custom_event';
+    if (!eventData.event && !eventData.properties?.event_name) {
+      // Infer from source field
+      if (eventData.properties?.source === 'proposal_viewer_mount') {
+        inferredEventName = 'proposal_viewed';
+      } else if (eventData.properties?.source === 'section_navigation') {
+        inferredEventName = 'section_viewed';
+      } else if (eventData.properties?.source === 'accept_dialog') {
+        inferredEventName = 'proposal_accepted';
+      } else if (eventData.properties?.source === 'change_request_dialog') {
+        inferredEventName = 'change_request_submitted';
+      }
+      // Infer from labels
+      else if (eventData.properties?.label) {
+        inferredEventName = 'button_clicked';
+      }
+    }
+    
     // Prepare event for Jitsu in the correct format based on documentation
     const jitsuEvent = {
       ...eventData,
       type: eventData.type || 'track', // Default to track if not specified
-      event: eventData.event || eventData.properties?.event_name || 'custom_event',
+      event: eventData.event || eventData.properties?.event_name || inferredEventName,
       messageId: eventData.messageId || generateMessageId(),
       timestamp: eventData.timestamp || new Date().toISOString(),
       sentAt: eventData.sentAt || new Date().toISOString(),

@@ -3,7 +3,7 @@
  */
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { ProposalSnapshot } from '@/types/snapshot';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -30,6 +30,7 @@ import ChangeRequestSuccessDialog from '@/components/modals/ChangeRequestSuccess
 import { fadeOut, contentIn } from '@/lib/animation';
 import { SECTIONS_WITH_SUBSECTIONS } from '@/lib/layoutConstants';
 import { CATEGORY_IDS, CATEGORY_NAMES } from '@/lib/constants';
+import * as SM from '@/lib/sectionMachine';
 
 // Import our custom hooks
 import { useSectionMachine } from '@/hooks/use-section-machine';
@@ -54,6 +55,14 @@ export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUp
   // Always show only non-null sections
   const showOnlyNonNullSections = true;
 
+  // Use our proposal analytics hook to track view events
+  const analytics = useProposalAnalytics(currentSnapshot);
+  
+  // Call trackView on mount to track the initial view
+  useEffect(() => {
+    analytics.trackView();
+  }, [analytics]);
+
   // Use our section machine hook to manage navigation
   const {
     machine: machineState,
@@ -61,7 +70,7 @@ export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUp
     activeSection,
     subIndex: sub,
     availableSections: uniqueSections,
-    handleSelect: handleSectionSelectChange,
+    handleSelect: handleSectionSelectBase,
     canPrev,
     canNext,
     goPrev,
@@ -69,9 +78,40 @@ export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUp
     progressPercent,
     resetScroll
   } = useSectionMachine(currentSnapshot, CATEGORY_NAMES, undefined, showOnlyNonNullSections);
-
-  // Use our proposal analytics hook to track view events
-  useProposalAnalytics(currentSnapshot);
+  
+  // Wrap section selection handler to track section changes
+  const handleSectionSelectChange = useCallback((newSection: string) => {
+    // First call the base handler to update the UI
+    handleSectionSelectBase(newSection);
+    
+    // Then track the section change
+    analytics.trackSection(newSection, CATEGORY_NAMES[newSection] || 'Unknown Section');
+  }, [handleSectionSelectBase, analytics, CATEGORY_NAMES]);
+  
+  // Wrap next/prev handlers to track navigation
+  const handleNext = useCallback(() => {
+    goNext();
+    const nextIndex = machineState.index + 1;
+    const nextStep = SM.STEPS[nextIndex];
+    if (nextStep) {
+      analytics.trackSection(
+        nextStep.section, 
+        CATEGORY_NAMES[nextStep.section] || 'Unknown Section'
+      );
+    }
+  }, [goNext, machineState.index, analytics, CATEGORY_NAMES]);
+  
+  const handlePrev = useCallback(() => {
+    goPrev();
+    const prevIndex = machineState.index - 1;
+    const prevStep = SM.STEPS[prevIndex];
+    if (prevStep) {
+      analytics.trackSection(
+        prevStep.section, 
+        CATEGORY_NAMES[prevStep.section] || 'Unknown Section'
+      );
+    }
+  }, [goPrev, machineState.index, analytics, CATEGORY_NAMES]);
 
   // Use our dialog hooks to manage acceptance and change request dialogs
   const {
@@ -334,8 +374,8 @@ export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUp
         onChangeRequestedStatusClick={handleChangeRequestedStatusClick}
         canGoPrev={() => canPrev}
         canGoNext={() => canNext}
-        handlePrev={goPrev}
-        handleNext={goNext}
+        handlePrev={handlePrev}
+        handleNext={handleNext}
       />
       
       {/* Success Dialogs */}

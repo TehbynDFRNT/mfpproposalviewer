@@ -23,7 +23,7 @@ import { Loader2, ThumbsUp, CheckCircle2, CheckCircle } from 'lucide-react';
 import { ProposalSnapshot } from '@/types/snapshot';
 import { isSectionEmpty } from '@/lib/utils';
 import { CATEGORY_IDS } from '@/lib/constants';
-import { trackProposalAccepted } from '@/lib/analytics';
+import { useProposalAnalytics } from '@/hooks/use-proposal-analytics';
 import { usePriceCalculator } from '@/hooks/use-price-calculator';
 
 interface AcceptProposalDialogProps {
@@ -44,6 +44,9 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
 
   // Use the price calculator hook for consistent calculations
   const { fmt, breakdown } = usePriceCalculator(snapshot);
+  
+  // Use analytics hook for tracking events
+  const analytics = useProposalAnalytics(snapshot);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -120,19 +123,8 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
         throw new Error(`${errorMessage}${errorDetails}`);
       }
 
-      // Track the proposal acceptance in Jitsu
-      trackProposalAccepted(snapshot.project_id, {
-        customer_name: snapshot.owner1,
-        consultant_name: snapshot.proposal_name,
-        pool_model: snapshot.spec_name,
-        total_price: breakdown.grandTotal,
-        proposal_created_at: snapshot.timestamp,
-        proposal_last_modified: snapshot.timestamp,
-        includes_extras: !isSectionEmpty(CATEGORY_IDS.ADD_ONS, snapshot),
-        includes_fencing: !isSectionEmpty(CATEGORY_IDS.FENCING, snapshot),
-        includes_water_feature: !isSectionEmpty(CATEGORY_IDS.WATER_FEATURE, snapshot),
-        includes_retaining_walls: !isSectionEmpty(CATEGORY_IDS.RETAINING_WALLS, snapshot)
-      });
+      // Track the proposal acceptance using our centralized analytics hook
+      analytics.trackAccept();
 
       // Close the main dialog
       setIsOpen(false);

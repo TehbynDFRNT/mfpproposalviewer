@@ -24,12 +24,12 @@ export default function SectionJumpSelect({
 }: SectionJumpSelectProps) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className={`w-[200px] bg-white ${className || ''}`}>
+      <SelectTrigger className={`w-[200px] bg-white text-base ${className || ''}`}>
         <SelectValue placeholder="Jump to section&" />
       </SelectTrigger>
       <SelectContent>
         {sections.map(section => (
-          <SelectItem key={section.id} value={section.id}>
+          <SelectItem key={section.id} value={section.id} className="text-base">
             {section.name}
           </SelectItem>
         ))}

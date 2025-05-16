@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { identify } from '@/lib/analytics';
+// Note: identity tracking now handled directly in use-proposal-analytics
 
 interface PinVerificationOptions {
   correctPin: string;
@@ -66,15 +66,7 @@ export function usePinVerification({
         // since we've already verified the PIN client-side
       }
       
-      // Identify user if email is available
-      if (userInfo.email) {
-        identify(userInfo.email, {
-          name: userInfo.name,
-          consultant: userInfo.consultant, 
-          phone: userInfo.phone,
-          address: userInfo.address
-        });
-      }
+      // Note: User identification is now handled by use-proposal-analytics
 
       // Set verified and trigger callback
       setIsVerified(true);
