@@ -18,7 +18,7 @@ export default async function DebugPage({ searchParams }: DebugPageProps) {
   let errorMessage = null;
   
   // Default UUID if none provided in URL
-  const defaultUuid = '0b7179a5-0a80-47ed-b12b-9989a520d770';
+  const defaultUuid = 'acec1f18-4af6-41d9-9b36-41aedf697d5f';
   // Use UUID from URL or fallback to default
   const customerUuid = searchParams.uuid || defaultUuid;
   

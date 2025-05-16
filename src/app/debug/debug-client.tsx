@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import type { ProposalSnapshot } from '@/types/snapshot';
+import PriceDebugPanel from './PriceDebugPanel';
 
 interface DebugClientProps {
   snapshotData: ProposalSnapshot | null;
@@ -116,6 +117,9 @@ export default function DebugClient({ snapshotData, errorMessage, initialUuid }:
       <UuidInput />
       <p className="mb-4">✅ Snapshot data loaded successfully</p>
       <p>Check the browser console for detailed logs</p>
+      
+      {/* Price Debug Panel Component */}
+      {snapshotData && <PriceDebugPanel snapshotData={snapshotData} />}
       
       <div className="mt-8 bg-white p-4 rounded shadow-sm">
         <div className="flex justify-between items-center mb-2">
