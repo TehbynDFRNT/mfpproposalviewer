@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Image from "next/image";
 import type { ProposalSnapshot } from '@/types/snapshot';
+import { calculatePrices } from '@/hooks/use-price-calculator';
 
 /**
  * Renders **one card per fencing package**.
@@ -16,7 +17,12 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
     fenceType: string;
     totalFenceLengthM: number;
     fenceLinearCost: number;
-    gateSelection: { quantity: number; gateTotalCost: number; freeGateDiscount: number };
+    gateSelection: { 
+      quantity: number; 
+      gateTotalCost: number; 
+      gateDiscountedCost: number;
+      freeGateDiscount: number 
+    };
     panels: { simpleCount: number; complexCount: number };
     earthingRequired: boolean;
     earthingCost: number;
@@ -28,22 +34,24 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
     // Calculate special gate pricing for frameless glass
     const glassGateCount = snapshot.glass_gates ?? 0;
     let glassGateCost = 0;
+    let glassGateOriginalCost = 0;
+    let glassGateDiscount = 0;
     
     if (glassGateCount > 0) {
-      // First gate has a fixed price of $385
-      const firstGatePrice = 385;
+      // Standard per-gate price is $385
+      const standardGatePrice = 385;
       
-      if (glassGateCount === 1) {
-        // If only one gate, use the fixed price
-        glassGateCost = firstGatePrice;
-      } else {
-        // For additional gates beyond the first one:
-        // Calculate per-gate cost from the original total
-        const originalPerGateCost = (snapshot.glass_gate_cost ?? 0) / glassGateCount;
-        
-        // Total cost: first gate at fixed price + additional gates at original per-gate price
-        glassGateCost = firstGatePrice + (originalPerGateCost * (glassGateCount - 1));
-      }
+      // Calculate original total gate cost (before discount)
+      glassGateOriginalCost = snapshot.glass_gate_cost ?? 0;
+      
+      // Apply discount: first gate is free ($385 discount)
+      glassGateDiscount = 385;
+      
+      // Total gate cost with discount applied
+      glassGateCost = glassGateOriginalCost - glassGateDiscount;
+      
+      // Ensure gate cost doesn't go negative
+      if (glassGateCost < 0) glassGateCost = 0;
     }
     
     packages.push({
@@ -52,8 +60,9 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
       fenceLinearCost: snapshot.glass_fence_cost ?? 0,
       gateSelection: {
         quantity: glassGateCount,
-        gateTotalCost: glassGateCost,
-        freeGateDiscount: 0,
+        gateTotalCost: glassGateOriginalCost, // Show original cost
+        gateDiscountedCost: glassGateCost, // Store discounted cost for reference
+        freeGateDiscount: glassGateDiscount,
       },
       panels: {
         simpleCount: snapshot.glass_simple_panels ?? 0,
@@ -74,6 +83,7 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
       gateSelection: {
         quantity: snapshot.metal_gates ?? 0,
         gateTotalCost: snapshot.metal_gate_cost ?? 0,
+        gateDiscountedCost: snapshot.metal_gate_cost ?? 0, // Add missing property
         freeGateDiscount: 0,
       },
       panels: {
@@ -88,8 +98,13 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
 
   if (packages.length === 0) return null;
 
-  /** helper: number → AUD string */
-  const fmt = (n: number) => n.toLocaleString('en-AU');
+  // Use our own formatter to ensure consistent dollar sign display
+  const fmtCalc = (n: number) => n.toLocaleString('en-AU');
+  // Also get the breakdown from the calculator
+  const { breakdown } = calculatePrices(snapshot);
+  
+  // Our display formatter that ensures just one $ sign
+  const fmt = (n: number) => '$' + fmtCalc(n);
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -111,10 +126,10 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
             <div className="mb-4">
               <div className="flex justify-between">
                 <p className="font-medium">
-                  Fence Length ({fmt(pkg.totalFenceLengthM)}m)
+                  Fence Length ({pkg.totalFenceLengthM}m)
                 </p>
                 <p className="font-medium whitespace-nowrap">
-                  ${fmt(pkg.fenceLinearCost)}
+                  {fmt(pkg.fenceLinearCost)}
                 </p>
               </div>
               <p className="text-base text-muted-foreground mt-0.5">Premium safety barrier with elegant finish</p>
@@ -127,21 +142,18 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
                     Safety Gate ({pkg.gateSelection.quantity})
                   </p>
                   <p className="font-medium whitespace-nowrap">
-                    ${fmt(pkg.gateSelection.gateTotalCost)}
+                    {fmt(pkg.gateSelection.gateTotalCost)}
                   </p>
                 </div>
-                {pkg.fenceType === 'Frameless Glass Fencing' 
-                  ? <p className="text-base text-green-700 font-medium mt-0.5">First Gate Discounted from <span className="line-through">$495</span></p>
-                  : <p className="text-base text-muted-foreground mt-0.5">Self-closing, child-resistant mechanism</p>
-                }
+                <p className="text-base text-muted-foreground mt-0.5">Self-closing, child-resistant mechanism</p>
               </div>
             )}
             
             {pkg.panels.simpleCount > 0 && (
               <div className="mb-4">
                 <div className="flex justify-between">
-                  <p className="font-medium">Simple Retaining Panels</p>
-                  <p className="font-medium whitespace-nowrap">{pkg.panels.simpleCount}</p>
+                  <p className="font-medium">Simple Retaining Panels ({pkg.panels.simpleCount})</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(pkg.panels.simpleCount * 220)}</p>
                 </div>
                 <p className="text-base text-muted-foreground mt-0.5">Standard height panels</p>
               </div>
@@ -150,8 +162,8 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
             {pkg.panels.complexCount > 0 && (
               <div className="mb-4">
                 <div className="flex justify-between">
-                  <p className="font-medium">Complex Retaining Panels</p>
-                  <p className="font-medium whitespace-nowrap">{pkg.panels.complexCount}</p>
+                  <p className="font-medium">Complex Retaining Panels ({pkg.panels.complexCount})</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(pkg.panels.complexCount * 385)}</p>
                 </div>
                 <p className="text-base text-muted-foreground mt-0.5">Custom height panels</p>
               </div>
@@ -161,21 +173,21 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
               <div className="mb-4">
                 <div className="flex justify-between">
                   <p className="font-medium">Safety Earthing</p>
-                  <p className="font-medium whitespace-nowrap">${fmt(pkg.earthingCost)}</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(pkg.earthingCost)}</p>
                 </div>
                 <p className="text-base text-muted-foreground mt-0.5">Electrical grounding for metal components</p>
               </div>
             )}
             
-            {pkg.gateSelection.freeGateDiscount > 0 && (
+            {pkg.fenceType === 'Frameless Glass Fencing' && pkg.gateSelection.freeGateDiscount > 0 && (
               <div className="mb-4">
                 <div className="flex justify-between">
-                  <p className="font-medium text-green-700">Complimentary Gate Discount</p>
+                  <p className="font-medium text-green-700">First Gate Discount</p>
                   <p className="font-medium whitespace-nowrap text-green-700">
-                    -${fmt(pkg.gateSelection.freeGateDiscount)}
+                    -{fmt(pkg.gateSelection.freeGateDiscount)}
                   </p>
                 </div>
-                <p className="text-base text-muted-foreground mt-0.5">Special offer included</p>
+                <p className="text-base text-green-700 mt-0.5">$385 discount on first gate</p>
               </div>
             )}
           </div>
@@ -185,7 +197,7 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
           <div className="flex justify-between items-center">
             <p className="font-semibold text-xl">Total Cost</p>
             <p className="text-xl font-semibold">
-              ${fmt(pkg.costSummary.totalCost)}
+              {fmt(pkg.costSummary.totalCost)}
             </p>
           </div>
           </CardContent>

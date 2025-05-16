@@ -183,14 +183,14 @@ export const POOL_DETAILS: Record<string, PoolDetail> = {
   'Infinity 3': {
     name: 'Infinity 3',
     description: 'The Infinity 3 is part of our Round Pools Series, featuring elegant proportions and quality construction to complement your outdoor space.',
-    heroImage: '/Pools/Pool-Hero/infinity-3-hero.webp',
-    layoutImage: '/Pools/Pool-Layout/infinity-3-layout.webp',
+    heroImage: '/Pools/Pool-Hero/infinity-3.0m-hero.webp',
+    layoutImage: '/Pools/Pool-Layout/infinity-3.0m-layout.webp',
   },
   'Infinity 4': {
     name: 'Infinity 4',
     description: 'The Infinity 4 is part of our Round Pools Series, featuring elegant proportions and quality construction to complement your outdoor space.',
-    heroImage: '/Pools/Pool-Hero/infinity-4-hero.webp',
-    layoutImage: '/Pools/Pool-Layout/infinity-4-layout.webp',
+    heroImage: '/Pools/Pool-Hero/infinity-4.0-hero.webp',
+    layoutImage: '/Pools/Pool-Layout/infinity-4.0-layout.webp',
   },
   'Terrace 3': {
     name: 'Terrace 3',

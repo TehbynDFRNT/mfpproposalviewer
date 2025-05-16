@@ -10,6 +10,8 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
   // Use the centralized price calculator hook
   const { fmt, breakdown } = usePriceCalculator(snapshot);
   
+  // No longer need debugger code
+  
   // Helper to format potentially null/undefined values
   const safeFormat = (n: number | undefined | null) => {
     if (n === undefined || n === null) return 'N/A';
@@ -77,6 +79,15 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
                 <div className="flex justify-between">
                   <p className="font-medium">Water Features</p>
                   <p className="font-medium whitespace-nowrap">{fmt(breakdown.waterFeatureTotal)}</p>
+                </div>
+              </div>
+            )}
+            
+            {(breakdown.retainingWallTotal || 0) > 0 && (
+              <div className="mb-4">
+                <div className="flex justify-between">
+                  <p className="font-medium">Retaining Walls</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(breakdown.retainingWallTotal || 0)}</p>
                 </div>
               </div>
             )}

@@ -67,10 +67,12 @@ export default function PriceCard({
                   <span className="font-medium">Filtration</span>
                   <span className="font-medium">{fmt(breakdown.filtrationTotal)}</span>
                 </div>
-                <div className="flex justify-between items-baseline">
-                  <span className="font-medium">Concrete & Paving</span>
-                  <span className="font-medium">{fmt(breakdown.concreteTotal)}</span>
-                </div>
+                {breakdown.concreteTotal > 0 && (
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-medium">Concrete & Paving</span>
+                    <span className="font-medium">{fmt(breakdown.concreteTotal)}</span>
+                  </div>
+                )}
                 {breakdown.fencingTotal > 0 && (
                   <div className="flex justify-between items-baseline">
                     <span className="font-medium">Fencing</span>
@@ -81,6 +83,12 @@ export default function PriceCard({
                   <div className="flex justify-between items-baseline">
                     <span className="font-medium">Water Features</span>
                     <span className="font-medium">{fmt(breakdown.waterFeatureTotal)}</span>
+                  </div>
+                )}
+                {(breakdown.retainingWallTotal || 0) > 0 && (
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-medium">Retaining Walls</span>
+                    <span className="font-medium">{fmt(breakdown.retainingWallTotal || 0)}</span>
                   </div>
                 )}
                 {breakdown.extrasTotal > 0 && (

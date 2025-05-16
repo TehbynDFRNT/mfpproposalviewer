@@ -7,30 +7,68 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator }         from '@/components/ui/separator';
 import Image                 from 'next/image';
 import type { ProposalSnapshot } from '@/types/snapshot';
+import { calculatePrices } from '@/hooks/use-price-calculator';
 
 export default function FiltrationMaintenanceCards(
   { snapshot }: { snapshot: ProposalSnapshot }
 ) {
-  /* ── build items from flat snapshot fields ───────────────── */
-  const items = [
-    { name: snapshot.fp_pump_name || 'Pump',           price: snapshot.fp_pump_price,       benefit: snapshot.fp_pump_description || 'Reduces operating costs by up to 70%' },
-    { name: snapshot.fp_filter_name || 'Filter',       price: snapshot.fp_filter_price,     benefit: snapshot.fp_filter_description || 'Maintains crystal-clear water with minimal maintenance' },
-    { name: snapshot.fp_sanitiser_name || 'Sanitiser', price: snapshot.fp_sanitiser_price,  benefit: snapshot.fp_sanitiser_description || 'Provides reliable, automated sanitation' },
-    { name: snapshot.fp_light_name || 'Light',         price: snapshot.fp_light_price,      benefit: snapshot.fp_light_description || 'Creates beautiful night-time illumination' },
-    { name: snapshot.fp_handover_name || 'Handover Kit', price: snapshot.fp_handover_kit_price, benefit: snapshot.fp_handover_description || 'Complete pool maintenance essentials' },
-  ].filter(i => i.price > 0);    // ignore items with zero price
-
-  // Calculate base equipment cost (sum of all item prices)
-  const equipmentBaseCost = items.reduce((t, i) => t + i.price, 0);
+  /* ── Use the price calculator helper function ───────────────── */
+  const { fmt, breakdown } = calculatePrices(snapshot);
   
-  // Apply margin using the formula: Cost / (1 - Margin/100)
+  /* ── build items from flat snapshot fields ───────────────── */
+  // First prepare raw component prices
+  const componentPrices = {
+    pump: snapshot.pump_price_inc_gst || 0,
+    filter: snapshot.filter_price_inc_gst || 0,
+    sanitiser: snapshot.sanitiser_price_inc_gst || 0,
+    light: snapshot.light_price_inc_gst || 0
+  };
+  
+  // Calculate total base price for the components (excluding handover kit)
+  const baseComponentsTotal = 
+    componentPrices.pump + 
+    componentPrices.filter + 
+    componentPrices.sanitiser + 
+    componentPrices.light;
+  
+  // Calculate handover kit cost
+  const handoverKitCost = (snapshot.handover_components || [])
+    .reduce((sum, c) => sum + c.hk_component_price_inc_gst * c.hk_component_quantity, 0);
+  
+  // Calculate percentage distribution based on component prices
+  const getHandoverKitShare = (componentPrice: number) => {
+    if (baseComponentsTotal === 0) return 0; // Avoid division by zero
+    return (componentPrice / baseComponentsTotal) * handoverKitCost;
+  };
+  
+  // Apply margin to individual item prices to match the displayed total
   const marginPercent = snapshot.pool_margin_pct || 0;
-  const equipmentTotal = marginPercent > 0 
-    ? equipmentBaseCost / (1 - marginPercent/100) 
-    : equipmentBaseCost;
+  const applyMargin = (price: number) => marginPercent > 0 
+    ? price / (1 - marginPercent/100) 
+    : price;
     
-  const fmt = (n: number) =>
-    n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
+  const items = [
+    { 
+      name: snapshot.pump_name,
+      price: applyMargin(componentPrices.pump + getHandoverKitShare(componentPrices.pump)),
+      benefit: 'Reduces operating costs by up to 70%' 
+    },
+    { 
+      name: snapshot.filter_name,
+      price: applyMargin(componentPrices.filter + getHandoverKitShare(componentPrices.filter)),
+      benefit: 'Maintains crystal-clear water with minimal maintenance' 
+    },
+    { 
+      name: snapshot.sanitiser_name,
+      price: applyMargin(componentPrices.sanitiser + getHandoverKitShare(componentPrices.sanitiser)),
+      benefit: 'Provides reliable, automated sanitation' 
+    },
+    { 
+      name: snapshot.light_name,
+      price: applyMargin(componentPrices.light + getHandoverKitShare(componentPrices.light)),
+      benefit: 'Creates beautiful night-time illumination' 
+    },
+  ].filter(i => i.price > 0);       // ignore zero-cost items
 
   /* ── render ─────────────────────────────────────────── */
   return (
@@ -40,7 +78,7 @@ export default function FiltrationMaintenanceCards(
       <Card className="w-full shadow-lg">
         <CardContent className="p-5 space-y-6">
           <header>
-            <h3 className="text-xl font-semibold">{snapshot.spec_name} Filtration Package</h3>
+            <h3 className="text-xl font-semibold">{snapshot.filtration_package_name || snapshot.spec_name} Filtration Package</h3>
             <p className="text-base text-muted-foreground">
               Crystal-clear water with minimal maintenance
             </p>
@@ -66,7 +104,7 @@ export default function FiltrationMaintenanceCards(
           {/* Grand total */}
           <div className="flex justify-between items-center">
             <p className="font-semibold text-xl">Total Cost</p>
-            <p className="text-xl font-semibold">{fmt(equipmentTotal)}</p>
+            <p className="text-xl font-semibold">{fmt(breakdown.filtrationTotal)}</p>
           </div>
         </CardContent>
       </Card>

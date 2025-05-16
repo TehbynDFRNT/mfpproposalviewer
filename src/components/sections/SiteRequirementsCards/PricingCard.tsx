@@ -7,45 +7,53 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator }         from '@/components/ui/separator';
 import { subCardFade }       from '@/lib/animation';
 import type { ProposalSnapshot } from '@/types/snapshot';
+import { calculatePrices } from '@/hooks/use-price-calculator';
 
 export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
-  // Formatting helper
-  const fmt = (n: number) => n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
-
-  // Site prep costs
+  // Use the price calculator for formatting and calculations
+  const { fmt, breakdown } = calculatePrices(snapshot);
+  
+  // Apply margin function for individual line items
+  const marginPercent = snapshot.pool_margin_pct || 0;
+  const applyMargin = (cost: number) => marginPercent > 0 
+    ? cost / (1 - marginPercent/100) 
+    : cost;
+  
+  // Site prep costs with margin applied to each item
   const craneLabel = snapshot.crn_name;
-  const craneCost = snapshot.crane_cost;
+  const craneCost = applyMargin(snapshot.crane_cost);
   
   // Separate bobcat and excavation
   const bobcatLabel = snapshot.bob_size_category;
-  const bobcatCost = snapshot.bobcat_cost;
+  const bobcatCost = applyMargin(snapshot.bobcat_cost);
   
   // Excavation from dig_types
   const excavationLabel = snapshot.dig_name;
   const excavationCost = snapshot.dig_excavation_rate * snapshot.dig_excavation_hours;
   const truckCost = snapshot.dig_truck_rate * snapshot.dig_truck_hours * snapshot.dig_truck_qty;
-  const excavationTotalCost = excavationCost + truckCost;
+  const excavationTotalCost = applyMargin(excavationCost + truckCost);
   
   const trafficLabel = snapshot.tc_name;
-  const trafficCost = snapshot.traffic_control_cost;
+  const trafficCost = applyMargin(snapshot.traffic_control_cost);
 
-  // Electrical cost items
+  // Electrical cost items without margin (they already include margin)
   const electricalItems = [
-    snapshot.elec_standard_power_flag ? { label: 'Standard Power', cost: snapshot.elec_standard_power_rate ?? 0 } : null,
-    snapshot.elec_fence_earthing_flag ? { label: 'Fence Earthing', cost: snapshot.elec_fence_earthing_rate ?? 0 } : null,
-    snapshot.elec_heat_pump_circuit_flag ? { label: 'Heat Pump Circuit', cost: snapshot.elec_heat_pump_circuit_rate ?? 0 } : null,
+    snapshot.elec_standard_power_flag ? { 
+      label: 'Standard Power', 
+      cost: snapshot.elec_standard_power_rate ?? 0
+    } : null,
+    snapshot.elec_fence_earthing_flag ? { 
+      label: 'Fence Earthing', 
+      cost: snapshot.elec_fence_earthing_rate ?? 0
+    } : null,
+    snapshot.elec_heat_pump_circuit_flag ? { 
+      label: 'Heat Pump Circuit', 
+      cost: snapshot.elec_heat_pump_circuit_rate ?? 0
+    } : null,
   ].filter((i): i is { label: string; cost: number } => i !== null);
 
-  // Base installation costs
-  const sitePrepTotal = craneCost + bobcatCost + excavationTotalCost + trafficCost;
-  const electricalTotal = snapshot.elec_total_cost;
-  const baseInstallationCost = sitePrepTotal + electricalTotal;
-  
-  // Apply margin using the same formula as pool price: Cost / (1 - Margin/100)
-  const marginPercent = snapshot.pool_margin_pct || 0;
-  const totalInstallation = marginPercent > 0 
-    ? baseInstallationCost / (1 - marginPercent/100) 
-    : baseInstallationCost;
+  // Use the installation total from the price calculator
+  const totalInstallation = breakdown.installationTotal;
 
   return (
     <motion.div
@@ -108,6 +116,31 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
                   <p className="text-base text-muted-foreground mt-0.5">{trafficLabel}</p>
                 </div>
               )}
+              
+              {/* Custom site requirements */}
+              {snapshot.site_requirements_data && (
+                <>
+                  <div className="mb-2">
+                    <p className="text-lg font-semibold">Custom Site Requirements</p>
+                  </div>
+                  
+                  {Array.isArray(snapshot.site_requirements_data) 
+                    ? snapshot.site_requirements_data.map((item: { id: string, price: number, description: string }) => (
+                        <div key={item.id} className="mb-4">
+                          <div className="flex justify-between">
+                            <p className="font-medium">{item.description}</p>
+                            <p className="font-medium whitespace-nowrap">{fmt(applyMargin(item.price))}</p>
+                          </div>
+                        </div>
+                      ))
+                    : null
+                  }
+                  
+                  {snapshot.site_requirement_notes && (
+                    <p className="text-base text-muted-foreground mt-0.5 mb-4">{snapshot.site_requirement_notes}</p>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Electrical costs */}
@@ -157,7 +190,7 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
             <div className="flex justify-between items-center">
               <p className="font-semibold text-xl">Total Cost</p>
               <p className="text-xl font-semibold">
-                {fmt(totalInstallation)}
+                {fmt(breakdown.installationTotal)}
               </p>
             </div>
           </CardContent>

@@ -57,7 +57,7 @@ export function isSectionEmpty(sectionId: string, snapshot: ProposalSnapshot): b
     
     case CATEGORY_IDS.ADD_ONS:
       // Check all add-on options: cleaner, heat pump, and blanket roller
-      const hasCleaner = snapshot.cleaner_included && snapshot.cleaner_cost_price && snapshot.cleaner_cost_price > 0;
+      const hasCleaner = snapshot.cleaner_included && snapshot.cleaner_price && snapshot.cleaner_price > 0;
       const hasHeatPump = snapshot.include_heat_pump && 
                           ((snapshot.heat_pump_cost && snapshot.heat_pump_cost > 0) || 
                            (snapshot.heat_pump_install_cost && snapshot.heat_pump_install_cost > 0));

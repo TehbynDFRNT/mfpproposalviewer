@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Image from "next/image";
 import type { ProposalSnapshot } from "@/types/snapshot";
+import { calculatePrices } from '@/hooks/use-price-calculator';
 
 // Define specific item types for clarity
 interface PavingItem {
@@ -15,8 +16,9 @@ interface PavingItem {
 }
 
 export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSnapshot }) {
-  const fmt = (n: number) => n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
-
+  // Use the price calculator for formatting and calculations
+  const { fmt, breakdown } = calculatePrices(snapshot);
+  
   // Calculate combined paving costs and square meters
   const totalPavingCost = (snapshot.extra_paving_cost || 0) + (snapshot.existing_paving_cost || 0);
   const hasPaving = totalPavingCost > 0;
@@ -79,8 +81,9 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
       ...(item.sqm !== undefined ? { sqm: item.sqm } : {}),
       cost: item.cost
     }));
-
-  const totalCost = validItems.reduce((sum, item) => sum + item.cost, 0);
+  
+  // Use the concrete total from the price calculator
+  const totalCost = breakdown.concreteTotal;
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -142,7 +145,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
           <div className="flex justify-between items-center">
             <p className="font-semibold text-xl">Total Cost</p>
             <p className="text-xl font-semibold">
-              {fmt(totalCost)}
+              {fmt(breakdown.concreteTotal)}
             </p>
           </div>
         </CardContent>

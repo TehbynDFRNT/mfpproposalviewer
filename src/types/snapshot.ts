@@ -70,6 +70,11 @@ export interface ProposalSnapshot {
   elec_fence_earthing_rate?: number;
   elec_heat_pump_circuit_rate?: number;
   elec_total_cost: number;
+
+  //Custom Requirements
+
+  site_requirements_data:  string;
+  site_requirement_notes: string;
   
   /* CONCRETE & PAVING */
   // Concrete cuts
@@ -132,39 +137,27 @@ export interface ProposalSnapshot {
   /* COMPOSITE FENCING TOTAL */
   fencing_total_cost: number | null;
   
-  /* FILTRATION */
-  fp_name: string;
-  fp_pump_price: number;
-  fp_filter_price: number;
-  fp_sanitiser_price: number;
-  fp_light_price: number;
-  /* — handover kit details */
-  fp_handover_kit_price: number;
-  
-  /* — pump details */
-  fp_pump_name: string;
-  fp_pump_model: string;
-  fp_pump_description: string;
-  
-  /* — filter details */
-  fp_filter_name: string;
-  fp_filter_model: string;
-  fp_filter_description: string;
-  
-  /* — sanitiser details */
-  fp_sanitiser_name: string;
-  fp_sanitiser_model: string;
-  fp_sanitiser_description: string;
-  
-  /* — light details */
-  fp_light_name: string;
-  fp_light_model: string;
-  fp_light_description: string;
-  
-  /* — handover-kit details */
-  fp_handover_name: string;
-  fp_handover_model: string;
-  fp_handover_description: string;
+  /* FILTRATION PACKAGE & HANDOVER KIT */
+  filtration_package_name: string;
+  pump_name: string;
+  pump_model: string;
+  pump_price_inc_gst: number;
+  filter_name: string;
+  filter_model: string;
+  filter_price_inc_gst: number;
+  sanitiser_name: string;
+  sanitiser_model: string;
+  sanitiser_price_inc_gst: number;
+  light_name: string;
+  light_model: string;
+  light_price_inc_gst: number;
+  handover_package_name: string;
+  handover_components: Array<{
+    hk_component_name: string;
+    hk_component_model: string;
+    hk_component_price_inc_gst: number;
+    hk_component_quantity: number;
+  }>;
   
   /* WATER FEATURE */
   water_feature_size: string;
@@ -200,10 +193,10 @@ export interface ProposalSnapshot {
   /* EXTRAS & UPGRADES */
   // Pool cleaner
   cleaner_included: boolean;
+  cleaner_model_number: string;
   cleaner_name: string;
-  cleaner_unit_price: number;
+  cleaner_price: number;
   cleaner_margin: number;
-  cleaner_cost_price: number;
   
   // Heating options
   include_heat_pump: boolean;

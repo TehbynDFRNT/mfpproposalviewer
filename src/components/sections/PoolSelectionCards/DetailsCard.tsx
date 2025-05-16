@@ -81,7 +81,7 @@ export function DetailsCard({ snapshot }: { snapshot: ProposalSnapshot }) {
               <Image
                 src={heroSrc}
                 alt={`${snapshot.spec_name} Pool`}
-                className="w-full h-full object-cover object-top" 
+                className="w-full h-full object-cover object-center" 
                 width={800}
                 height={450}
               />

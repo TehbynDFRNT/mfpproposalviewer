@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Image from 'next/image';
 import { useState } from 'react';
 import type { ProposalSnapshot } from '@/types/snapshot';
+import { calculatePrices } from '@/hooks/use-price-calculator';
 
 // Define proper wall type to help TypeScript
 interface RetainingWall {
@@ -92,17 +93,17 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
   // If no retaining walls, don't render anything
   if (availableWalls.length === 0) return null;
 
-  // Calculate the total cost of all retaining walls
-  const totalRetainingWallCost = availableWalls.reduce((sum, wall) => sum + wall.totalCost, 0);
+  // Get the price calculator for consistent formatting and calculations
+  const { fmt, breakdown } = calculatePrices(snapshot);
+  
+  // Use the calculated retaining wall total from the price calculator
+  const totalRetainingWallCost = breakdown.retainingWallTotal;
 
   // Get the currently selected wall
   const selectedWall = availableWalls.find(wall => wall.id === selectedWallId) || availableWalls[0];
 
   // Calculate area using both height values
   const area = calculateWallArea(selectedWall.height1, selectedWall.height2, selectedWall.length);
-
-  const fmt = (n: number) =>
-    n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -113,7 +114,7 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
             <Image
               src="/CardHero/retainingwall.webp"
               alt="Block Retaining Wall"
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-cover object-center"
               width={800}
               height={450}
             />
