@@ -48,62 +48,85 @@ export default function PriceCard({
               </div>
               
               <motion.div 
-                className="space-y-1.5 w-full"
+                className="space-y-2 w-full"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
-                <div className="flex justify-between items-baseline">
-                  <span className="font-medium">Base Pool</span>
-                  <span className="font-medium">{fmt(totals.basePoolTotal)}</span>
+                {/* Base Price Section */}
+                <div>
+                  <h5 className="text-xs font-semibold text-muted-foreground mb-1">Base Price (Website RRP)</h5>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-sm">Base Pool</span>
+                    <span className="text-sm font-medium">{fmt(totals.basePoolTotal)}</span>
+                  </div>
                 </div>
-                {totals.siteRequirementsTotal > 0 && (
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-medium">Site Requirements</span>
-                    <span className="font-medium">{fmt(totals.siteRequirementsTotal)}</span>
+
+                {/* Additional Site Requirements Section */}
+                {(totals.siteRequirementsTotal > 0 || totals.electricalTotal > 0) && (
+                  <div className="border-t border-border/50 pt-2">
+                    <h5 className="text-xs font-semibold text-muted-foreground mb-1">Additional Site Requirements</h5>
+                    {totals.siteRequirementsTotal > 0 && (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-sm">Site Requirements</span>
+                        <span className="text-sm font-medium">{fmt(totals.siteRequirementsTotal)}</span>
+                      </div>
+                    )}
+                    {totals.electricalTotal > 0 && (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-sm">Electrical</span>
+                        <span className="text-sm font-medium">{fmt(totals.electricalTotal)}</span>
+                      </div>
+                    )}
                   </div>
                 )}
-                {totals.electricalTotal > 0 && (
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-medium">Electrical</span>
-                    <span className="font-medium">{fmt(totals.electricalTotal)}</span>
+
+                {/* Poolscaping Options Section */}
+                {(totals.concreteTotal > 0 || totals.fencingTotal > 0 || totals.waterFeatureTotal > 0 || totals.retainingWallsTotal > 0) && (
+                  <div className="border-t border-border/50 pt-2">
+                    <h5 className="text-xs font-semibold text-muted-foreground mb-1">Poolscaping Options</h5>
+                    {totals.concreteTotal > 0 && (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-sm">Concrete & Paving</span>
+                        <span className="text-sm font-medium">{fmt(totals.concreteTotal)}</span>
+                      </div>
+                    )}
+                    {totals.fencingTotal > 0 && (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-sm">Fencing</span>
+                        <span className="text-sm font-medium">{fmt(totals.fencingTotal)}</span>
+                      </div>
+                    )}
+                    {totals.waterFeatureTotal > 0 && (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-sm">Water Features</span>
+                        <span className="text-sm font-medium">{fmt(totals.waterFeatureTotal)}</span>
+                      </div>
+                    )}
+                    {totals.retainingWallsTotal > 0 && (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-sm">Retaining Walls</span>
+                        <span className="text-sm font-medium">{fmt(totals.retainingWallsTotal)}</span>
+                      </div>
+                    )}
                   </div>
                 )}
-                {totals.concreteTotal > 0 && (
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-medium">Concrete & Paving</span>
-                    <span className="font-medium">{fmt(totals.concreteTotal)}</span>
-                  </div>
-                )}
-                {totals.fencingTotal > 0 && (
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-medium">Fencing</span>
-                    <span className="font-medium">{fmt(totals.fencingTotal)}</span>
-                  </div>
-                )}
-                {totals.waterFeatureTotal > 0 && (
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-medium">Water Features</span>
-                    <span className="font-medium">{fmt(totals.waterFeatureTotal)}</span>
-                  </div>
-                )}
-                {totals.retainingWallsTotal > 0 && (
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-medium">Retaining Walls</span>
-                    <span className="font-medium">{fmt(totals.retainingWallsTotal)}</span>
-                  </div>
-                )}
+
+                {/* Upgrades & Extras Section */}
                 {totals.extrasTotal > 0 && (
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-medium">Extras & Add-ons</span>
-                    <span className="font-medium">{fmt(totals.extrasTotal)}</span>
+                  <div className="border-t border-border/50 pt-2">
+                    <h5 className="text-xs font-semibold text-muted-foreground mb-1">Upgrades & Extras</h5>
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-sm">Extras & Add-ons</span>
+                      <span className="text-sm font-medium">{fmt(totals.extrasTotal)}</span>
+                    </div>
                   </div>
                 )}
                 
                 <Separator className="my-3" />
                 <div className="flex justify-between items-baseline">
-                  <span className="text-xl font-semibold">Total Quote</span>
-                  <span className="text-xl font-semibold">{fmt(totals.grandTotalCalculated)}</span>
+                  <span className="text-lg font-semibold">Total Quote (inc GST)</span>
+                  <span className="text-lg font-semibold">{fmt(totals.grandTotalCalculated)}</span>
                 </div>
               </motion.div>
               

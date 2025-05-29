@@ -112,7 +112,7 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
                 {pkg.fenceType}
               </h3>
               <p className="text-base text-muted-foreground">
-                Safety-compliant barrier with premium finish
+                Organised and managed by MFPEasy, here is your third party quotation via our premium fencing contractor
               </p>
             </div>
           

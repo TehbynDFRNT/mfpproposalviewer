@@ -27,74 +27,101 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
 
           {/* Cost breakdown section */}
           <div className="space-y-4">
+            {/* Base Price Section */}
             <div className="mb-4">
+              <h4 className="text-lg font-semibold text-muted-foreground mb-2">Base Price (Website RRP)</h4>
               <div className="flex justify-between">
                 <p className="font-medium">Base {snapshot.spec_name} Pool</p>
                 <p className="font-medium whitespace-nowrap">{fmt(totals.basePoolTotal)}</p>
               </div>
             </div>
 
-            {totals.siteRequirementsTotal > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between">
-                  <p className="font-medium">Site Requirements</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(totals.siteRequirementsTotal)}</p>
+            {/* Additional Site Requirements Section */}
+            {(totals.siteRequirementsTotal > 0 || totals.electricalTotal > 0) && (
+              <>
+                <Separator className="my-3" />
+                <div className="mb-4">
+                  <h4 className="text-lg font-semibold text-muted-foreground mb-2">Additional Site Requirements</h4>
+                  
+                  {totals.siteRequirementsTotal > 0 && (
+                    <div className="mb-2">
+                      <div className="flex justify-between">
+                        <p className="font-medium">Site Requirements</p>
+                        <p className="font-medium whitespace-nowrap">{fmt(totals.siteRequirementsTotal)}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {totals.electricalTotal > 0 && (
+                    <div className="mb-2">
+                      <div className="flex justify-between">
+                        <p className="font-medium">Electrical</p>
+                        <p className="font-medium whitespace-nowrap">{fmt(totals.electricalTotal)}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              </>
             )}
 
-            {totals.electricalTotal > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between">
-                  <p className="font-medium">Electrical</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(totals.electricalTotal)}</p>
+            {/* Poolscaping Options Section */}
+            {(totals.concreteTotal > 0 || totals.fencingTotal > 0 || totals.waterFeatureTotal > 0 || totals.retainingWallsTotal > 0) && (
+              <>
+                <Separator className="my-3" />
+                <div className="mb-4">
+                  <h4 className="text-lg font-semibold text-muted-foreground mb-2">Poolscaping Options</h4>
+                  
+                  {totals.concreteTotal > 0 && (
+                    <div className="mb-2">
+                      <div className="flex justify-between">
+                        <p className="font-medium">Concrete & Paving</p>
+                        <p className="font-medium whitespace-nowrap">{fmt(totals.concreteTotal)}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {totals.fencingTotal > 0 && (
+                    <div className="mb-2">
+                      <div className="flex justify-between">
+                        <p className="font-medium">Fencing</p>
+                        <p className="font-medium whitespace-nowrap">{fmt(totals.fencingTotal)}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {totals.waterFeatureTotal > 0 && (
+                    <div className="mb-2">
+                      <div className="flex justify-between">
+                        <p className="font-medium">Water Features</p>
+                        <p className="font-medium whitespace-nowrap">{fmt(totals.waterFeatureTotal)}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {totals.retainingWallsTotal > 0 && (
+                    <div className="mb-2">
+                      <div className="flex justify-between">
+                        <p className="font-medium">Retaining Walls</p>
+                        <p className="font-medium whitespace-nowrap">{fmt(totals.retainingWallsTotal)}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              </>
             )}
 
-            {totals.concreteTotal > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between">
-                  <p className="font-medium">Concrete & Paving</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(totals.concreteTotal)}</p>
-                </div>
-              </div>
-            )}
-
-            {totals.fencingTotal > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between">
-                  <p className="font-medium">Fencing</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(totals.fencingTotal)}</p>
-                </div>
-              </div>
-            )}
-
-            {totals.waterFeatureTotal > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between">
-                  <p className="font-medium">Water Features</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(totals.waterFeatureTotal)}</p>
-                </div>
-              </div>
-            )}
-            
-            {totals.retainingWallsTotal > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between">
-                  <p className="font-medium">Retaining Walls</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(totals.retainingWallsTotal)}</p>
-                </div>
-              </div>
-            )}
-
+            {/* Upgrades & Extras Section */}
             {totals.extrasTotal > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between">
-                  <p className="font-medium">Extras & Add-ons</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(totals.extrasTotal)}</p>
+              <>
+                <Separator className="my-3" />
+                <div className="mb-4">
+                  <h4 className="text-lg font-semibold text-muted-foreground mb-2">Upgrades & Extras</h4>
+                  <div className="flex justify-between">
+                    <p className="font-medium">Extras & Add-ons</p>
+                    <p className="font-medium whitespace-nowrap">{fmt(totals.extrasTotal)}</p>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
 
@@ -102,7 +129,7 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
 
           {/* Grand total */}
           <div className="flex justify-between items-center mt-1">
-            <p className="text-xl font-semibold">Total Investment</p>
+            <p className="text-xl font-semibold">Total Investment (inc GST)</p>
             <p className="text-xl font-semibold">{fmt(totals.grandTotalCalculated)}</p>
           </div>
         </CardContent>

@@ -254,36 +254,77 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
               {snapshot.site_address || snapshot.home_address || 'N/A'}
             </p>
 
-            <div className="border-t border-border pt-3 space-y-1.5">
+            <div className="border-t border-border pt-3 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-base">Selected Pool:</span>
                 <span className="font-medium">{snapshot.spec_name}</span>
               </div>
 
-              {/* Always show base pool first */}
-              {["basePool"].map((key) => {
-                const item = subtotals[key as keyof typeof subtotals];
-                return item && item.show && (
-                  <div key={key} className="flex justify-between items-center">
-                    <span className="text-base text-muted-foreground">{item.label}:</span>
-                    <span className="text-base">{fmt(item.value)}</span>
-                  </div>
-                );
-              })}
+              {/* Base Price Section */}
+              <div>
+                <h5 className="text-sm font-semibold text-muted-foreground mb-1">Base Price (Website RRP)</h5>
+                {["basePool"].map((key) => {
+                  const item = subtotals[key as keyof typeof subtotals];
+                  return item && item.show && (
+                    <div key={key} className="flex justify-between items-center">
+                      <span className="text-sm">{item.label}:</span>
+                      <span className="text-sm font-medium">{fmt(item.value)}</span>
+                    </div>
+                  );
+                })}
+              </div>
 
-              {/* Then show optional sections if they have values */}
-              {["siteRequirements", "electrical", "concrete", "fencing", "waterFeature", "retainingWalls", "extras"].map((key) => {
-                const item = subtotals[key as keyof typeof subtotals];
-                return item && item.show && (
-                  <div key={key} className="flex justify-between items-center">
-                    <span className="text-base text-muted-foreground">{item.label}:</span>
-                    <span className="text-base">{fmt(item.value)}</span>
+              {/* Additional Site Requirements Section */}
+              {(subtotals.siteRequirements?.show || subtotals.electrical?.show) && (
+                <div>
+                  <div className="border-t border-border pt-2">
+                    <h5 className="text-sm font-semibold text-muted-foreground mb-1">Additional Site Requirements</h5>
+                    {["siteRequirements", "electrical"].map((key) => {
+                      const item = subtotals[key as keyof typeof subtotals];
+                      return item && item.show && (
+                        <div key={key} className="flex justify-between items-center">
+                          <span className="text-sm">{item.label}:</span>
+                          <span className="text-sm font-medium">{fmt(item.value)}</span>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
+                </div>
+              )}
+
+              {/* Poolscaping Options Section */}
+              {(subtotals.concrete?.show || subtotals.fencing?.show || subtotals.waterFeature?.show || subtotals.retainingWalls?.show) && (
+                <div>
+                  <div className="border-t border-border pt-2">
+                    <h5 className="text-sm font-semibold text-muted-foreground mb-1">Poolscaping Options</h5>
+                    {["concrete", "fencing", "waterFeature", "retainingWalls"].map((key) => {
+                      const item = subtotals[key as keyof typeof subtotals];
+                      return item && item.show && (
+                        <div key={key} className="flex justify-between items-center">
+                          <span className="text-sm">{item.label}:</span>
+                          <span className="text-sm font-medium">{fmt(item.value)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Upgrades & Extras Section */}
+              {subtotals.extras?.show && (
+                <div>
+                  <div className="border-t border-border pt-2">
+                    <h5 className="text-sm font-semibold text-muted-foreground mb-1">Upgrades & Extras</h5>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">{subtotals.extras?.label}:</span>
+                      <span className="text-sm font-medium">{fmt(subtotals.extras?.value)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="border-t border-border mt-2 pt-2 flex justify-between items-center">
-                <span className="text-base font-medium">Total Investment:</span>
+                <span className="text-base font-medium">Total Investment (inc GST):</span>
                 <span className="font-medium text-base">{totalPrice}</span>
               </div>
             </div>

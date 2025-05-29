@@ -32,7 +32,7 @@ export const POOL_DETAILS: Record<string, PoolDetail> = {
   },
   'Latina': {
     name: 'Latina',
-    description: 'Piazza Series',
+    description: 'Features an extended bench along one side, ideal for spa jet integration and family relaxation. The uninterrupted swimming zone provides ample space for the whole family to enjoy. This contemporary geometric design seamlessly complements any outdoor setting.',
     heroImage: '/Pools/Pool-Hero/latina-hero.webp',
     layoutImage: '/Pools/Pool-Layout/latina-layout.webp',
   },
@@ -68,7 +68,7 @@ export const POOL_DETAILS: Record<string, PoolDetail> = {
   },
   'Palazzo': {
     name: 'Palazzo',
-    description: 'Piazza Series',
+    description: 'The larger version of our popular Latina design, featuring the same extended bench seating along one side that\'s perfect for spa jet installation and family gathering. This spacious contemporary design offers an even more generous uninterrupted swimming area whilst maintaining the sleek geometric styling that suits any outdoor environment.',
     heroImage: '/Pools/Pool-Hero/palazzo-hero.webp',
     layoutImage: '/Pools/Pool-Layout/palazzo-layout.webp',
   },
@@ -140,13 +140,13 @@ export const POOL_DETAILS: Record<string, PoolDetail> = {
   },
   'Allure': {
     name: 'Allure',
-    description: 'The Allure is part of our Vogue Series, featuring elegant proportions and quality construction to complement your outdoor space.',
+    description: 'Specifically designed for compact outdoor spaces and smaller block sizes, the Allure maximises functionality in a slender footprint. Twin side entry steps are strategically placed to preserve the swimming area, while the substantial depth ensures excellent swimming conditions. An extended entry step at the shallow end doubles as a comfortable seating ledge for relaxation.',
     heroImage: '/Pools/Pool-Hero/allure-hero.webp',
     layoutImage: '/Pools/Pool-Layout/allure-layout.webp',
   },
   'Harmony': {
     name: 'Harmony',
-    description: 'The Harmony is part of our Vogue Series, featuring elegant proportions and quality construction to complement your outdoor space.',
+    description: 'Combining modern geometric styling with space-efficient design, the Harmony is ideal for narrow outdoor areas. Dual side entry steps are cleverly positioned to maximise the swimming zone, whilst the generous depth throughout ensures excellent swimming conditions. The extended shallow-end step provides a comfortable relaxation area for lounging in the water.',
     heroImage: '/Pools/Pool-Hero/harmony-hero.webp',
     layoutImage: '/Pools/Pool-Layout/harmony-layout.webp',
   },
@@ -182,19 +182,19 @@ export const POOL_DETAILS: Record<string, PoolDetail> = {
   },
   'Infinity 3': {
     name: 'Infinity 3',
-    description: 'The Infinity 3 is part of our Round Pools Series, featuring elegant proportions and quality construction to complement your outdoor space.',
+    description: 'Transform your compact backyard into a stylish retreat with this round plunge pool. Despite its space-saving design, the Infinity 3 delivers a premium pool experience that brings families together outdoors. Perfect for creating a relaxing sanctuary where you can unwind and enjoy quality time in your own private aquatic haven.',
     heroImage: '/Pools/Pool-Hero/infinity-3.0m-hero.webp',
     layoutImage: '/Pools/Pool-Layout/infinity-3.0m-layout.webp',
   },
   'Infinity 4': {
     name: 'Infinity 4',
-    description: 'The Infinity 4 is part of our Round Pools Series, featuring elegant proportions and quality construction to complement your outdoor space.',
+    description: 'The larger of our round plunge pool options, offering enhanced space whilst maintaining the compact footprint perfect for smaller backyards. The Infinity 4 combines functionality with elegant styling, creating a tranquil outdoor retreat where families can gather, relax, and enjoy the luxury of their own private pool without requiring extensive yard space.',
     heroImage: '/Pools/Pool-Hero/infinity-4.0-hero.webp',
     layoutImage: '/Pools/Pool-Layout/infinity-4.0-layout.webp',
   },
   'Terrace 3': {
     name: 'Terrace 3',
-    description: 'The Terrace 3 is part of our Round Pools Series, featuring elegant proportions and quality construction to complement your outdoor space.',
+    description: 'Create year-round enjoyment with this beautifully designed round plunge pool featuring softer, organic curves that blend seamlessly with your landscaping. At 3.4 metres in diameter, the Terrace 3 brings luxury pool living to compact spaces, offering endless opportunities for family fun and peaceful relaxation in your own backyard oasis.',
     heroImage: '/Pools/Pool-Hero/terrace-3-hero.webp',
     layoutImage: '/Pools/Pool-Layout/terrace-3-layout.webp',
   },

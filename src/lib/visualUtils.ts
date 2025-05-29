@@ -31,54 +31,54 @@ export function getDefaultVisual(
         address: snapshot.site_address ?? snapshot.home_address ?? ''
       };
     case CATEGORY_IDS.POOL_SELECTION:
-      // Always show the Sheffield video for all sub-indices in pool selection
+      // Always show the placeholder video for all sub-indices in pool selection
       return {
         type: 'placeholder',
         name: 'Loading 3D Pool Model...',
         fallbackType: 'video',
-        fallbackSrc: 'Sheffield'
+        fallbackSrc: 'placeholder'
       };
     case CATEGORY_IDS.FILTRATION_MAINTENANCE:
       return {
         type: 'placeholder',
         name: 'Loading Filtration Visualization...',
         fallbackType: 'video',
-        fallbackSrc: 'fire'
+        fallbackSrc: 'placeholder'
       };
     case CATEGORY_IDS.CONCRETE_PAVING:
       return {
         type: 'placeholder',
         name: 'Loading Paving Visualization...',
-        fallbackType: 'image',
-        fallbackSrc: '/Unique3D/paving.webp'
+        fallbackType: 'video',
+        fallbackSrc: 'placeholder'
       };
     case CATEGORY_IDS.FENCING:
       return {
         type: 'placeholder',
         name: 'Loading Fencing Visualization...',
-        fallbackType: 'image',
-        fallbackSrc: '/Unique3D/fencing.webp'
+        fallbackType: 'video',
+        fallbackSrc: 'placeholder'
       };
     case CATEGORY_IDS.RETAINING_WALLS:
       return {
         type: 'placeholder',
         name: 'Loading Retaining Wall Visualization...',
-        fallbackType: 'image',
-        fallbackSrc: '/Unique3D/RetainingWallImagery.webp'
+        fallbackType: 'video',
+        fallbackSrc: 'placeholder'
       };
     case CATEGORY_IDS.WATER_FEATURE:
       return {
         type: 'placeholder',
         name: 'Loading Water Feature Visualization...',
         fallbackType: 'video',
-        fallbackSrc: 'waterfeature'
+        fallbackSrc: 'placeholder'
       };
     case CATEGORY_IDS.ADD_ONS:
       return {
         type: 'placeholder',
         name: 'Loading Extras Visualization...',
-        fallbackType: 'image',
-        fallbackSrc: '/Unique3D/lighting.webp'
+        fallbackType: 'video',
+        fallbackSrc: 'placeholder'
       };
     case CATEGORY_IDS.SITE_REQUIREMENTS:
       // Always directly return the FrannaCrane video - never show a placeholder for Site Requirements
@@ -88,12 +88,12 @@ export function getDefaultVisual(
         alt: 'Pool Installation'
       };
     case CATEGORY_IDS.PROPOSAL_SUMMARY:
-      // Use Sheffield video for the proposal summary
+      // Use placeholder video for the proposal summary
       return {
         type: 'placeholder',
         name: 'Loading Summary Visualization...',
         fallbackType: 'video',
-        fallbackSrc: 'Sheffield'
+        fallbackSrc: 'placeholder'
       };
     default:
       return { type: 'placeholder', name: 'Loading...' };
@@ -142,6 +142,7 @@ export function selectVisual(
   use3DVisuals: boolean,
   renders: RenderVisual[] | null
 ): Visual {
+  console.log('selectVisual called:', { sectionId, use3DVisuals, subIndex });
   // Special case for Site Requirements (always use FrannaCrane video)
   if (sectionId === CATEGORY_IDS.SITE_REQUIREMENTS) {
     return {
@@ -178,23 +179,23 @@ export function selectVisual(
   // When 3D is disabled, use the original visual content
   switch (sectionId) {
     case CATEGORY_IDS.POOL_SELECTION:
-      return { type: 'video', videoName: 'Sheffield' };
+      return { type: 'video', videoName: 'placeholder' };
     case CATEGORY_IDS.FILTRATION_MAINTENANCE:
-      return { type: 'video', videoName: 'fire', alt: 'Pool Filtration' };
+      return { type: 'video', videoName: 'placeholder', alt: 'Pool Filtration' };
     case CATEGORY_IDS.CONCRETE_PAVING:
-      if (subIndex === 0) return { type: 'image', src: '/Unique3D/paving.webp', alt: 'Paving Options' };
-      if (subIndex === 1) return { type: 'image', src: '/Unique3D/paving.webp', alt: 'Paving & Concrete Cost Metrics' };
-      return { type: 'image', src: '/Unique3D/paving.webp', alt: 'Paving & Concrete' };
+      if (subIndex === 0) return { type: 'video', videoName: 'placeholder', alt: 'Paving Options' };
+      if (subIndex === 1) return { type: 'video', videoName: 'placeholder', alt: 'Paving & Concrete Cost Metrics' };
+      return { type: 'video', videoName: 'placeholder', alt: 'Paving & Concrete' };
     case CATEGORY_IDS.FENCING:
-      return { type: 'image', src: '/Unique3D/fencing.webp', alt: 'Fencing' };
+      return { type: 'video', videoName: 'placeholder', alt: 'Fencing' };
     case CATEGORY_IDS.RETAINING_WALLS:
-      return { type: 'image', src: '/Unique3D/RetainingWallImagery.webp', alt: 'Retaining Walls' };
+      return { type: 'video', videoName: 'placeholder', alt: 'Retaining Walls' };
     case CATEGORY_IDS.WATER_FEATURE:
-      return { type: 'video', videoName: 'waterfeature', alt: 'Water Feature' };
+      return { type: 'video', videoName: 'placeholder', alt: 'Water Feature' };
     case CATEGORY_IDS.ADD_ONS:
-      return { type: 'image', src: '/Unique3D/lighting.webp', alt: 'Extras & Upgrades' };
+      return { type: 'video', videoName: 'placeholder', alt: 'Extras & Upgrades' };
     case CATEGORY_IDS.PROPOSAL_SUMMARY:
-      return { type: 'video', videoName: 'Sheffield', alt: 'Proposal Summary' };
+      return { type: 'video', videoName: 'placeholder', alt: 'Proposal Summary' };
     default:
       return { type: 'placeholder', name: 'Loading...' };
   }

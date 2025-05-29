@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Image from "next/image";
+import { CheckCircle } from 'lucide-react';
 import { subCardFade } from '@/lib/animation';
 import type { ProposalSnapshot } from "@/types/snapshot";
 import { getPoolDetails } from "@/types/pool-details";
@@ -97,13 +98,27 @@ export function DetailsCard({ snapshot }: { snapshot: ProposalSnapshot }) {
             </div>
             
             <div className="mt-4">
-              <ul className="text-sm font-semibold text-muted-foreground space-y-1">
-                <li>• Includes installation costs excepting unique site requirements.</li>
-                <li>• Includes filtration costs.</li>
-              </ul>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-semibold text-muted-foreground">Includes excavation, installation, and standard inclusions</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-semibold text-muted-foreground">Includes Complete Filtration Package</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-semibold text-muted-foreground">Includes coping around the pool</span>
+                </div>
+              </div>
               
               <p className="text-sm text-muted-foreground mt-3">
                 This value matches our Web RRP price and includes all the compulsory costs to install your selected pool on a standard block.
+              </p>
+              
+              <p className="text-sm text-muted-foreground mt-2">
+                Your quote includes any additional site requirements, which are dependent on the installation needs for your unique block.
               </p>
             </div>
           </CardContent>

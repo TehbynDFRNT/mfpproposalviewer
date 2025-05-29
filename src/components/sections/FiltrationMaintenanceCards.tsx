@@ -80,7 +80,7 @@ export default function FiltrationMaintenanceCards(
           <header>
             <h3 className="text-xl font-semibold">{snapshot.filtration_package_name || snapshot.spec_name} Filtration Package</h3>
             <p className="text-base text-muted-foreground">
-              Crystal-clear water with minimal maintenance
+              A complete filtration package included in your base price to ensure crystal-clear water with minimal maintenance
             </p>
           </header>
 

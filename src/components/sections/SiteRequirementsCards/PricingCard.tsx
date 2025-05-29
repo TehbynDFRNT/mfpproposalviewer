@@ -90,7 +90,7 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
             <header>
               <h3 className="text-xl font-semibold">Site Requirements</h3>
               <p className="text-base text-muted-foreground">
-                Professional site preparation and equipment
+                Additional requirements unique to your site, ensuring a premium long lasting pool installation.
               </p>
             </header>
 

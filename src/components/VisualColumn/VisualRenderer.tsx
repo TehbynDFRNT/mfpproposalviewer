@@ -9,6 +9,8 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { ResponsiveVideo } from '@/components/ResponsiveVideo';
+import { Card, CardContent } from '@/components/ui/card';
+import { Box } from 'lucide-react';
 import { fadeOut, visualIn } from '@/lib/animation';
 import type { Visual } from './VisualColumn.types';
 
@@ -33,6 +35,7 @@ export function VisualRenderer({
   render3DContent,
   use3DVisuals
 }: VisualRendererProps) {
+  console.log('VisualRenderer received visual:', visual);
   switch (visual.type) {
     case 'map':
       // Use coordinates from visual if available
@@ -127,6 +130,7 @@ export function VisualRenderer({
       );
 
     case 'video':
+      console.log('Rendering video:', visual.videoName);
       return (
         <motion.div
           key={`video-${visual.videoName}`}
@@ -134,7 +138,7 @@ export function VisualRenderer({
           initial="initial"
           animate="enter"
           exit="exit"
-          className="w-full h-full flex justify-center items-start"
+          className="w-full h-full flex justify-center items-start relative"
         >
           <ResponsiveVideo
             baseName={visual.videoName}
@@ -143,6 +147,19 @@ export function VisualRenderer({
             controls={false}
             loop={true}
           />
+          {/* Show 3D pending message when placeholder is playing and 3D is disabled */}
+          {visual.videoName === 'placeholder' && !use3DVisuals && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <Card className="bg-white/60 shadow-lg border-0">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 justify-center">
+                    <Box className="w-4 h-4 text-blue-500" />
+                    <p className="text-sm font-medium">Your 3D Render is Pending</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </motion.div>
       );
 

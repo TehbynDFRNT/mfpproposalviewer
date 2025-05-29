@@ -92,7 +92,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
         <CardContent className="p-5 space-y-6">
           <div className="mb-2">
             <h3 className="text-xl font-semibold">Concrete & Paving</h3>
-            <p className="text-base text-muted-foreground">Premium surfaces and finishes for your pool area</p>
+            <p className="text-base text-muted-foreground">A pool scaping option to bring life to your pool area with Premium surfaces and finishes using 3DStone pavers</p>
           </div>
 
           <Separator className="mb-4" />

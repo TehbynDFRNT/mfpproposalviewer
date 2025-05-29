@@ -43,6 +43,7 @@ export default function VisualColumn({
   );
   const { isLoaded, location: mapCenter } = useGeocode(address);
   
+  
   const [priceCardExpanded, setPriceCardExpanded] = useState<boolean>(false);
   const [sitePlanExpanded, setSitePlanExpanded] = useState<boolean>(false);
 
@@ -160,7 +161,7 @@ export default function VisualColumn({
       {/* Main Visual Content using our VisualRenderer component */}
       <AnimatePresence mode="wait" onExitComplete={resetScroll}>
         <VisualRenderer
-          key={`${activeSection}-${subIndex}`}
+          key={activeSection}
           visual={visual}
           isLoaded={isLoaded}
           mapCenter={mapCenter}
