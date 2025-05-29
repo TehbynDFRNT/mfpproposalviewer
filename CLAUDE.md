@@ -26,6 +26,8 @@
     - `sectionMachine.ts` - State machine for navigation
     - `layoutConstants.ts` - Layout-specific constants
     - `animation.ts` - Animation configurations
+    - `utils.ts` - Utility functions including `isSectionEmpty` 
+  for conditional section rendering
     - `/types` - TypeScript type definitions
       - `snapshot.ts` - SQL view data structure types
       - `pool-details.ts` - Pool details type definitions
@@ -219,44 +221,74 @@
   4. The client renders different sections based on the data 
   and user navigation
 
-  ## Data Structure and Migration
-  Current implementation has two data structures:
+  ## Data Structure and Price Calculator Architecture
 
-  1. **SQL View Structure (New)**: 
+  ### Current Implementation (Post-Refactoring)
+  The application now uses a centralized price calculation system:
+
+  1. **SQL View Structure**: 
      - Direct SQL view mapping with flat, snake_case properties
-   (e.g., `spec_name`, `home_address`)
-     - Defined in `/src/app/lib/types/snapshot.ts` as 
-  `ProposalSnapshot`
-     - Used by the server-side data fetching in 
-  `getProposalSnapshot.server.ts`
+     (e.g., `spec_name`, `home_address`, `created_at`, `updated_at`)
+     - Defined in `/src/types/snapshot.ts` as `ProposalSnapshot`
+     - Used by server-side data fetching in `getProposalSnapshot.server.ts`
 
-  2. **Component Structure (Legacy)**:
-     - Nested object structure with camelCase properties (e.g.,
-   `poolSpecification.name`, `poolProject.homeAddress`)
-     - Previously defined in the old `snapshot.ts` file (before
-   the recent changes)
-     - Still expected by all client-side components
+  2. **Centralized Price Calculator**:
+     - All components now use `usePriceCalculator` hook from `/src/hooks/use-price-calculator.ts`
+     - Returns `{ fmt, totals }` where:
+       - `fmt`: Currency formatter function
+       - `totals`: `DebugPriceTotals` interface with all calculated values
+     - Replaces previous scattered calculation logic across components
 
-  ### Migration Approach
-  We are refactoring components one by one to use the new flat 
-  SQL view structure directly. 
+  ### Price Calculator Hook Structure
+  The `usePriceCalculator` hook provides consistent pricing calculations:
 
-  **IMPORTANT**: 
-  - Use snake_case in component code to match the SQL view 
-  property names
-  - Adhere to the flat structure - don't recreate nested 
-  objects
-  - Standard TypeScript best practices are less important than 
-  consistency with the database fields
-  - When refactoring a component, update the import to use the 
-  new `ProposalSnapshot` type
+  ```typescript
+  const { fmt, totals } = usePriceCalculator(snapshot);
+  
+  // totals contains:
+  // - basePoolTotal: Base pool price with margin applied
+  // - siteRequirementsTotal: Site requirements with margin
+  // - electricalTotal: Electrical costs (margin included in DB)
+  // - concreteTotal: Concrete & paving costs (margin included)
+  // - fencingTotal: Glass + metal fencing costs (margin included)
+  // - waterFeatureTotal: Water feature costs (margin included)
+  // - retainingWallsTotal: Sum of all retaining wall costs
+  // - extrasTotal: All extras and add-ons (margin included)
+  // - grandTotalCalculated: Final total price
+  ```
 
-  ### Financial Calculations
-  Previously separated calculations have now been integrated:
+  ### Component Migration Status (COMPLETED)
+  All major components have been refactored to use the centralized calculator:
 
-  - **Base Pool Costs**: Combines fixed costs, variable costs, 
-  and shell cost
-  - **Base Pool Price**: Calculated using the formula: `Cost ÷ 
-  (1 - margin %)`
-  - **Installation Costs**: Include electrical, traffic 
-  control, bobcat, and crane costs
+  - ✅ **ProposalSummaryCards.tsx** - Uses `totals` structure
+  - ✅ **AcceptProposalDialog.tsx** - Uses `totals` structure  
+  - ✅ **PriceCard.tsx** - Uses `totals` structure
+  - ✅ **VisualColumn.tsx** - Passes `totals` to PriceCard
+  - ✅ **PriceDebugPanel.tsx** - Simplified to use calculator totals
+  - ✅ **All section components** - Use individual pricing logic but totals come from calculator
+
+  ### Database Field Standards
+  **IMPORTANT**: Use correct database field names:
+  - ❌ `snapshot.timestamp` (old/incorrect)
+  - ✅ `snapshot.created_at` and `snapshot.updated_at` (correct)
+  - ❌ `breakdown.grandTotal` (old structure)
+  - ✅ `totals.grandTotalCalculated` (new structure)
+
+  ### Financial Calculation Architecture
+  The centralized calculator handles all pricing logic:
+
+  - **Base Pool Price**: Combines shell cost, excavation, filtration, variable costs, and fixed costs (6285), then applies margin
+  - **Site Requirements**: Crane (with $700 allowance), bobcat, traffic control, and custom requirements with margin
+  - **Electrical**: Pre-calculated totals from database (margin already included)
+  - **Other Sections**: Use database totals where margin is pre-applied
+  - **Margin Application**: Calculated as `Cost ÷ (1 - margin %)` for applicable sections
+
+  ### Development Guidelines for Pricing Components
+  When working with pricing components:
+
+  1. **Always use the centralized hook**: `const { fmt, totals } = usePriceCalculator(snapshot);`
+  2. **Never recalculate totals**: Use the provided `totals` object values
+  3. **Handle null/undefined gracefully**: The `fmt` function handles null/undefined values
+  4. **Type safety**: Use `string | null` to `string | undefined` conversion with `|| undefined` when needed
+  5. **Conditional rendering**: Use `totals.sectionTotal > 0` for showing optional sections
+  6. **Consistent structure**: All pricing displays should follow the same section order and formatting

@@ -134,7 +134,7 @@ export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUp
     changeMessage: changeSuccessDialogMessage,
     onChange: handleChangeRequestSuccess,
     handleChangeRequestedStatusClick
-  } = useProposalDialogs(currentSnapshot.proposal_status, refreshProposalData);
+  } = useProposalDialogs(currentSnapshot.proposal_status || undefined, refreshProposalData);
 
   // Handle proposal acceptance error
   const handleAcceptError = (errorMessage: string) => {

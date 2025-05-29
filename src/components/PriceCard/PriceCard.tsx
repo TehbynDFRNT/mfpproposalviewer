@@ -8,22 +8,20 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
-import type { PriceBreakdown } from '@/hooks/use-price-calculator';
+import type { DebugPriceTotals } from '@/hooks/use-price-calculator';
 
 export interface PriceCardProps {
   expanded: boolean;
   onToggle: () => void;
-  fmt: (n: number) => string;
-  grandTotal: number;
-  breakdown: PriceBreakdown;
+  fmt: (n: number | null | undefined) => string;
+  totals: DebugPriceTotals;
 }
 
 export default function PriceCard({
   expanded,
   onToggle,
   fmt,
-  grandTotal,
-  breakdown
+  totals
 }: PriceCardProps) {
   return (
     <div className="hidden lg:flex absolute bottom-4 right-4 z-50 bg-background/90 backdrop-blur-sm text-foreground p-4 rounded-lg shadow-lg border border-[#DB9D6A]/20 w-[28rem] overflow-hidden">
@@ -57,51 +55,55 @@ export default function PriceCard({
               >
                 <div className="flex justify-between items-baseline">
                   <span className="font-medium">Base Pool</span>
-                  <span className="font-medium">{fmt(breakdown.basePoolPrice)}</span>
+                  <span className="font-medium">{fmt(totals.basePoolTotal)}</span>
                 </div>
-                <div className="flex justify-between items-baseline">
-                  <span className="font-medium">Installation</span>
-                  <span className="font-medium">{fmt(breakdown.installationTotal)}</span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <span className="font-medium">Filtration</span>
-                  <span className="font-medium">{fmt(breakdown.filtrationTotal)}</span>
-                </div>
-                {breakdown.concreteTotal > 0 && (
+                {totals.siteRequirementsTotal > 0 && (
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-medium">Site Requirements</span>
+                    <span className="font-medium">{fmt(totals.siteRequirementsTotal)}</span>
+                  </div>
+                )}
+                {totals.electricalTotal > 0 && (
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-medium">Electrical</span>
+                    <span className="font-medium">{fmt(totals.electricalTotal)}</span>
+                  </div>
+                )}
+                {totals.concreteTotal > 0 && (
                   <div className="flex justify-between items-baseline">
                     <span className="font-medium">Concrete & Paving</span>
-                    <span className="font-medium">{fmt(breakdown.concreteTotal)}</span>
+                    <span className="font-medium">{fmt(totals.concreteTotal)}</span>
                   </div>
                 )}
-                {breakdown.fencingTotal > 0 && (
+                {totals.fencingTotal > 0 && (
                   <div className="flex justify-between items-baseline">
                     <span className="font-medium">Fencing</span>
-                    <span className="font-medium">{fmt(breakdown.fencingTotal)}</span>
+                    <span className="font-medium">{fmt(totals.fencingTotal)}</span>
                   </div>
                 )}
-                {breakdown.waterFeatureTotal > 0 && (
+                {totals.waterFeatureTotal > 0 && (
                   <div className="flex justify-between items-baseline">
                     <span className="font-medium">Water Features</span>
-                    <span className="font-medium">{fmt(breakdown.waterFeatureTotal)}</span>
+                    <span className="font-medium">{fmt(totals.waterFeatureTotal)}</span>
                   </div>
                 )}
-                {(breakdown.retainingWallTotal || 0) > 0 && (
+                {totals.retainingWallsTotal > 0 && (
                   <div className="flex justify-between items-baseline">
                     <span className="font-medium">Retaining Walls</span>
-                    <span className="font-medium">{fmt(breakdown.retainingWallTotal || 0)}</span>
+                    <span className="font-medium">{fmt(totals.retainingWallsTotal)}</span>
                   </div>
                 )}
-                {breakdown.extrasTotal > 0 && (
+                {totals.extrasTotal > 0 && (
                   <div className="flex justify-between items-baseline">
                     <span className="font-medium">Extras & Add-ons</span>
-                    <span className="font-medium">{fmt(breakdown.extrasTotal)}</span>
+                    <span className="font-medium">{fmt(totals.extrasTotal)}</span>
                   </div>
                 )}
                 
                 <Separator className="my-3" />
                 <div className="flex justify-between items-baseline">
                   <span className="text-xl font-semibold">Total Quote</span>
-                  <span className="text-xl font-semibold">{fmt(breakdown.grandTotal)}</span>
+                  <span className="text-xl font-semibold">{fmt(totals.grandTotalCalculated)}</span>
                 </div>
               </motion.div>
               
@@ -119,7 +121,7 @@ export default function PriceCard({
               <span className="text-xl font-semibold">Total Quote:</span>
               <div className="flex items-center gap-3">
                 <span className="text-xl font-semibold">
-                  {fmt(grandTotal)}
+                  {fmt(totals.grandTotalCalculated)}
                 </span>
                 <motion.button 
                   onClick={onToggle}

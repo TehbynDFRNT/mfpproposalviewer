@@ -50,7 +50,7 @@ export default async function ProposalPage({
   try {
     const snapshot = await getProposalSnapshot(customerUuid);
     console.log('Server-side snapshot retrieved successfully:', {
-      timestamp: snapshot.timestamp
+      created_at: snapshot.created_at
     });
 
     // Return the PIN verification component which will show the proposal viewer after verification

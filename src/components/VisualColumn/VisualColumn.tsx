@@ -33,7 +33,7 @@ export default function VisualColumn({
 }: VisualColumnProps) {
   // Fetch site plan data and pricing calculations
   const { sitePlanVisual } = useSitePlan(snapshot?.project_id);
-  const { fmt, grandTotal, breakdown } = usePriceCalculator(snapshot);
+  const { fmt, totals } = usePriceCalculator(snapshot);
   const { renders } = useRenders(snapshot?.project_id, use3DVisuals);
   
   // Use the geocode hook instead of passing isLoaded and mapCenter as props
@@ -154,8 +154,7 @@ export default function VisualColumn({
         expanded={priceCardExpanded}
         onToggle={() => setPriceCardExpanded(!priceCardExpanded)}
         fmt={fmt}
-        grandTotal={grandTotal}
-        breakdown={breakdown}
+        totals={totals}
       />
       
       {/* Main Visual Content using our VisualRenderer component */}

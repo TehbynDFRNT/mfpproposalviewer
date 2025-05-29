@@ -43,7 +43,7 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
   const [proposalAccepted, setProposalAccepted] = useState(false);
 
   // Use the price calculator hook for consistent calculations
-  const { fmt, breakdown } = usePriceCalculator(snapshot);
+  const { fmt, totals } = usePriceCalculator(snapshot);
   
   // Use analytics hook for tracking events
   const analytics = useProposalAnalytics(snapshot);
@@ -163,58 +163,55 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
   const getProposalBreakdown = () => {
     if (!snapshot.project_id) return { totalPrice: 'N/A', subtotals: {} };
 
-    // Use the centralized breakdown from our usePriceCalculator hook
+    // Use the centralized totals from our usePriceCalculator hook
     return {
-      totalPrice: fmt(breakdown.grandTotal),
+      totalPrice: fmt(totals.grandTotalCalculated),
       subtotals: {
         basePool: {
-          label: 'Base Pool',
-          value: breakdown.basePoolPrice,
-          show: true, // Always show core sections
+          label: `Base ${snapshot.spec_name} Pool`,
+          value: totals.basePoolTotal,
+          show: true,
           sectionId: CATEGORY_IDS.POOL_SELECTION
         },
-        installation: {
-          label: 'Installation',
-          value: breakdown.installationTotal,
-          show: true, // Always show core sections
+        siteRequirements: {
+          label: 'Site Requirements',
+          value: totals.siteRequirementsTotal,
+          show: totals.siteRequirementsTotal > 0,
           sectionId: CATEGORY_IDS.SITE_REQUIREMENTS
         },
-        filtration: {
-          label: 'Filtration',
-          value: breakdown.filtrationTotal,
-          show: true, // Always show core sections
-          sectionId: CATEGORY_IDS.FILTRATION_MAINTENANCE
+        electrical: {
+          label: 'Electrical',
+          value: totals.electricalTotal,
+          show: totals.electricalTotal > 0,
+          sectionId: CATEGORY_IDS.SITE_REQUIREMENTS
         },
         concrete: {
           label: 'Concrete & Paving',
-          value: breakdown.concreteTotal,
+          value: totals.concreteTotal,
           show: !isSectionEmpty(CATEGORY_IDS.CONCRETE_PAVING, snapshot),
           sectionId: CATEGORY_IDS.CONCRETE_PAVING
         },
         fencing: {
           label: 'Fencing',
-          value: breakdown.fencingTotal,
+          value: totals.fencingTotal,
           show: !isSectionEmpty(CATEGORY_IDS.FENCING, snapshot),
           sectionId: CATEGORY_IDS.FENCING
         },
         waterFeature: {
           label: 'Water Feature',
-          value: breakdown.waterFeatureTotal,
+          value: totals.waterFeatureTotal,
           show: !isSectionEmpty(CATEGORY_IDS.WATER_FEATURE, snapshot),
           sectionId: CATEGORY_IDS.WATER_FEATURE
         },
         retainingWalls: {
           label: 'Retaining Walls',
-          value: snapshot.retaining_wall1_total_cost +
-                 (snapshot.retaining_wall2_total_cost || 0) +
-                 (snapshot.retaining_wall3_total_cost || 0) +
-                 (snapshot.retaining_wall4_total_cost || 0),
+          value: totals.retainingWallsTotal,
           show: !isSectionEmpty(CATEGORY_IDS.RETAINING_WALLS, snapshot),
           sectionId: CATEGORY_IDS.RETAINING_WALLS
         },
         extras: {
           label: 'Extras & Add-ons',
-          value: breakdown.extrasTotal,
+          value: totals.extrasTotal,
           show: !isSectionEmpty(CATEGORY_IDS.ADD_ONS, snapshot),
           sectionId: CATEGORY_IDS.ADD_ONS
         }
@@ -263,8 +260,8 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
                 <span className="font-medium">{snapshot.spec_name}</span>
               </div>
 
-              {/* Always show core sections first */}
-              {["basePool", "installation", "filtration"].map((key) => {
+              {/* Always show base pool first */}
+              {["basePool"].map((key) => {
                 const item = subtotals[key as keyof typeof subtotals];
                 return item && item.show && (
                   <div key={key} className="flex justify-between items-center">
@@ -274,8 +271,8 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
                 );
               })}
 
-              {/* Then show optional sections if they're not empty (according to isSectionEmpty) */}
-              {["concrete", "fencing", "waterFeature", "retainingWalls", "extras"].map((key) => {
+              {/* Then show optional sections if they have values */}
+              {["siteRequirements", "electrical", "concrete", "fencing", "waterFeature", "retainingWalls", "extras"].map((key) => {
                 const item = subtotals[key as keyof typeof subtotals];
                 return item && item.show && (
                   <div key={key} className="flex justify-between items-center">

@@ -47,7 +47,7 @@ export default async function DrawingsPage({
     const snapshot = await getProposalSnapshot(customerUuid);
 
     console.log('Server-side data retrieved successfully for drawings page:', {
-      timestamp: snapshot.timestamp,
+      created_at: snapshot.created_at,
       videoCount: snapshot.videos_json?.length || 0
     });
 

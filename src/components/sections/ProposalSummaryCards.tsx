@@ -8,15 +8,7 @@ import { usePriceCalculator } from "@/hooks/use-price-calculator";
 
 export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Use the centralized price calculator hook
-  const { fmt, breakdown } = usePriceCalculator(snapshot);
-  
-  // No longer need debugger code
-  
-  // Helper to format potentially null/undefined values
-  const safeFormat = (n: number | undefined | null) => {
-    if (n === undefined || n === null) return 'N/A';
-    return fmt(n);
-  };
+  const { fmt, totals } = usePriceCalculator(snapshot);
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -38,65 +30,69 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
             <div className="mb-4">
               <div className="flex justify-between">
                 <p className="font-medium">Base {snapshot.spec_name} Pool</p>
-                <p className="font-medium whitespace-nowrap">{fmt(breakdown.basePoolPrice)}</p>
+                <p className="font-medium whitespace-nowrap">{fmt(totals.basePoolTotal)}</p>
               </div>
             </div>
 
-            <div className="mb-4">
-              <div className="flex justify-between">
-                <p className="font-medium">Installation</p>
-                <p className="font-medium whitespace-nowrap">{fmt(breakdown.installationTotal)}</p>
+            {totals.siteRequirementsTotal > 0 && (
+              <div className="mb-4">
+                <div className="flex justify-between">
+                  <p className="font-medium">Site Requirements</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(totals.siteRequirementsTotal)}</p>
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="mb-4">
-              <div className="flex justify-between">
-                <p className="font-medium">Filtration</p>
-                <p className="font-medium whitespace-nowrap">{fmt(breakdown.filtrationTotal)}</p>
+            {totals.electricalTotal > 0 && (
+              <div className="mb-4">
+                <div className="flex justify-between">
+                  <p className="font-medium">Electrical</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(totals.electricalTotal)}</p>
+                </div>
               </div>
-            </div>
+            )}
 
-            {breakdown.concreteTotal > 0 && (
+            {totals.concreteTotal > 0 && (
               <div className="mb-4">
                 <div className="flex justify-between">
                   <p className="font-medium">Concrete & Paving</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(breakdown.concreteTotal)}</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(totals.concreteTotal)}</p>
                 </div>
               </div>
             )}
 
-            {breakdown.fencingTotal > 0 && (
+            {totals.fencingTotal > 0 && (
               <div className="mb-4">
                 <div className="flex justify-between">
                   <p className="font-medium">Fencing</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(breakdown.fencingTotal)}</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(totals.fencingTotal)}</p>
                 </div>
               </div>
             )}
 
-            {breakdown.waterFeatureTotal > 0 && (
+            {totals.waterFeatureTotal > 0 && (
               <div className="mb-4">
                 <div className="flex justify-between">
                   <p className="font-medium">Water Features</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(breakdown.waterFeatureTotal)}</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(totals.waterFeatureTotal)}</p>
                 </div>
               </div>
             )}
             
-            {(breakdown.retainingWallTotal || 0) > 0 && (
+            {totals.retainingWallsTotal > 0 && (
               <div className="mb-4">
                 <div className="flex justify-between">
                   <p className="font-medium">Retaining Walls</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(breakdown.retainingWallTotal || 0)}</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(totals.retainingWallsTotal)}</p>
                 </div>
               </div>
             )}
 
-            {breakdown.extrasTotal > 0 && (
+            {totals.extrasTotal > 0 && (
               <div className="mb-4">
                 <div className="flex justify-between">
                   <p className="font-medium">Extras & Add-ons</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(breakdown.extrasTotal)}</p>
+                  <p className="font-medium whitespace-nowrap">{fmt(totals.extrasTotal)}</p>
                 </div>
               </div>
             )}
@@ -107,7 +103,7 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
           {/* Grand total */}
           <div className="flex justify-between items-center mt-1">
             <p className="text-xl font-semibold">Total Investment</p>
-            <p className="text-xl font-semibold">{fmt(breakdown.grandTotal)}</p>
+            <p className="text-xl font-semibold">{fmt(totals.grandTotalCalculated)}</p>
           </div>
         </CardContent>
       </Card>
@@ -135,7 +131,7 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
             </li>
           </ul>
           <p className="text-base text-muted-foreground mt-4">
-            All prices are inclusive of GST and valid for 30 days from {new Date(snapshot.timestamp).toLocaleDateString('en-AU')}.
+            All prices are inclusive of GST and valid for 30 days from {new Date(snapshot.created_at).toLocaleDateString('en-AU')}.
             Terms and conditions apply.
           </p>
         </CardContent>
