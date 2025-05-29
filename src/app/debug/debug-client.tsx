@@ -121,6 +121,7 @@ export default function DebugClient({ snapshotData, errorMessage, initialUuid }:
       {/* Price Debug Panel Component */}
       {snapshotData && <PriceDebugPanel snapshotData={snapshotData} />}
       
+      
       <div className="mt-8 bg-white p-4 rounded shadow-sm">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-lg font-semibold">Complete Snapshot Data:</h2>

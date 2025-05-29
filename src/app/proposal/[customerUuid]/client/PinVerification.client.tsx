@@ -12,10 +12,64 @@ import { usePinVerification } from '@/hooks/use-pin-verification';
 import { useProposalRefresh } from '@/hooks/use-proposal-refresh';
 
 interface PinVerificationProps {
-  snapshot: ProposalSnapshot;
+  snapshot: ProposalSnapshot | null;
+  customerUuid?: string;
 }
 
-export default function PinVerification({ snapshot: initialSnapshot }: PinVerificationProps) {
+export default function PinVerification({ snapshot: initialSnapshot, customerUuid }: PinVerificationProps) {
+  // If no snapshot provided, we can't proceed - show invalid PIN message
+  if (!initialSnapshot) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center bg-[#07032D] proposal-background overflow-hidden">
+        {/* Logo above the PIN card */}
+        <div className="mb-8 flex flex-col items-center">
+          <Image
+            src="/Logo/logo-white.png"
+            alt="MFP Pools Logo"
+            width={100}
+            height={24}
+            priority
+            style={{ width: 'auto', height: 'auto' }}
+          />
+        </div>
+
+        <Card className="w-[350px] shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-center text-xl font-semibold">Enter PIN</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center mb-4">
+              Please enter the 4-digit PIN provided to you to view your proposal.
+            </p>
+            <div className="mb-6">
+              <div className="flex justify-center">
+                <InputOTP
+                  maxLength={4}
+                  value=""
+                  onChange={() => {}}
+                  containerClassName="group"
+                  disabled={true}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex-col">
+            <p className="text-center text-sm text-muted-foreground">
+              If you don't have a PIN, please contact your pool consultant.
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
   // Use the proposal refresh hook
   const { 
     snapshot, 
@@ -37,7 +91,7 @@ export default function PinVerification({ snapshot: initialSnapshot }: PinVerifi
     handlePinChange
   } = usePinVerification({
     correctPin: snapshot.pin || '',
-    customerUuid: snapshot.project_id || '',
+    customerUuid: snapshot.project_id || customerUuid || '',
     userInfo: {
       email: snapshot.email,
       name: snapshot.owner1,

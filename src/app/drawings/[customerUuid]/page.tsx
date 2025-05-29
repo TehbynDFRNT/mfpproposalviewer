@@ -6,7 +6,7 @@
 import { getProposalSnapshot } from '@/app/api/get-proposal-snapshot/getProposalSnapshot.server';
 import type { ProposalSnapshot } from '@/types/snapshot';
 import type { Metadata, ResolvingMetadata } from 'next';
-import DrawingsViewer from "@/app/drawings/[customerUuid]/client/DrawingsViewer.client";
+import DrawingsPinVerification from "@/app/drawings/[customerUuid]/client/DrawingsPinVerification.client";
 
 // Generate dynamic metadata based on snapshot data
 export async function generateMetadata(
@@ -16,19 +16,27 @@ export async function generateMetadata(
   // Await params before using its properties
   const { customerUuid } = await params;
   
-  // Fetch the snapshot data
-  const snapshot = await getProposalSnapshot(customerUuid);
+  try {
+    // Fetch the snapshot data
+    const snapshot = await getProposalSnapshot(customerUuid);
 
-  // Build title using owner names
-  const ownerNames = snapshot.owner2
-    ? `${snapshot.owner1.split(' ')[0]} & ${snapshot.owner2.split(' ')[0]}`
-    : snapshot.owner1;
+    // Build title using owner names
+    const ownerNames = snapshot.owner2
+      ? `${snapshot.owner1.split(' ')[0]} & ${snapshot.owner2.split(' ')[0]}`
+      : snapshot.owner1;
 
-  // Create metadata object
-  return {
-    title: `${ownerNames} | 3D Render Upload - MFP Pools`,
-    description: `3D render upload portal for ${ownerNames}'s pool project.`,
-  };
+    // Create metadata object
+    return {
+      title: `${ownerNames} | 3D Render Upload - MFP Pools`,
+      description: `3D render upload portal for ${ownerNames}'s pool project.`,
+    };
+  } catch (error) {
+    // Return generic metadata for invalid UUIDs to prevent enumeration attacks
+    return {
+      title: '3D Render Upload - MFP Pools',
+      description: 'Upload portal for 3D pool renders.',
+    };
+  }
 }
 
 export default async function DrawingsPage({
@@ -51,9 +59,10 @@ export default async function DrawingsPage({
       videoCount: snapshot.videos_json?.length || 0
     });
 
-    return <DrawingsViewer snapshot={snapshot} />;
+    return <DrawingsPinVerification snapshot={snapshot} />;
   } catch (error) {
     console.error('Error fetching data for drawings page:', error);
-    throw error; // Let Next.js error handling take over
+    // Show PIN verification even for invalid UUIDs to prevent enumeration attacks
+    return <DrawingsPinVerification snapshot={null} customerUuid={customerUuid} />;
   }
 }

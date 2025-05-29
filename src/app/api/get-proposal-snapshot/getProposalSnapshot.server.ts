@@ -15,7 +15,8 @@ function isValidUuid(uuid: string): boolean {
  */
 export async function getProposalSnapshot(customerUuid: string): Promise<ProposalSnapshot> {
   if (!isValidUuid(customerUuid)) {
-    throw new Error(`Invalid customerUuid "${customerUuid}"`)
+    console.log(`[getProposalSnapshot] Invalid UUID format: ${customerUuid?.slice(0, 8)}...`)
+    throw new Error(`Invalid customerUuid format`)
   }
 
   const { data, error } = await supabase

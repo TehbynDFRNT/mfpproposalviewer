@@ -21,19 +21,27 @@ export async function generateMetadata(
   // Await params before using its properties
   const { customerUuid } = await params;
   
-  // Fetch the snapshot data
-  const snapshot = await getProposalSnapshot(customerUuid);
+  try {
+    // Fetch the snapshot data
+    const snapshot = await getProposalSnapshot(customerUuid);
 
-  // Build title using owner names
-  const ownerNames = snapshot.owner2
-    ? `${snapshot.owner1.split(' ')[0]} & ${snapshot.owner2.split(' ')[0]}`
-    : snapshot.owner1;
+    // Build title using owner names
+    const ownerNames = snapshot.owner2
+      ? `${snapshot.owner1.split(' ')[0]} & ${snapshot.owner2.split(' ')[0]}`
+      : snapshot.owner1;
 
-  // Create metadata object
-  return {
-    title: `${ownerNames} | Your Pool Proposal - MFP Pools`,
-    description: `Pool proposal for ${ownerNames} featuring a ${snapshot.spec_name || 'custom'} pool.`,
-  };
+    // Create metadata object
+    return {
+      title: `${ownerNames} | Your Pool Proposal - MFP Pools`,
+      description: `Pool proposal for ${ownerNames} featuring a ${snapshot.spec_name || 'custom'} pool.`,
+    };
+  } catch (error) {
+    // Return generic metadata for invalid UUIDs to prevent enumeration attacks
+    return {
+      title: 'Pool Proposal - MFP Pools',
+      description: 'Your personalized pool proposal from MFP Pools.',
+    };
+  }
 }
 
 export default async function ProposalPage({
@@ -57,6 +65,7 @@ export default async function ProposalPage({
     return <PinVerification snapshot={snapshot} />;
   } catch (error) {
     console.error('Error fetching proposal snapshot:', error);
-    throw error; // Let Next.js error handling take over
+    // Show PIN verification even for invalid UUIDs to prevent enumeration attacks
+    return <PinVerification snapshot={null} customerUuid={customerUuid} />;
   }
 }
