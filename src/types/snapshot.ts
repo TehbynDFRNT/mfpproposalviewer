@@ -7,14 +7,16 @@ export interface ProposalSnapshot {
   /* 01–10: CORE PROJECT & CUSTOMER */
   project_id: string;
   owner1: string;
-  owner2?: string;
+  owner2: string | null; // owner2 can be null
   email: string;
   phone: string;
   home_address: string;
   site_address: string;
   proposal_name: string;
   installation_area: string;
-  resident_homeowner: boolean;
+  resident_homeowner: boolean; 
+  created_at: string; // From pj.created_at (Timestamptz converted to string)
+  updated_at: string; // From pj.updated_at (Timestamptz converted to string)
   
   /* BASE POOL PRICE (Pool-spec + individual pool costs + excavation) */
   // Pool specification (dimensions + base buy-prices)
@@ -66,15 +68,14 @@ export interface ProposalSnapshot {
   elec_standard_power_flag: boolean;
   elec_fence_earthing_flag: boolean;
   elec_heat_pump_circuit_flag: boolean;
-  elec_standard_power_rate?: number;
-  elec_fence_earthing_rate?: number;
-  elec_heat_pump_circuit_rate?: number;
+  elec_standard_power_rate: number | null; // SQL may return NULL due to CASE or LEFT JOIN
+  elec_fence_earthing_rate: number | null; // SQL may return NULL
+  elec_heat_pump_circuit_rate: number | null; // SQL may return NULL
   elec_total_cost: number;
 
   //Custom Requirements
-
-  site_requirements_data:  string;
-  site_requirement_notes: string;
+  site_requirements_data: string; // From pj.site_requirements_data (Type assumed string, could be JSON string)
+  site_requirements_notes: string; // Formerly site_requirement_notes
   
   /* CONCRETE & PAVING */
   // Concrete cuts
@@ -100,44 +101,46 @@ export interface ProposalSnapshot {
   extra_concreting_margin: number;
   extra_concreting_unit_price: number;
   extra_concreting_sqm: number;
-  extra_concreting_calc_total: number;
-  extra_concreting_saved_total: number;
+  // extra_concreting_calc_total and extra_concreting_saved_total removed.
+  extra_concreting_cost: number; // Replaces extra_concreting_calc_total and extra_concreting_saved_total, matches SQL extra_concreting_cost
   
   // Concrete pump
   concrete_pump_needed: boolean;
-  concrete_pump_quantity: number | null;
+  // concrete_pump_quantity renamed to concrete_pump_hours
+  concrete_pump_hours: number | null; // Formerly concrete_pump_quantity
   concrete_pump_total_cost: number;
   
   // Under-fence concrete strips
+  // uf_strips_raw renamed to uf_strips_data
+  uf_strips_data: string; // Formerly uf_strips_raw, matches SQL uf_strips_data (Type assumed string, could be JSON string)
   uf_strips_cost: number;
-  uf_strips_raw: string;
   
   /* FRAMELESS-GLASS FENCING */
   glass_linear_meters: number | null;
-  glass_fence_cost: number | null;
+  // Redundant/intermediate cost fields (glass_fence_cost, glass_gate_cost, glass_earthing_cost) removed.
+  // These are not direct outputs from the SQL view. The view provides glass_total_cost.
   glass_gates: number | null;
-  glass_gate_cost: number | null;
   glass_simple_panels: number | null;
   glass_complex_panels: number | null;
   glass_earthing_required: boolean | null;
-  glass_earthing_cost: number | null;
-  glass_fence_total_cost: number | null;
+  // glass_fence_total_cost renamed to glass_total_cost
+  glass_total_cost: number | null; // Formerly glass_fence_total_cost, matches SQL
   
   /* FLAT-TOP METAL FENCING */
   metal_linear_meters: number | null;
-  metal_fence_cost: number | null;
+  // Redundant/intermediate cost fields (metal_fence_cost, metal_gate_cost, metal_earthing_cost) removed.
   metal_gates: number | null;
-  metal_gate_cost: number | null;
   metal_simple_panels: number | null;
   metal_complex_panels: number | null;
   metal_earthing_required: boolean | null;
-  metal_earthing_cost: number | null;
-  metal_fence_total_cost: number | null;
+  // metal_fence_total_cost renamed to metal_total_cost
+  metal_total_cost: number | null; // Formerly metal_fence_total_cost, matches SQL
   
   /* COMPOSITE FENCING TOTAL */
   fencing_total_cost: number | null;
   
   /* FILTRATION PACKAGE & HANDOVER KIT */
+  filtration_package_id: string | null; // Added from SQL (pf.filtration_package_id - UUID as string), can be null
   filtration_package_name: string;
   pump_name: string;
   pump_model: string;
@@ -169,34 +172,25 @@ export interface ProposalSnapshot {
   water_feature_total_cost: number;
   
   /* RETAINING WALLS (up to 4 raw sets) */
-  retaining_wall1_type: string;
-  retaining_wall1_height1: number;
-  retaining_wall1_height2: number;
-  retaining_wall1_length: number;
-  retaining_wall1_total_cost: number;
-  retaining_wall2_type?: string;
-  retaining_wall2_height1?: number;
-  retaining_wall2_height2?: number;
-  retaining_wall2_length?: number;
-  retaining_wall2_total_cost?: number;
-  retaining_wall3_type?: string;
-  retaining_wall3_height1?: number;
-  retaining_wall3_height2?: number;
-  retaining_wall3_length?: number;
-  retaining_wall3_total_cost?: number;
-  retaining_wall4_type?: string;
-  retaining_wall4_height1?: number;
-  retaining_wall4_height2?: number;
-  retaining_wall4_length?: number;
-  retaining_wall4_total_cost?: number;
+  // Individual retaining_wallX fields (retaining_wall1_type, etc.) removed.
+  // Replaced by retaining_walls_json to match SQL view structure.
+  retaining_walls_json: Array<{ 
+    wall_type: string;
+    height1: number;
+    height2: number | null; // height2 can be null
+    length: number;
+    total_cost: number;
+  }> | null; // This field can be null if no retaining walls (due to LEFT JOIN)
   
   /* EXTRAS & UPGRADES */
   // Pool cleaner
   cleaner_included: boolean;
-  cleaner_model_number: string;
+  // cleaner_model_number removed; not directly available in the SQL view's selected fields for cleaner.
   cleaner_name: string;
-  cleaner_price: number;
+  // cleaner_price renamed to cleaner_unit_price
+  cleaner_unit_price: number; // Formerly cleaner_price, matches SQL
   cleaner_margin: number;
+  cleaner_cost_price: number; // Added from SQL (plc.cost_price)
   
   // Heating options
   include_heat_pump: boolean;
@@ -205,52 +199,84 @@ export interface ProposalSnapshot {
   // Heat pump product details
   heat_pump_sku: string;
   heat_pump_description: string;
-  heat_pump_cost: number;
+  heat_pump_cost: number; // Matches heat_opt.heat_pump_cost from SQL
+  // heat_pump_install_cost split into heat_pump_installation_cost and heat_pump_install_cost_reference
+  heat_pump_installation_cost: number; // Matches heat_opt.heat_pump_installation_cost from SQL
   heat_pump_margin: number;
   heat_pump_rrp: number;
-  heat_pump_install_cost: number;
-  heat_pump_install_inclusions: string;
+  heat_pump_install_cost_reference: number | null; // Added from SQL (hi_hp.installation_cost), can be null
+  heat_pump_install_inclusions: string | null; // Type changed to string | null, as it can be null from LEFT JOIN
   
   // Blanket-roller product details
   blanket_roller_sku: string;
   blanket_roller_description: string;
-  blanket_roller_cost: number;
+  blanket_roller_cost: number; // Matches heat_opt.blanket_roller_cost from SQL
+  // br_install_cost split into blanket_roller_installation_cost and br_install_cost_reference
+  blanket_roller_installation_cost: number; // Matches heat_opt.blanket_roller_installation_cost from SQL
   blanket_roller_margin: number;
   blanket_roller_rrp: number;
-  br_install_cost: number;
-  br_install_inclusions: string;
+  br_install_cost_reference: number | null; // Added from SQL (hi_br.installation_cost), can be null
+  br_install_inclusions: string | null; // Type changed to string | null, as it can be null from LEFT JOIN
   
   // Totals from the quote
   heating_total_cost: number;
   heating_total_margin: number;
   
-  // Added by getProposalSnapshot function
-  timestamp: string;
+  /* FENCING PRICE BOOK */
+  // Full lookup for fencing unit prices from the database
+  fencing_costs_json: Array<{
+    id: string;
+    item: string;
+    type: string;
+    unit_price: number;
+    category: string;
+  }>;
+  
+  /* GENERAL EXTRAS */
+  selected_extras_json: Array<{
+    id: string;
+    general_extra_id: string;
+    name: string;
+    sku: string;
+    type: string;
+    description: string;
+    quantity: number;
+    cost: number;
+    margin: number;
+    rrp: number;
+    total_cost: number;
+    total_margin: number;
+    total_rrp: number;
+  }> | null;
+  extras_total_cost: number | null;
+  extras_total_margin: number | null;
+  extras_total_rrp: number | null;
+  
+  // timestamp field removed. It was noted as "Added by getProposalSnapshot function"
+  // and is not part of the proposal_snapshot_v SQL view, aligning with the objective
+  // to match the SQL view for a 1:1 data object.
 
   /* 3D VIDEOS & VISUALS */
-  videos_json?: Array<{
+  videos_json: Array<{ // Type changed from optional to nullable, can be null due to LEFT JOIN
     video_type: string;
     video_path: string;
     created_at: string;
-  }>;
+  }> | null;
 
   /* Proposal Status Fields (from pool_proposal_status table) */
-  proposal_status?: string;
-  render_ready?: boolean;
-  last_viewed?: string;
-  accepted_datetime?: string;
-  accepted_ip?: string;
-  last_change_requested?: string;
-  version?: number;
-  pin?: string;
+  // Fields from pps (LEFT JOIN) changed from optional to nullable for accurate SQL type mapping
+  proposal_status: string | null;
+  render_ready: boolean | null; // From pps.render_ready
+  last_viewed: string | null;
+  accepted_datetime: string | null;
+  accepted_ip: string | null;
+  last_change_requested: string | null;
+  version: number | null;
+  pin: string | null;
   
   /* Latest Change Request JSON (from the most recent change request) */
-  change_request_json?: any;
+  change_request_json: any | null; // Type changed from optional to nullable, can be null due to LEFT JOIN
 
-  /* Change Request History (aggregated from change_requests table) */
-  change_requests_json?: Array<{
-    id: string;
-    payload: any;
-    created_at: string;
-  }>;
+  // change_requests_json field (and its comment block) removed.
+  // This field is not present in the proposal_snapshot_v SQL view.
 }

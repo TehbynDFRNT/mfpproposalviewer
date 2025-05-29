@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Image from "next/image";
 import type { ProposalSnapshot } from "@/types/snapshot";
-import { calculatePrices } from '@/hooks/use-price-calculator';
+import { usePriceCalculator } from '@/hooks/use-price-calculator';
 
 // Define specific item types for clarity
 interface PavingItem {
@@ -16,8 +16,8 @@ interface PavingItem {
 }
 
 export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSnapshot }) {
-  // Use the price calculator for formatting and calculations
-  const { fmt, breakdown } = calculatePrices(snapshot);
+  // Use the price calculator for formatting and calculated total
+  const { fmt, totals } = usePriceCalculator(snapshot);
   
   // Calculate combined paving costs and square meters
   const totalPavingCost = (snapshot.extra_paving_cost || 0) + (snapshot.existing_paving_cost || 0);
@@ -34,7 +34,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
         cost: totalPavingCost
       } : null,
 
-    (snapshot.extra_concreting_saved_total && snapshot.extra_concreting_saved_total > 0) ?
+    (snapshot.extra_concreting_cost && snapshot.extra_concreting_cost > 0) ?
       {
         label: 'Extra Concreting',
         detail: snapshot.extra_concreting_type
@@ -43,7 +43,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
               .replace(/\b\w/g, c => c.toUpperCase())
           : 'Standard finish',
         sqm: snapshot.extra_concreting_sqm || 0,
-        cost: snapshot.extra_concreting_saved_total
+        cost: snapshot.extra_concreting_cost
       } : null,
 
     // Moved down below separator
@@ -58,8 +58,8 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
     snapshot.concrete_pump_needed ?
       {
         label: 'Concrete Pump',
-        detail: snapshot.concrete_pump_quantity
-          ? `Needed for ${snapshot.concrete_pump_quantity} Day${snapshot.concrete_pump_quantity !== 1 ? 's' : ''}`
+        detail: snapshot.concrete_pump_hours
+          ? `Needed for ${snapshot.concrete_pump_hours} Hour${snapshot.concrete_pump_hours !== 1 ? 's' : ''}`
           : 'Required for installation',
         cost: snapshot.concrete_pump_total_cost || 0
       } : null,
@@ -83,7 +83,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
     }));
   
   // Use the concrete total from the price calculator
-  const totalCost = breakdown.concreteTotal;
+  const totalCost = totals.concreteTotal;
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -145,7 +145,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
           <div className="flex justify-between items-center">
             <p className="font-semibold text-xl">Total Cost</p>
             <p className="text-xl font-semibold">
-              {fmt(breakdown.concreteTotal)}
+              {fmt(totals.concreteTotal)}
             </p>
           </div>
         </CardContent>

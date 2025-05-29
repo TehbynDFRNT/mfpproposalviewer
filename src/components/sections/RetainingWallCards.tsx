@@ -9,83 +9,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Image from 'next/image';
 import { useState } from 'react';
 import type { ProposalSnapshot } from '@/types/snapshot';
-import { calculatePrices } from '@/hooks/use-price-calculator';
+import { usePriceCalculator } from '@/hooks/use-price-calculator';
 
-// Define proper wall type to help TypeScript
+// Define proper wall type to help TypeScript - matches the JSONB structure
 interface RetainingWall {
   id: number;
-  type: string;
+  wall_type: string;
   height1: number;
-  height2?: number;
+  height2: number | null;
   length: number;
-  totalCost: number;
+  total_cost: number;
 }
 
 export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Helper function to calculate wall area using height1, height2, and length
-  const calculateWallArea = (height1: number, height2: number | undefined, length: number) => {
+  const calculateWallArea = (height1: number, height2: number | null, length: number) => {
     // If height2 is provided, use average height
     const avgHeight = height2 ? (height1 + height2) / 2 : height1;
     return avgHeight * length;
   };
 
-  // Create wall objects from snapshot with type safety
-  const wallsArray: (RetainingWall | null)[] = [
-    snapshot.retaining_wall1_type &&
-    typeof snapshot.retaining_wall1_height1 === 'number' &&
-    typeof snapshot.retaining_wall1_length === 'number' &&
-    typeof snapshot.retaining_wall1_total_cost === 'number' ?
-    {
-      id: 1,
-      type: snapshot.retaining_wall1_type,
-      height1: snapshot.retaining_wall1_height1,
-      height2: snapshot.retaining_wall1_height2,
-      length: snapshot.retaining_wall1_length,
-      totalCost: snapshot.retaining_wall1_total_cost
-    } : null,
-
-    snapshot.retaining_wall2_type &&
-    typeof snapshot.retaining_wall2_height1 === 'number' &&
-    typeof snapshot.retaining_wall2_length === 'number' &&
-    typeof snapshot.retaining_wall2_total_cost === 'number' ?
-    {
-      id: 2,
-      type: snapshot.retaining_wall2_type,
-      height1: snapshot.retaining_wall2_height1,
-      height2: snapshot.retaining_wall2_height2,
-      length: snapshot.retaining_wall2_length,
-      totalCost: snapshot.retaining_wall2_total_cost
-    } : null,
-
-    snapshot.retaining_wall3_type &&
-    typeof snapshot.retaining_wall3_height1 === 'number' &&
-    typeof snapshot.retaining_wall3_length === 'number' &&
-    typeof snapshot.retaining_wall3_total_cost === 'number' ?
-    {
-      id: 3,
-      type: snapshot.retaining_wall3_type,
-      height1: snapshot.retaining_wall3_height1,
-      height2: snapshot.retaining_wall3_height2,
-      length: snapshot.retaining_wall3_length,
-      totalCost: snapshot.retaining_wall3_total_cost
-    } : null,
-
-    snapshot.retaining_wall4_type &&
-    typeof snapshot.retaining_wall4_height1 === 'number' &&
-    typeof snapshot.retaining_wall4_length === 'number' &&
-    typeof snapshot.retaining_wall4_total_cost === 'number' ?
-    {
-      id: 4,
-      type: snapshot.retaining_wall4_type,
-      height1: snapshot.retaining_wall4_height1,
-      height2: snapshot.retaining_wall4_height2,
-      length: snapshot.retaining_wall4_length,
-      totalCost: snapshot.retaining_wall4_total_cost
-    } : null
-  ];
-  
-  // Type-safe filter for non-null walls
-  const availableWalls: RetainingWall[] = wallsArray.filter((wall): wall is RetainingWall => wall !== null);
+  // Get walls from the JSONB structure and add IDs for component state management
+  const availableWalls: RetainingWall[] = (snapshot.retaining_walls_json || [])
+    .map((wall, index) => ({
+      id: index + 1,
+      ...wall
+    }))
+    .sort((a, b) => a.wall_type.localeCompare(b.wall_type));
 
   // State to track which wall is selected - define before conditional returns
   const [selectedWallId, setSelectedWallId] = useState(availableWalls.length > 0 ? availableWalls[0].id : 0);
@@ -93,11 +43,11 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
   // If no retaining walls, don't render anything
   if (availableWalls.length === 0) return null;
 
-  // Get the price calculator for consistent formatting and calculations
-  const { fmt, breakdown } = calculatePrices(snapshot);
+  // Get the price calculator for consistent formatting and calculated total
+  const { fmt, totals } = usePriceCalculator(snapshot);
   
   // Use the calculated retaining wall total from the price calculator
-  const totalRetainingWallCost = breakdown.retainingWallTotal;
+  const totalRetainingWallCost = totals.retainingWallsTotal;
 
   // Get the currently selected wall
   const selectedWall = availableWalls.find(wall => wall.id === selectedWallId) || availableWalls[0];
@@ -149,7 +99,7 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
                 <SelectContent>
                   {availableWalls.map((wall) => (
                     <SelectItem key={wall.id} value={wall.id.toString()}>
-                      Wall {wall.id}: {wall.type}
+                      {wall.wall_type}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -170,7 +120,7 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
                 <div>
                   <p className="font-medium">Type</p>
                 </div>
-                <p className="font-medium whitespace-nowrap">{selectedWall.type}</p>
+                <p className="font-medium whitespace-nowrap">{selectedWall.wall_type}</p>
               </div>
 
               {/* Wall Height */}
@@ -207,7 +157,7 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
           {/* This wall's price */}
           <div className="flex justify-between items-center mt-1">
             <p className="text-xl font-semibold">Subtotal</p>
-            <p className="text-xl font-semibold">{fmt(selectedWall.totalCost)}</p>
+            <p className="text-xl font-semibold">{fmt(selectedWall.total_cost)}</p>
           </div>
         </CardContent>
       </Card>

@@ -7,11 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator }         from '@/components/ui/separator';
 import { subCardFade }       from '@/lib/animation';
 import type { ProposalSnapshot } from '@/types/snapshot';
-import { calculatePrices } from '@/hooks/use-price-calculator';
+import { usePriceCalculator } from '@/hooks/use-price-calculator';
 
 export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
-  // Use the price calculator for formatting and calculations
-  const { fmt, breakdown } = calculatePrices(snapshot);
+  // Use the price calculator for formatting and calculated total
+  const { fmt, totals } = usePriceCalculator(snapshot);
   
   // Apply margin function for individual line items
   const marginPercent = snapshot.pool_margin_pct || 0;
@@ -21,17 +21,36 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
   
   // Site prep costs with margin applied to each item
   const craneLabel = snapshot.crn_name;
-  const craneCost = applyMargin(snapshot.crane_cost);
+  const rawCraneCost = snapshot.crane_cost;
   
-  // Separate bobcat and excavation
+  // Handle crane cost logic: $700 allowance included in base price
+  const getCraneDisplayInfo = () => {
+    if (rawCraneCost === 700) {
+      return {
+        displayCost: 'Included in Base Price',
+        showSubtext: false,
+        isIncluded: true
+      };
+    } else if (rawCraneCost > 700) {
+      return {
+        displayCost: applyMargin(rawCraneCost - 700),
+        showSubtext: true,
+        isIncluded: false
+      };
+    } else {
+      return {
+        displayCost: applyMargin(rawCraneCost),
+        showSubtext: false,
+        isIncluded: false
+      };
+    }
+  };
+  
+  const craneInfo = getCraneDisplayInfo();
+  
+  // Separate bobcat
   const bobcatLabel = snapshot.bob_size_category;
   const bobcatCost = applyMargin(snapshot.bobcat_cost);
-  
-  // Excavation from dig_types
-  const excavationLabel = snapshot.dig_name;
-  const excavationCost = snapshot.dig_excavation_rate * snapshot.dig_excavation_hours;
-  const truckCost = snapshot.dig_truck_rate * snapshot.dig_truck_hours * snapshot.dig_truck_qty;
-  const excavationTotalCost = applyMargin(excavationCost + truckCost);
   
   const trafficLabel = snapshot.tc_name;
   const trafficCost = applyMargin(snapshot.traffic_control_cost);
@@ -52,8 +71,9 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
     } : null,
   ].filter((i): i is { label: string; cost: number } => i !== null);
 
-  // Use the installation total from the price calculator
-  const totalInstallation = breakdown.installationTotal;
+  // Use separate totals from the price calculator
+  const siteRequirementsTotal = totals.siteRequirementsTotal;
+  const electricalTotal = totals.electricalTotal;
 
   return (
     <motion.div
@@ -64,12 +84,13 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
       className="w-full min-h-[80vh] py-4"
     >
       <div className="space-y-6 h-full overflow-y-auto">
+        {/* Site Requirements Card */}
         <Card className="w-full shadow-lg">
           <CardContent className="p-5 space-y-6">
             <header>
-              <h3 className="text-xl font-semibold">{snapshot.spec_name} Installation</h3>
+              <h3 className="text-xl font-semibold">Site Requirements</h3>
               <p className="text-base text-muted-foreground">
-                Professional site preparation and electrical work
+                Professional site preparation and equipment
               </p>
             </header>
 
@@ -81,19 +102,14 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
                 <div className="mb-4">
                   <div className="flex justify-between">
                     <p className="font-medium">Crane Service</p>
-                    <p className="font-medium whitespace-nowrap">{fmt(craneCost)}</p>
+                    <p className="font-medium whitespace-nowrap">
+                      {craneInfo.isIncluded ? craneInfo.displayCost as string : fmt(craneInfo.displayCost as number)}
+                    </p>
                   </div>
                   <p className="text-base text-muted-foreground mt-0.5">{craneLabel}</p>
-                </div>
-              )}
-              
-              {excavationLabel && (
-                <div className="mb-4">
-                  <div className="flex justify-between">
-                    <p className="font-medium">Excavation</p>
-                    <p className="font-medium whitespace-nowrap">{fmt(excavationTotalCost)}</p>
-                  </div>
-                  <p className="text-base text-muted-foreground mt-0.5">{excavationLabel}</p>
+                  {craneInfo.showSubtext && (
+                    <p className="text-base text-muted-foreground mt-0.5">$700 Crane allowance included in base price</p>
+                  )}
                 </div>
               )}
               
@@ -136,65 +152,80 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
                     : null
                   }
                   
-                  {snapshot.site_requirement_notes && (
-                    <p className="text-base text-muted-foreground mt-0.5 mb-4">{snapshot.site_requirement_notes}</p>
+                  {snapshot.site_requirements_notes && (
+                    <p className="text-base text-muted-foreground mt-0.5 mb-4">{snapshot.site_requirements_notes}</p>
                   )}
                 </>
               )}
             </div>
 
-            {/* Electrical costs */}
-            {electricalItems.length > 0 && (
-              <>
-                <Separator className="my-3" />
-                
-                <div className="space-y-3">
-                  <div className="mb-2">
-                    <p className="text-lg font-semibold">Electrical Requirements</p>
-                  </div>
-                  
-                  {electricalItems.map((item, idx) => {
-                    // Custom descriptions that are user-friendly for each electrical item
-                    let description = '';
-                    switch(item.label) {
-                      case 'Standard Power':
-                        description = 'Filtered pump power connection with safety features';
-                        break;
-                      case 'Fence Earthing':
-                        description = 'Safety earthing for metal pool fencing';
-                        break;
-                      case 'Heat Pump Circuit':
-                        description = 'Dedicated high-capacity circuit for pool heating';
-                        break;
-                      default:
-                        description = 'Professional electrical installation';
-                    }
-                    
-                    return (
-                      <div key={idx} className="mb-4">
-                        <div className="flex justify-between">
-                          <p className="font-medium">{item.label}</p>
-                          <p className="font-medium whitespace-nowrap">{fmt(item.cost)}</p>
-                        </div>
-                        <p className="text-base text-muted-foreground mt-0.5">{description}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-
             <Separator className="mb-3" />
 
-            {/* Grand total */}
+            {/* Site Requirements Total */}
             <div className="flex justify-between items-center">
               <p className="font-semibold text-xl">Total Cost</p>
               <p className="text-xl font-semibold">
-                {fmt(breakdown.installationTotal)}
+                {fmt(siteRequirementsTotal)}
               </p>
             </div>
           </CardContent>
         </Card>
+
+        {/* Electrical Requirements Card */}
+        {electricalItems.length > 0 && (
+          <Card className="w-full shadow-lg">
+            <CardContent className="p-5 space-y-6">
+              <header>
+                <h3 className="text-xl font-semibold">Electrical Requirements</h3>
+                <p className="text-base text-muted-foreground">
+                  Professional electrical installation and connections
+                </p>
+              </header>
+
+              <Separator className="mb-4" />
+              
+              <div className="space-y-3">
+                {electricalItems.map((item, idx) => {
+                  // Custom descriptions that are user-friendly for each electrical item
+                  let description = '';
+                  switch(item.label) {
+                    case 'Standard Power':
+                      description = 'Filtered pump power connection with safety features';
+                      break;
+                    case 'Fence Earthing':
+                      description = 'Safety earthing for metal pool fencing';
+                      break;
+                    case 'Heat Pump Circuit':
+                      description = 'Dedicated high-capacity circuit for pool heating';
+                      break;
+                    default:
+                      description = 'Professional electrical installation';
+                  }
+                  
+                  return (
+                    <div key={idx} className="mb-4">
+                      <div className="flex justify-between">
+                        <p className="font-medium">{item.label}</p>
+                        <p className="font-medium whitespace-nowrap">{fmt(item.cost)}</p>
+                      </div>
+                      <p className="text-base text-muted-foreground mt-0.5">{description}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <Separator className="mb-3" />
+
+              {/* Electrical Total */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold text-xl">Total Cost</p>
+                <p className="text-xl font-semibold">
+                  {fmt(electricalTotal)}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </motion.div>
   );

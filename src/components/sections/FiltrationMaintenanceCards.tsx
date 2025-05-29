@@ -7,13 +7,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator }         from '@/components/ui/separator';
 import Image                 from 'next/image';
 import type { ProposalSnapshot } from '@/types/snapshot';
-import { calculatePrices } from '@/hooks/use-price-calculator';
+// Note: usePriceCalculator import removed as it's no longer needed
 
 export default function FiltrationMaintenanceCards(
   { snapshot }: { snapshot: ProposalSnapshot }
 ) {
   /* ── Use the price calculator helper function ───────────────── */
-  const { fmt, breakdown } = calculatePrices(snapshot);
+  // Note: fmt removed as it's no longer needed since we show "Included" for all items
   
   /* ── build items from flat snapshot fields ───────────────── */
   // First prepare raw component prices
@@ -92,7 +92,7 @@ export default function FiltrationMaintenanceCards(
               <div key={idx} className="mb-4">
                 <div className="flex justify-between">
                   <p className="font-medium">{item.name}</p>
-                  <p className="font-medium whitespace-nowrap">{fmt(item.price)}</p>
+                  <p className="font-medium whitespace-nowrap">Included</p>
                 </div>
                 <p className="text-base text-muted-foreground mt-0.5">{item.benefit}</p>
               </div>
@@ -104,7 +104,7 @@ export default function FiltrationMaintenanceCards(
           {/* Grand total */}
           <div className="flex justify-between items-center">
             <p className="font-semibold text-xl">Total Cost</p>
-            <p className="text-xl font-semibold">{fmt(breakdown.filtrationTotal)}</p>
+            <p className="text-xl font-semibold">Included in Base Price</p>
           </div>
         </CardContent>
       </Card>

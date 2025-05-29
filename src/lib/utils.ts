@@ -32,38 +32,42 @@ export function isSectionEmpty(sectionId: string, snapshot: ProposalSnapshot): b
         (!snapshot.concrete_cuts_cost || snapshot.concrete_cuts_cost === 0) &&
         (!snapshot.extra_paving_cost || snapshot.extra_paving_cost === 0) &&
         (!snapshot.existing_paving_cost || snapshot.existing_paving_cost === 0) &&
-        (!snapshot.extra_concreting_saved_total || snapshot.extra_concreting_saved_total === 0) &&
+        (!snapshot.extra_concreting_cost || snapshot.extra_concreting_cost === 0) &&
         (!snapshot.concrete_pump_total_cost || snapshot.concrete_pump_total_cost === 0) &&
         (!snapshot.uf_strips_cost || snapshot.uf_strips_cost === 0)
       );
     
     case CATEGORY_IDS.FENCING:
       // Show fencing section if either glass OR metal fencing has a non-zero cost
-      const hasGlassFencing = snapshot.glass_fence_total_cost && snapshot.glass_fence_total_cost > 0;
-      const hasMetalFencing = snapshot.metal_fence_total_cost && snapshot.metal_fence_total_cost > 0;
+      const hasGlassFencing = snapshot.glass_total_cost && snapshot.glass_total_cost > 0;
+      const hasMetalFencing = snapshot.metal_total_cost && snapshot.metal_total_cost > 0;
       return !hasGlassFencing && !hasMetalFencing;
     
     case CATEGORY_IDS.WATER_FEATURE:
       return !snapshot.water_feature_total_cost || snapshot.water_feature_total_cost === 0;
     
     case CATEGORY_IDS.RETAINING_WALLS:
-      // Check if any of the 4 possible retaining walls have a non-zero cost
-      const hasWall1 = snapshot.retaining_wall1_total_cost && snapshot.retaining_wall1_total_cost > 0;
-      const hasWall2 = snapshot.retaining_wall2_total_cost && snapshot.retaining_wall2_total_cost > 0;
-      const hasWall3 = snapshot.retaining_wall3_total_cost && snapshot.retaining_wall3_total_cost > 0;
-      const hasWall4 = snapshot.retaining_wall4_total_cost && snapshot.retaining_wall4_total_cost > 0;
+      // Check if retaining_walls_json exists and has any walls with non-zero costs
+      if (!snapshot.retaining_walls_json || snapshot.retaining_walls_json.length === 0) {
+        return true; // Empty if no walls exist
+      }
       
-      return !hasWall1 && !hasWall2 && !hasWall3 && !hasWall4;
+      // Check if any wall has a positive total cost
+      const hasWallWithCost = snapshot.retaining_walls_json.some(wall => 
+        wall.total_cost && wall.total_cost > 0
+      );
+      
+      return !hasWallWithCost;
     
     case CATEGORY_IDS.ADD_ONS:
       // Check all add-on options: cleaner, heat pump, and blanket roller
-      const hasCleaner = snapshot.cleaner_included && snapshot.cleaner_price && snapshot.cleaner_price > 0;
+      const hasCleaner = snapshot.cleaner_included && snapshot.cleaner_unit_price && snapshot.cleaner_unit_price > 0;
       const hasHeatPump = snapshot.include_heat_pump && 
-                          ((snapshot.heat_pump_cost && snapshot.heat_pump_cost > 0) || 
-                           (snapshot.heat_pump_install_cost && snapshot.heat_pump_install_cost > 0));
+                          ((snapshot.heat_pump_rrp && snapshot.heat_pump_rrp > 0) || 
+                           (snapshot.heat_pump_installation_cost && snapshot.heat_pump_installation_cost > 0));
       const hasBlanketRoller = snapshot.include_blanket_roller && 
-                               ((snapshot.blanket_roller_cost && snapshot.blanket_roller_cost > 0) || 
-                                (snapshot.br_install_cost && snapshot.br_install_cost > 0));
+                               ((snapshot.blanket_roller_rrp && snapshot.blanket_roller_rrp > 0) || 
+                                (snapshot.blanket_roller_installation_cost && snapshot.blanket_roller_installation_cost > 0));
       
       // Section is empty only if none of the add-ons are present
       return !hasCleaner && !hasHeatPump && !hasBlanketRoller;

@@ -10,6 +10,7 @@ import Image from "next/image";
 import { subCardFade } from '@/lib/animation';
 import type { ProposalSnapshot } from "@/types/snapshot";
 import { getPoolDetails } from "@/types/pool-details";
+import { usePriceCalculator } from '@/hooks/use-price-calculator';
 
 export function DetailsCard({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Get pool details from the spec_name in the snapshot
@@ -20,47 +21,9 @@ export function DetailsCard({ snapshot }: { snapshot: ProposalSnapshot }) {
   const heroSrc = poolDetails.heroImage;
   const layoutSrc = poolDetails.layoutImage;
 
-  // Calculate total of individual pool costs
-  const individualPoolCosts = 
-    snapshot.pc_beam + 
-    snapshot.pc_coping_supply + 
-    snapshot.pc_coping_lay + 
-    snapshot.pc_salt_bags + 
-    snapshot.pc_trucked_water + 
-    snapshot.pc_misc + 
-    snapshot.pc_pea_gravel + 
-    snapshot.pc_install_fee;
-  
-  // Fixed costs are always the same, so we can hard-code the total
-  const fixedCostsData = [
-    {"id":"a3f2eb40-9370-4a3c-bcca-86329216bad3","name":"Temporary Safety Barrier","price":400},
-    {"id":"c825fe88-893f-4604-9b51-58607c88e9b7","name":"Freight","price":800},
-    {"id":"b335f1dc-fcda-47df-8834-ba649588adcf","name":"Earthbond","price":40},
-    {"id":"d19b9dba-c036-484d-b74e-04730d909aac","name":"Ag Line","price":35},
-    {"id":"7e31adfc-9466-4a6a-8d1f-e33f0676d6dc","name":"Pipe Fitting + 3 Way Valve","price":300},
-    {"id":"69578277-9345-4786-9e26-2dee48d02a3b","name":"Filter Slab","price":50},
-    {"id":"6f8bd374-d64b-45d8-95cc-bd351a53f53a","name":"Miscellaneous","price":2700},
-    {"id":"df475e8c-794b-4a4f-8596-86fad86fa68a","name":"Form 15","price":1295},
-    {"id":"94485e26-5c0a-4dfc-872a-f815585d82fd","name":"Fire Ant","price":165},
-    {"id":"8589c183-19f4-443c-9e14-c69d4988c2ac","name":"Handover","price":500}
-  ];
-  
-  const fixedCosts = fixedCostsData.reduce((total, item) => total + item.price, 0); // Sum: 6285
-  
-  // Calculate base cost (sum of spec cost, individual pool costs, and fixed costs)
-  const baseCost = snapshot.spec_buy_inc_gst + individualPoolCosts + fixedCosts;
-  
-  // Apply margin using the formula: Cost / (1 - Margin/100)
-  const marginPercent = snapshot.pool_margin_pct || 0;
-  const basePoolPrice = marginPercent > 0 
-    ? baseCost / (1 - marginPercent/100) 
-    : baseCost;
-  
-  // Format for display
-  const formattedPrice = basePoolPrice.toLocaleString('en-AU', {
-    style: 'currency',
-    currency: 'AUD',
-  });
+  // Use the price calculator for the base pool total
+  const { fmt, totals } = usePriceCalculator(snapshot);
+  const basePoolPrice = totals.basePoolTotal;
 
   // Dimensions from flat snapshot
   const { spec_length_m, spec_width_m, spec_depth_shallow_m, spec_depth_deep_m } = snapshot;
@@ -130,7 +93,18 @@ export function DetailsCard({ snapshot }: { snapshot: ProposalSnapshot }) {
           <CardContent className="p-5">
             <div className="flex justify-between items-center">
               <p className="text-xl font-semibold">{snapshot.spec_name} Base Price</p>
-              <p className="text-xl font-semibold">{formattedPrice}</p>
+              <p className="text-xl font-semibold">{fmt(basePoolPrice)}</p>
+            </div>
+            
+            <div className="mt-4">
+              <ul className="text-sm font-semibold text-muted-foreground space-y-1">
+                <li>• Includes installation costs excepting unique site requirements.</li>
+                <li>• Includes filtration costs.</li>
+              </ul>
+              
+              <p className="text-sm text-muted-foreground mt-3">
+                This value matches our Web RRP price and includes all the compulsory costs to install your selected pool on a standard block.
+              </p>
             </div>
           </CardContent>
         </Card>

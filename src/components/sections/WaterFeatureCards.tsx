@@ -5,10 +5,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Image from "next/image";
 import type { ProposalSnapshot } from "@/types/snapshot";
+import { usePriceCalculator } from '@/hooks/use-price-calculator';
 
 export default function WaterFeatureCards({
   snapshot,
 }: { snapshot: ProposalSnapshot }) {
+  // Use the price calculator for consistent formatting and calculated total
+  const { fmt, totals } = usePriceCalculator(snapshot);
   return (
     <div className="space-y-6 h-full overflow-y-auto">
       {/* Water Feature Hero Card */}
@@ -116,7 +119,7 @@ export default function WaterFeatureCards({
           <div className="flex justify-between items-center mt-1">
             <p className="text-xl font-semibold">Total Cost</p>
             <p className="text-xl font-semibold">
-              ${snapshot.water_feature_total_cost.toLocaleString()}
+              {fmt(totals.waterFeatureTotal)}
             </p>
           </div>
         </CardContent>
