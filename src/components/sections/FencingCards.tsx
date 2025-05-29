@@ -206,6 +206,7 @@ export default function FencingCards({ snapshot }: { snapshot: ProposalSnapshot 
                 className="w-full h-16 object-cover rounded-md" 
                 width={80}
                 height={64}
+                priority
               />
             </div>
 

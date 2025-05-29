@@ -45,6 +45,7 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
                         width={80} 
                         height={64} 
                         className="w-full h-16 rounded-md object-contain" 
+                        priority
                       />
                     </div>
                     <div className="flex-grow">
@@ -80,6 +81,7 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
                           width={80} 
                           height={64} 
                           className="w-full h-16 rounded-md object-contain" 
+                          priority
                         />
                       </div>
                       <div className="flex-grow">
@@ -103,6 +105,7 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
                           width={80} 
                           height={64} 
                           className="w-full h-16 rounded-md object-contain" 
+                          priority
                         />
                       </div>
                       <div className="flex-grow">
@@ -179,6 +182,7 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
                               width={80} 
                               height={64} 
                               className="w-full h-16 rounded-md object-contain" 
+                              priority
                             />
                           </div>
                           <div className="flex-grow">
@@ -213,6 +217,7 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
                               width={80} 
                               height={64} 
                               className="w-full h-16 rounded-md object-contain" 
+                              priority
                             />
                           </div>
                           <div className="flex-grow">
@@ -244,6 +249,7 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
                                 width={80} 
                                 height={64} 
                                 className="w-full h-16 rounded-md object-contain" 
+                                priority
                               />
                             ) : (
                               <div className="w-full h-16 rounded-md bg-gray-200 flex items-center justify-center">

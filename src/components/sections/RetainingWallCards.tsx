@@ -67,6 +67,7 @@ export default function RetainingWallCards({ snapshot }: { snapshot: ProposalSna
               className="w-full h-full object-cover object-center"
               width={800}
               height={450}
+              priority
             />
             <div className="absolute bottom-0 right-0 p-4">
               <div className="bg-white/90 p-2 rounded-md">

@@ -36,6 +36,7 @@ export function ColourGuardCard({ snapshot }: { snapshot?: ProposalSnapshot }) {
                     className="w-full h-16 object-contain transform rotate-90"
                     width={80}
                     height={64}
+                    priority
                   />
                 </div>
 
@@ -78,6 +79,7 @@ export function ColourGuardCard({ snapshot }: { snapshot?: ProposalSnapshot }) {
                     className="w-full h-16 rounded-md object-contain"
                     width={80}
                     height={64}
+                    priority
                   />
                 </div>
 
@@ -120,6 +122,7 @@ export function ColourGuardCard({ snapshot }: { snapshot?: ProposalSnapshot }) {
                     className="w-full h-16 rounded-md object-contain"
                     width={80}
                     height={64}
+                    priority
                   />
                 </div>
 
@@ -162,6 +165,7 @@ export function ColourGuardCard({ snapshot }: { snapshot?: ProposalSnapshot }) {
                     className="w-full h-16 rounded-md object-contain"
                     width={80}
                     height={64}
+                    priority
                   />
                 </div>
 

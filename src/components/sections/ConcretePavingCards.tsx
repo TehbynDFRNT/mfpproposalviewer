@@ -163,6 +163,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
                 className="w-full h-16 rounded-md object-contain"
                 width={80}
                 height={64}
+                priority
               />
             </div>
 

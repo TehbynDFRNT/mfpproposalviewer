@@ -142,7 +142,7 @@ function VipCard(
         <div className="flex flex-row items-center w-full">
           <div className="flex-shrink-0 pr-6 flex items-center justify-center h-full w-20 sm:w-20 lg:w-20">
             <Image src={img} alt={title} width={80} height={64}
-                   className="w-full h-16 rounded-md object-contain" />
+                   className="w-full h-16 rounded-md object-contain" priority />
           </div>
 
           <div className="flex-grow">

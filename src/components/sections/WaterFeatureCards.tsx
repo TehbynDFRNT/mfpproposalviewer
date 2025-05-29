@@ -24,6 +24,7 @@ export default function WaterFeatureCards({
               className="w-full h-full object-cover object-center" 
               width={800}
               height={450}
+              priority
             />
             {/* Overlay diagram - bottom right positioning */}
             <div className="absolute bottom-0 right-0 p-4">
