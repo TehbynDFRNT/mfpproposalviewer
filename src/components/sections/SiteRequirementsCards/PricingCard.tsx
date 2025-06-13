@@ -13,12 +13,6 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Use the price calculator for formatting and calculated total
   const { fmt, totals } = usePriceCalculator(snapshot);
   
-  // Apply margin function for individual line items
-  const marginPercent = snapshot.pool_margin_pct || 0;
-  const applyMargin = (cost: number) => marginPercent > 0 
-    ? cost / (1 - marginPercent/100) 
-    : cost;
-  
   // Site prep costs with margin applied to each item
   const craneLabel = snapshot.crn_name;
   const rawCraneCost = snapshot.crane_cost;
@@ -33,13 +27,13 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
       };
     } else if (rawCraneCost > 700) {
       return {
-        displayCost: applyMargin(rawCraneCost - 700),
+        displayCost: rawCraneCost - 700,
         showSubtext: true,
         isIncluded: false
       };
     } else {
       return {
-        displayCost: applyMargin(rawCraneCost),
+        displayCost: rawCraneCost,
         showSubtext: false,
         isIncluded: false
       };
@@ -50,10 +44,10 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
   
   // Separate bobcat
   const bobcatLabel = snapshot.bob_size_category;
-  const bobcatCost = applyMargin(snapshot.bobcat_cost);
+  const bobcatCost = snapshot.bobcat_cost;
   
   const trafficLabel = snapshot.tc_name;
-  const trafficCost = applyMargin(snapshot.traffic_control_cost);
+  const trafficCost = snapshot.traffic_control_cost;
 
   // Electrical cost items without margin (they already include margin)
   const electricalItems = [
@@ -145,7 +139,7 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
                         <div key={item.id} className="mb-4">
                           <div className="flex justify-between">
                             <p className="font-medium">{item.description}</p>
-                            <p className="font-medium whitespace-nowrap">{fmt(applyMargin(item.price))}</p>
+                            <p className="font-medium whitespace-nowrap">{fmt(item.price)}</p>
                           </div>
                         </div>
                       ))
