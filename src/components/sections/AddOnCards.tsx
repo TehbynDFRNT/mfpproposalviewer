@@ -144,6 +144,10 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
                       return '/VipCards/spajet.webp';
                     } else if (name.includes('pepper pot') || name.includes('pepperpot')) {
                       return '/VipCards/pepperpots.png';
+                    } else if (name.includes('hand grab') || name.includes('handgrab') || name.includes('rtd-348')) {
+                      return '/VipCards/handgrabrail.png';
+                    } else if (name.includes('quantum') || name.includes('uv sanitation')) {
+                      return '/VipCards/quantum.png';
                     }
                     return null; // No specific image, use placeholder
                   };
