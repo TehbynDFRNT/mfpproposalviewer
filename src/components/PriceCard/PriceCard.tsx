@@ -8,20 +8,26 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
-import type { DebugPriceTotals } from '@/hooks/use-price-calculator';
+import type { DebugPriceTotals, DiscountBreakdown } from '@/hooks/use-price-calculator';
 
 export interface PriceCardProps {
   expanded: boolean;
   onToggle: () => void;
   fmt: (n: number | null | undefined) => string;
   totals: DebugPriceTotals;
+  grandTotal: number;
+  grandTotalWithoutDiscounts: number;
+  discountBreakdown: DiscountBreakdown;
 }
 
 export default function PriceCard({
   expanded,
   onToggle,
   fmt,
-  totals
+  totals,
+  grandTotal,
+  grandTotalWithoutDiscounts,
+  discountBreakdown
 }: PriceCardProps) {
   return (
     <div className="hidden lg:flex absolute bottom-4 right-4 z-50 bg-background/90 backdrop-blur-sm text-foreground p-4 rounded-lg shadow-lg border border-[#DB9D6A]/20 w-[28rem] overflow-hidden">
@@ -123,10 +129,36 @@ export default function PriceCard({
                   </div>
                 )}
                 
+                {/* Subtotal (before discounts) */}
+                {totals.discountTotal > 0 && (
+                  <>
+                    <Separator className="my-3" />
+                    <div className="flex justify-between items-baseline text-muted-foreground">
+                      <span className="text-sm">Subtotal</span>
+                      <span className="text-sm">{fmt(grandTotalWithoutDiscounts)}</span>
+                    </div>
+                  </>
+                )}
+
+                {/* Discount Section */}
+                {totals.discountTotal > 0 && (
+                  <div className="space-y-1 mt-2">
+                    {discountBreakdown.discountDetails.map((discount, index) => (
+                      <div key={index} className="flex justify-between items-baseline text-green-600">
+                        <span className="text-sm">
+                          {discount.name}
+                          {discount.type === 'percentage' && ` (${discount.value}%)`}
+                        </span>
+                        <span className="text-sm">-{fmt(discount.calculatedAmount)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <Separator className="my-3" />
                 <div className="flex justify-between items-baseline">
                   <span className="text-lg font-semibold">Total Quote (inc GST)</span>
-                  <span className="text-lg font-semibold">{fmt(totals.grandTotalCalculated)}</span>
+                  <span className="text-lg font-semibold">{fmt(grandTotal)}</span>
                 </div>
               </motion.div>
               
@@ -144,7 +176,7 @@ export default function PriceCard({
               <span className="text-xl font-semibold">Total Quote:</span>
               <div className="flex items-center gap-3">
                 <span className="text-xl font-semibold">
-                  {fmt(totals.grandTotalCalculated)}
+                  {fmt(grandTotal)}
                 </span>
                 <motion.button 
                   onClick={onToggle}

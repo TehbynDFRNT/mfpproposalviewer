@@ -13,29 +13,31 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Use the price calculator for formatting and calculated total
   const { fmt, totals } = usePriceCalculator(snapshot);
   
+  // Calculate margin multiplier for crane calculations
+  const marginMultiplier = 1 / (1 - (snapshot.pool_margin_pct || 0) / 100);
+  
   // Site prep costs with margin applied to each item
   const craneLabel = snapshot.crn_name;
   const rawCraneCost = snapshot.crane_cost;
   
-  // Handle crane cost logic: $700 allowance included in base price
+  // Handle crane cost logic: $700 allowance included in base price with margin applied
   const getCraneDisplayInfo = () => {
-    if (rawCraneCost === 700) {
+    const craneCostWithMargin = rawCraneCost * marginMultiplier;
+    const craneAllowanceWithMargin = 700 * marginMultiplier;
+    
+    if (craneCostWithMargin <= craneAllowanceWithMargin) {
       return {
         displayCost: 'Included in Base Price',
         showSubtext: false,
-        isIncluded: true
-      };
-    } else if (rawCraneCost > 700) {
-      return {
-        displayCost: rawCraneCost - 700,
-        showSubtext: true,
-        isIncluded: false
+        isIncluded: true,
+        allowanceAmount: craneAllowanceWithMargin
       };
     } else {
       return {
-        displayCost: rawCraneCost,
-        showSubtext: false,
-        isIncluded: false
+        displayCost: craneCostWithMargin - craneAllowanceWithMargin,
+        showSubtext: true,
+        isIncluded: false,
+        allowanceAmount: craneAllowanceWithMargin
       };
     }
   };
@@ -102,7 +104,7 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
                   </div>
                   <p className="text-base text-muted-foreground mt-0.5">{craneLabel}</p>
                   {craneInfo.showSubtext && (
-                    <p className="text-base text-muted-foreground mt-0.5">$700 Crane allowance included in base price</p>
+                    <p className="text-base text-muted-foreground mt-0.5">{fmt(craneInfo.allowanceAmount)} Crane allowance included in base price</p>
                   )}
                 </div>
               )}

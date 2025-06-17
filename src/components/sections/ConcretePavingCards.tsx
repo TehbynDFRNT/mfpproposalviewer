@@ -37,11 +37,7 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
     (snapshot.extra_concreting_cost && snapshot.extra_concreting_cost > 0) ?
       {
         label: 'Extra Concreting',
-        detail: snapshot.extra_concreting_type
-          ? snapshot.extra_concreting_type
-              .replace(/-/g, ' ')
-              .replace(/\b\w/g, c => c.toUpperCase())
-          : 'Standard finish',
+        detail: snapshot.extra_concreting_name || snapshot.extra_concreting_type || 'Standard finish',
         sqm: snapshot.extra_concreting_sqm || 0,
         cost: snapshot.extra_concreting_cost
       } : null,

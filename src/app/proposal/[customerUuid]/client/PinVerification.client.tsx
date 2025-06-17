@@ -70,12 +70,26 @@ export default function PinVerification({ snapshot: initialSnapshot, customerUui
     );
   }
 
+  // Log the initial snapshot from server
+  console.log('🔐 PinVerification initialSnapshot discounts:', {
+    hasDiscounts: !!initialSnapshot.applied_discounts_json,
+    discountCount: initialSnapshot.applied_discounts_json?.length || 0,
+    discounts: initialSnapshot.applied_discounts_json
+  });
+
   // Use the proposal refresh hook
   const { 
     snapshot, 
     isRefreshing, 
     refreshProposalData 
   } = useProposalRefresh(initialSnapshot);
+
+  // Log the snapshot from refresh hook
+  console.log('🔐 PinVerification refreshed snapshot discounts:', {
+    hasDiscounts: !!snapshot.applied_discounts_json,
+    discountCount: snapshot.applied_discounts_json?.length || 0,
+    discounts: snapshot.applied_discounts_json
+  });
 
   // Track if PIN has been verified
   const [showProposal, setShowProposal] = useState(false);

@@ -3,8 +3,7 @@
 DROP VIEW public.proposal_snapshot_v;
 
 CREATE OR REPLACE VIEW public.proposal_snapshot_v
- AS
- WITH target AS (
+ AS  WITH target AS (
          SELECT pool_projects.id,
             pool_projects.owner1,
             pool_projects.owner2,
@@ -87,11 +86,34 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
             pool_paving_selections.extra_concreting_square_meters,
             pool_paving_selections.extra_concreting_total_cost
            FROM pool_paving_selections
-        ), fence_strips AS (
-         SELECT pool_fence_concrete_strips.pool_project_id,
-            pool_fence_concrete_strips.strip_data,
-            pool_fence_concrete_strips.total_cost
-           FROM pool_fence_concrete_strips
+        ), fence_strips AS (                                             -- ⬅ enrich strip_data
+         SELECT
+           fs.pool_project_id,
+           jsonb_agg(
+             jsonb_build_object(
+               'id',         elem ->> 'id',
+               'length',     (elem ->> 'length')::numeric,
+               'type',       ufs.type,
+               'unit_cost',  ufs.cost,
+               'unit_margin',ufs.margin
+             )
+             ORDER BY ufs.display_order
+           )                             AS strip_data_enriched,
+           fs.total_cost
+         FROM pool_fence_concrete_strips               fs
+         LEFT JOIN LATERAL
+           jsonb_array_elements(
+             CASE jsonb_typeof(fs.strip_data)
+               WHEN 'array'  THEN fs.strip_data
+               WHEN 'string' THEN (fs.strip_data #>> '{}')::jsonb
+               ELSE '[]'::jsonb
+             END
+           ) AS elem
+         ON TRUE
+         LEFT JOIN under_fence_concrete_strips         ufs
+           ON ufs.id = (elem ->> 'id')::uuid
+         GROUP BY fs.pool_project_id,
+                  fs.total_cost
         ), concrete_selections AS (
          SELECT pool_concrete_selections.pool_project_id,
             pool_concrete_selections.concrete_pump_needed,
@@ -121,49 +143,33 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
             cr.change_request_json
            FROM change_requests cr
           ORDER BY cr.pool_proposal_status_id, cr.created_at DESC
-        ), extras AS (            -- 👈 NEW CTE
-          SELECT
-            pge.pool_project_id,
-            json_agg(
-              json_build_object(
-                'id',            pge.id,
-                'general_extra_id', pge.general_extra_id,
-                'name',          pge.name,
-                'sku',           pge.sku,
-                'type',          pge.type,
-                'description',   pge.description,
-                'quantity',      pge.quantity,
-                'cost',          pge.cost,
-                'margin',        pge.margin,
-                'rrp',           pge.rrp,
-                'total_cost',    pge.total_cost,
-                'total_margin',  pge.total_margin,
-                'total_rrp',     pge.total_rrp
-              )
-              ORDER BY pge.name
-            )                           AS selected_extras_json,
-            SUM(pge.total_cost)  ::numeric AS extras_total_cost,
-            SUM(pge.total_margin)::numeric AS extras_total_margin,
-            SUM(pge.total_rrp)   ::numeric AS extras_total_rrp
-          FROM pool_general_extras pge
+        ), extras AS (
+         SELECT pge.pool_project_id,
+            json_agg(json_build_object('id', pge.id, 'general_extra_id', pge.general_extra_id, 'name', pge.name, 'sku', pge.sku, 'type', pge.type, 'description', pge.description, 'quantity', pge.quantity, 'cost', pge.cost, 'margin', pge.margin, 'rrp', pge.rrp, 'total_cost', pge.total_cost, 'total_margin', pge.total_margin, 'total_rrp', pge.total_rrp) ORDER BY pge.name) AS selected_extras_json,
+            sum(pge.total_cost) AS extras_total_cost,
+            sum(pge.total_margin) AS extras_total_margin,
+            sum(pge.total_rrp) AS extras_total_rrp
+           FROM pool_general_extras pge
           GROUP BY pge.pool_project_id
-        ),
-        -- ───────────────────────────────────────────────────────────────
-        --  NEW  ·  price-book CTE for every fencing / gate line-item
-        -- ───────────────────────────────────────────────────────────────
-        fencing_pricebook AS (
-          SELECT
+        ), fencing_pricebook AS (
+         SELECT json_agg(json_build_object('id', fc.id, 'item', fc.item, 'type', fc.type, 'unit_price', fc.unit_price, 'category', fc.category) ORDER BY fc.display_order) AS fencing_costs_json
+           FROM fencing_costs fc
+        ), discounts AS (
+         SELECT pd.pool_project_id,
             json_agg(
-              json_build_object(
-                'id',         fc.id,
-                'item',       fc.item,
-                'type',       fc.type,
-                'unit_price', fc.unit_price::numeric,
-                'category',   fc.category
-              )
-              ORDER BY fc.display_order
-            ) AS fencing_costs_json
-          FROM public.fencing_costs fc
+                json_build_object(
+                    'id', pd.id,
+                    'discount_promotion_uuid', pd.discount_promotion_uuid,
+                    'discount_name', dp.discount_name,
+                    'discount_type', dp.discount_type,
+                    'dollar_value', dp.dollar_value,
+                    'percentage_value', dp.percentage_value,
+                    'created_at', pd.created_at
+                ) ORDER BY pd.created_at
+            ) AS applied_discounts_json
+           FROM pool_discounts pd
+           JOIN discount_promotions dp ON dp.uuid = pd.discount_promotion_uuid
+          GROUP BY pd.pool_project_id
         )
  SELECT pj.id AS project_id,
     pj.owner1,
@@ -177,6 +183,7 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     pj.resident_homeowner,
     pj.created_at,
     pj.updated_at,
+    pj.pool_color,
     spec.name AS spec_name,
     spec.range AS spec_range,
     spec.width AS spec_width_m,
@@ -205,6 +212,7 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     crn.name AS crn_name,
     bob.price AS bobcat_cost,
     bob.size_category AS bob_size_category,
+    bob.day_code AS bob_day_code,
     tc.price AS traffic_control_cost,
     tc.name AS tc_name,
     pj.site_requirements_data,
@@ -227,25 +235,33 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     COALESCE(hk_comps.handover_components, '[]'::json) AS handover_components,
     con.concrete_cuts_cost,
     cuts.concrete_cuts_json,
-    epc.category AS epc_category,
+    epc.category    AS epc_category,
+    epc.category    AS extra_paving_name,        -- human-readable extra paving
     epc.paver_cost AS epc_paver_cost,
     epc.wastage_cost AS epc_wastage_cost,
     epc.margin_cost AS epc_margin_cost,
     pav.extra_paving_square_meters AS extra_paving_sqm,
     pav.extra_paving_total_cost AS extra_paving_cost,
     pav.existing_concrete_paving_category AS existing_paving_category,
+    epc2.category   AS existing_paving_name,     -- human-readable existing paving
     pav.existing_concrete_paving_square_meters AS existing_paving_sqm,
     pav.existing_concrete_paving_total_cost AS existing_paving_cost,
     pav.extra_concreting_type,
+    ec.type         AS extra_concreting_name,    -- human-readable extra concreting
     ec.price AS extra_concreting_base_price,
     ec.margin AS extra_concreting_margin,
     ec.price + ec.margin AS extra_concreting_unit_price,
     pav.extra_concreting_square_meters AS extra_concreting_sqm,
     pav.extra_concreting_total_cost AS extra_concreting_cost,
+    pav.extra_concrete_finish_one,
+    pav.extra_concrete_finish_two,
+    pav.coping_category,
+    pav.grout_colour,
+    pav.recess_drainage,
     con.concrete_pump_needed,
     con.concrete_pump_quantity AS concrete_pump_hours,
     con.concrete_pump_total_cost,
-    fs.strip_data AS uf_strips_data,
+    fs.strip_data_enriched AS uf_strips_data,
     fs.total_cost AS uf_strips_cost,
     gf.glass_linear_meters,
     gf.glass_gates,
@@ -275,9 +291,6 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     pwf_latest.back_cladding_needed AS water_feature_back_cladding_needed,
     pwf_latest.led_blade AS water_feature_led_blade,
     pwf_latest.water_feature_total_cost,
-    -----------------------------------------
-    --  🔽  NEW FLATTENED-EXTRAS COLUMNS
-    -----------------------------------------
     extras.selected_extras_json,
     extras.extras_total_cost,
     extras.extras_total_margin,
@@ -308,7 +321,6 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     hi_br.installation_inclusions AS br_install_inclusions,
     heat_opt.heating_total_cost,
     heat_opt.heating_total_margin,
-    -- Full lookup so the front-end can display / cache the unit-prices
     fencing_pricebook.fencing_costs_json,
     elec.standard_power AS elec_standard_power_flag,
     elec.fence_earthing AS elec_fence_earthing_flag,
@@ -335,19 +347,17 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     pps.last_change_requested,
     pps.version,
     pps.pin,
-    crl.change_request_json
+    crl.change_request_json,
+    disc.applied_discounts_json
    FROM target pj
      LEFT JOIN concrete_selections con ON con.pool_project_id = pj.id
      LEFT JOIN pool_paving_selections pav ON pav.pool_project_id = pj.id
-     LEFT JOIN pool_fence_concrete_strips fs ON fs.pool_project_id = pj.id
+     LEFT JOIN fence_strips fs ON fs.pool_project_id = pj.id
      LEFT JOIN retaining_walls rw ON rw.pool_project_id = pj.id
      LEFT JOIN equipment eq ON eq.pool_project_id = pj.id
      LEFT JOIN crane_costs crn ON crn.id = eq.crane_id
      LEFT JOIN bobcat_costs bob ON bob.id = eq.bobcat_id
-     LEFT JOIN traffic_control_costs tc ON tc.id = COALESCE(eq.traffic_control_id, ( SELECT traffic_control_costs.id
-           FROM traffic_control_costs
-          ORDER BY traffic_control_costs.display_order
-         LIMIT 1))
+     LEFT JOIN traffic_control_costs tc ON tc.id = eq.traffic_control_id
      LEFT JOIN pool_specifications spec ON spec.id = pj.pool_specification_id
      LEFT JOIN project_filtration pf ON pf.project_id = pj.id
      LEFT JOIN filtration_packages fp ON fp.id = pf.filtration_package_id
@@ -363,8 +373,10 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
      LEFT JOIN pool_costs pc ON pc.pool_id = spec.id
      LEFT JOIN pool_dig_type_matches pdtm ON pdtm.pool_id = pj.pool_specification_id
      LEFT JOIN dig_types dig ON dig.id = pdtm.dig_type_id
-     LEFT JOIN extra_paving_costs epc ON epc.id = pav.extra_paving_category
-     LEFT JOIN extra_concreting ec ON lower(replace(ec.type, ' '::text, '-'::text)) = lower(pav.extra_concreting_type)
+     LEFT JOIN extra_paving_costs epc  ON epc.id  = pav.extra_paving_category
+     -- add normalized lookup for existing paving
+     LEFT JOIN extra_paving_costs epc2 ON nullif(pav.existing_concrete_paving_category, '')::uuid = epc2.id
+     LEFT JOIN extra_concreting ec ON ec.id = NULLIF(pav.extra_concreting_type, '')::uuid
      LEFT JOIN pwf_latest ON pwf_latest.customer_id = pj.id
      LEFT JOIN LATERAL ( SELECT f.linear_meters AS glass_linear_meters,
             f.gates AS glass_gates,
@@ -409,18 +421,6 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
      LEFT JOIN videos_by_type ON videos_by_type.pool_project_id = pj.id
      LEFT JOIN pool_proposal_status pps ON pps.pool_project_id = pj.id
      LEFT JOIN change_req_latest crl ON crl.pool_proposal_status_id = pps.pool_project_id
-     -- join the new CTE so we can pull the extras columns
-     LEFT JOIN extras                   ON extras.pool_project_id        = pj.id
-
-     -- one-row cross-join brings the pricebook into every result row
+     LEFT JOIN extras ON extras.pool_project_id = pj.id
+     LEFT JOIN discounts disc ON disc.pool_project_id = pj.id
      CROSS JOIN fencing_pricebook;
-
-ALTER TABLE public.proposal_snapshot_v
-    OWNER TO postgres;
-COMMENT ON VIEW public.proposal_snapshot_v
-    IS 'Updated view with project-specific filtration packages, correct excavation code, and installation costs';
-
-GRANT ALL ON TABLE public.proposal_snapshot_v TO anon;
-GRANT ALL ON TABLE public.proposal_snapshot_v TO authenticated;
-GRANT ALL ON TABLE public.proposal_snapshot_v TO postgres;
-GRANT ALL ON TABLE public.proposal_snapshot_v TO service_role;

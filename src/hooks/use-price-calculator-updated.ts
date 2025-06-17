@@ -91,9 +91,22 @@ export interface PriceCalculatorResult {
  * Hook for calculating all price components for a proposal
  * 
  * @param snapshot - The proposal snapshot containing all pricing data
+ * @param appliedDiscounts - Array of applied discount promotions with details
  * @returns Formatted prices, grand total, and detailed breakdown
  */
-export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined): PriceCalculatorResult {
+export function usePriceCalculator(
+  snapshot: ProposalSnapshot | null | undefined, 
+  appliedDiscounts?: Array<{
+    id: string;
+    discount_promotion: {
+      uuid: string;
+      discount_name: string;
+      discount_type: 'dollar' | 'percentage';
+      dollar_value?: number;
+      percentage_value?: number;
+    };
+  }>
+): PriceCalculatorResult {
   return useMemo(() => {
     console.log('💰 usePriceCalculator called', { 
       snapshot: !!snapshot, 
@@ -221,43 +234,27 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
       discountDetails: []
     };
 
-    console.log('💸 Checking for discounts:', {
-      hasAppliedDiscounts: !!snapshot.applied_discounts_json,
-      discountCount: snapshot.applied_discounts_json?.length || 0,
-      discounts: snapshot.applied_discounts_json
-    });
-
-    if (snapshot.applied_discounts_json && snapshot.applied_discounts_json.length > 0) {
-      snapshot.applied_discounts_json.forEach(poolDiscount => {
-        console.log('💸 Processing discount:', poolDiscount);
-        
-        if (poolDiscount && poolDiscount.discount_type) {
-          if (poolDiscount.discount_type === 'dollar' && poolDiscount.dollar_value) {
-            discountBreakdown.totalDollarDiscount += poolDiscount.dollar_value;
+    if (appliedDiscounts && appliedDiscounts.length > 0) {
+      appliedDiscounts.forEach(poolDiscount => {
+        const promotion = poolDiscount.discount_promotion;
+        if (promotion && promotion.discount_type) {
+          if (promotion.discount_type === 'dollar' && promotion.dollar_value) {
+            discountBreakdown.totalDollarDiscount += promotion.dollar_value;
             discountBreakdown.discountDetails.push({
-              name: poolDiscount.discount_name,
+              name: promotion.discount_name,
               type: 'dollar',
-              value: poolDiscount.dollar_value,
-              calculatedAmount: poolDiscount.dollar_value
+              value: promotion.dollar_value,
+              calculatedAmount: promotion.dollar_value
             });
-            console.log('💸 Added dollar discount:', {
-              name: poolDiscount.discount_name,
-              value: poolDiscount.dollar_value
-            });
-          } else if (poolDiscount.discount_type === 'percentage' && poolDiscount.percentage_value) {
-            // Calculate percentage based on contract total (excluding fencing and electrical)
-            const percentageAmount = (contractGrandTotal * poolDiscount.percentage_value) / 100;
+          } else if (promotion.discount_type === 'percentage' && promotion.percentage_value) {
+            // Calculate percentage based on total excluding fencing and electrical
+            const totalExcludingFencingAndElectrical = grandTotalCalculated - fencingTotal - electricalTotal;
+            const percentageAmount = (totalExcludingFencingAndElectrical * promotion.percentage_value) / 100;
             discountBreakdown.totalPercentageDiscount += percentageAmount;
             discountBreakdown.discountDetails.push({
-              name: poolDiscount.discount_name,
+              name: promotion.discount_name,
               type: 'percentage',
-              value: poolDiscount.percentage_value,
-              calculatedAmount: percentageAmount
-            });
-            console.log('💸 Added percentage discount:', {
-              name: poolDiscount.discount_name,
-              percentage: poolDiscount.percentage_value,
-              baseAmount: contractGrandTotal,
+              value: promotion.percentage_value,
               calculatedAmount: percentageAmount
             });
           }
@@ -267,15 +264,6 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
 
     const totalDiscountAmount = discountBreakdown.totalDollarDiscount + discountBreakdown.totalPercentageDiscount;
     const finalGrandTotal = grandTotalCalculated - totalDiscountAmount;
-
-    console.log('💸 Discount calculation complete:', {
-      totalDollarDiscount: discountBreakdown.totalDollarDiscount,
-      totalPercentageDiscount: discountBreakdown.totalPercentageDiscount,
-      totalDiscountAmount,
-      grandTotalWithoutDiscounts: grandTotalCalculated,
-      finalGrandTotal,
-      discountBreakdown
-    });
 
     // Calculate individual component costs and prices
     const poolShellCost = snapshot.spec_buy_inc_gst || 0;
@@ -354,5 +342,5 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
       siteRequirementsBreakdown,
       discountBreakdown
     };
-  }, [snapshot]);
+  }, [snapshot, appliedDiscounts]);
 }

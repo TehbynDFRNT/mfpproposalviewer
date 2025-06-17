@@ -45,12 +45,26 @@ export interface ProposalViewerProps {
 }
 
 export default function ProposalViewer({ snapshot: initialSnapshot, onSnapshotUpdate }: ProposalViewerProps) {
+  // Log the initial snapshot to check for discounts
+  console.log('🎯 ProposalViewer initialSnapshot discounts:', {
+    hasDiscounts: !!initialSnapshot.applied_discounts_json,
+    discountCount: initialSnapshot.applied_discounts_json?.length || 0,
+    discounts: initialSnapshot.applied_discounts_json
+  });
+
   // Use our proposal refresh hook to manage proposal data
   const { 
     snapshot: currentSnapshot, 
     isRefreshing, 
     refreshProposalData 
   } = useProposalRefresh(initialSnapshot);
+
+  // Log the current snapshot to check for discounts
+  console.log('🎯 ProposalViewer currentSnapshot discounts:', {
+    hasDiscounts: !!currentSnapshot.applied_discounts_json,
+    discountCount: currentSnapshot.applied_discounts_json?.length || 0,
+    discounts: currentSnapshot.applied_discounts_json
+  });
 
   // Always show only non-null sections
   const showOnlyNonNullSections = true;

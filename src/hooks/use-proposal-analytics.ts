@@ -5,6 +5,7 @@ import { isClient } from '@/lib/utils';
 import type { ProposalSnapshot } from '@/types/snapshot';
 import { isSectionEmpty } from '@/lib/utils';
 import { CATEGORY_IDS } from '@/lib/constants';
+import { usePriceCalculator } from '@/hooks/use-price-calculator';
 
 // Analytics event name constants
 const EVENTS = {
@@ -174,27 +175,7 @@ export function useProposalAnalytics(snapshot: ProposalSnapshot) {
   const hasTrackedRef = useRef(false);
   
   // Get the pricing breakdown using the price calculator hook
-  const getPricing = useCallback(() => {
-    try {
-      // Dynamic import to avoid circular dependencies
-      const { usePriceCalculator } = require('@/hooks/use-price-calculator');
-      return usePriceCalculator(snapshot);
-    } catch (e) {
-      console.error('Error loading price calculator:', e);
-      return { 
-        breakdown: { 
-          grandTotal: 0,
-          basePoolPrice: 0,
-          installationTotal: 0,
-          filtrationTotal: 0,
-          concreteTotal: 0,
-          fencingTotal: 0,
-          waterFeatureTotal: 0,
-          extrasTotal: 0
-        } 
-      };
-    }
-  }, [snapshot]);
+  const { totals } = usePriceCalculator(snapshot);
 
   // Track the initial proposal view
   const trackView = useCallback(() => {
@@ -234,8 +215,6 @@ export function useProposalAnalytics(snapshot: ProposalSnapshot) {
   const trackAccept = useCallback(() => {
     if (!snapshot.project_id) return;
     
-    const { breakdown } = getPricing();
-    
     return sendEvent(
       EVENTS.PROPOSAL_ACCEPTED, 
       {
@@ -243,7 +222,7 @@ export function useProposalAnalytics(snapshot: ProposalSnapshot) {
         customer_name: snapshot.owner1,
         consultant_name: snapshot.proposal_name,
         pool_model: snapshot.spec_name,
-        total_price: breakdown.grandTotal,
+        total_price: totals.grandTotalCalculated,
         proposal_created_at: snapshot.created_at,
         proposal_last_modified: snapshot.updated_at,
         includes_extras: !isSectionEmpty(CATEGORY_IDS.ADD_ONS, snapshot),
@@ -255,7 +234,7 @@ export function useProposalAnalytics(snapshot: ProposalSnapshot) {
       },
       snapshot.email
     );
-  }, [snapshot, getPricing]);
+  }, [snapshot, totals.grandTotalCalculated]);
 
   // Handler for tracking change requests
   const trackChange = useCallback((sections: string[], customMessage: string) => {

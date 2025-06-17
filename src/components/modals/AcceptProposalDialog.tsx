@@ -43,7 +43,7 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
   const [proposalAccepted, setProposalAccepted] = useState(false);
 
   // Use the price calculator hook for consistent calculations
-  const { fmt, totals } = usePriceCalculator(snapshot);
+  const { fmt, totals, grandTotal, grandTotalWithoutDiscounts, discountBreakdown } = usePriceCalculator(snapshot);
   
   // Use analytics hook for tracking events
   const analytics = useProposalAnalytics(snapshot);
@@ -165,7 +165,7 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
 
     // Use the centralized totals from our usePriceCalculator hook
     return {
-      totalPrice: fmt(totals.grandTotalCalculated),
+      totalPrice: fmt(grandTotal),
       subtotals: {
         basePool: {
           label: `Base ${snapshot.spec_name} Pool`,
@@ -323,9 +323,32 @@ export default function AcceptProposalDialog({ snapshot, onAcceptSuccess, onAcce
                 </div>
               )}
 
+              {/* Subtotal (before discounts) */}
+              {totals.discountTotal > 0 && (
+                <div className="border-t border-border mt-2 pt-2 flex justify-between items-center text-muted-foreground">
+                  <span className="text-sm">Subtotal:</span>
+                  <span className="text-sm">{fmt(grandTotalWithoutDiscounts)}</span>
+                </div>
+              )}
+
+              {/* Discount Section */}
+              {totals.discountTotal > 0 && (
+                <div className="space-y-1">
+                  {discountBreakdown.discountDetails.map((discount, index) => (
+                    <div key={index} className="flex justify-between items-center text-green-600">
+                      <span className="text-sm">
+                        {discount.name}
+                        {discount.type === 'percentage' && ` (${discount.value}%)`}
+                      </span>
+                      <span className="text-sm">-{fmt(discount.calculatedAmount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="border-t border-border mt-2 pt-2 flex justify-between items-center">
                 <span className="text-base font-medium">Total Investment (inc GST):</span>
-                <span className="font-medium text-base">{totalPrice}</span>
+                <span className="font-medium text-base">{fmt(grandTotal)}</span>
               </div>
             </div>
           </div>

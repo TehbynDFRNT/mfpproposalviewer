@@ -97,6 +97,7 @@ export interface ProposalSnapshot {
   
   // Extra concreting
   extra_concreting_type: string;
+  extra_concreting_name: string; // human-readable extra concreting type
   extra_concreting_base_price: number;
   extra_concreting_margin: number;
   extra_concreting_unit_price: number;
@@ -276,6 +277,18 @@ export interface ProposalSnapshot {
   
   /* Latest Change Request JSON (from the most recent change request) */
   change_request_json: any | null; // Type changed from optional to nullable, can be null due to LEFT JOIN
+
+  /* APPLIED DISCOUNTS */
+  // Discounts applied to this pool project from pool_discounts joined with discount_promotions
+  applied_discounts_json: Array<{
+    id: string;
+    discount_promotion_uuid: string;
+    discount_name: string;
+    discount_type: 'dollar' | 'percentage';
+    dollar_value: number | null;
+    percentage_value: number | null;
+    created_at: string;
+  }> | null; // Can be null if no discounts are applied
 
   // change_requests_json field (and its comment block) removed.
   // This field is not present in the proposal_snapshot_v SQL view.

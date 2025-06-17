@@ -8,7 +8,16 @@ import { usePriceCalculator } from "@/hooks/use-price-calculator";
 
 export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Use the centralized price calculator hook
-  const { fmt, totals } = usePriceCalculator(snapshot);
+  const { fmt, totals, grandTotal, grandTotalWithoutDiscounts, discountBreakdown } = usePriceCalculator(snapshot);
+
+  console.log('🎯 ProposalSummaryCards discount data:', {
+    discountTotal: totals.discountTotal,
+    hasDiscounts: totals.discountTotal > 0,
+    grandTotal,
+    grandTotalWithoutDiscounts,
+    discountBreakdown,
+    snapshotDiscounts: snapshot.applied_discounts_json
+  });
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -127,10 +136,36 @@ export default function ProposalSummaryCards({ snapshot }: { snapshot: ProposalS
 
           <Separator className="mb-3" />
 
+          {/* Subtotal (before discounts) */}
+          {totals.discountTotal > 0 && (
+            <div className="flex justify-between items-center text-muted-foreground">
+              <p className="font-medium">Subtotal</p>
+              <p className="font-medium">{fmt(grandTotalWithoutDiscounts)}</p>
+            </div>
+          )}
+
+          {/* Discount Section */}
+          {totals.discountTotal > 0 && (
+            <>
+              <div className="space-y-2">
+                {discountBreakdown.discountDetails.map((discount, index) => (
+                  <div key={index} className="flex justify-between items-center text-green-600">
+                    <p className="font-medium">
+                      {discount.name}
+                      {discount.type === 'percentage' && ` (${discount.value}%)`}
+                    </p>
+                    <p className="font-medium whitespace-nowrap">-{fmt(discount.calculatedAmount)}</p>
+                  </div>
+                ))}
+              </div>
+              <Separator className="my-3" />
+            </>
+          )}
+
           {/* Grand total */}
           <div className="flex justify-between items-center mt-1">
             <p className="text-xl font-semibold">Total Investment (inc GST)</p>
-            <p className="text-xl font-semibold">{fmt(totals.grandTotalCalculated)}</p>
+            <p className="text-xl font-semibold">{fmt(grandTotal)}</p>
           </div>
         </CardContent>
       </Card>

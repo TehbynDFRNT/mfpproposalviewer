@@ -34,6 +34,13 @@ export async function getProposalSnapshot(customerUuid: string): Promise<Proposa
     throw new Error(`No proposal found for customerUuid "${customerUuid}"`)
   }
 
+  // Log the discount data for debugging
+  console.log('[getProposalSnapshot] Fetched data discounts:', {
+    hasDiscounts: !!data.applied_discounts_json,
+    discountCount: data.applied_discounts_json?.length || 0,
+    discounts: data.applied_discounts_json
+  });
+
   // stamp it so UI knows exactly when it was fetched
   return {
     ...data,
