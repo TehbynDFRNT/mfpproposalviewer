@@ -17,6 +17,7 @@ export interface ProposalSnapshot {
   resident_homeowner: boolean; 
   created_at: string; // From pj.created_at (Timestamptz converted to string)
   updated_at: string; // From pj.updated_at (Timestamptz converted to string)
+  pool_color: string | null; // Pool color selection
   
   /* BASE POOL PRICE (Pool-spec + individual pool costs + excavation) */
   // Pool specification (dimensions + base buy-prices)
@@ -48,7 +49,13 @@ export interface ProposalSnapshot {
   dig_truck_qty: number;
   
   // Fixed Costs (Standard Across ALL Quotes)
-  fixed_costs_json: any[];
+  fixed_costs_json: Array<{
+    id: string;
+    name: string;
+    price: string;
+    display_order: number;
+    created_at: string;
+  }>;
   
   // Optional pool margin (% by specification)
   pool_margin_pct: number;
@@ -59,6 +66,7 @@ export interface ProposalSnapshot {
   crn_name: string;
   bobcat_cost: number;
   bob_size_category: string;
+  bob_day_code: string;
 
   // Traffic control (stored or fallback level 1)
   traffic_control_cost: number;
@@ -84,6 +92,7 @@ export interface ProposalSnapshot {
   
   // Extra paving
   epc_category: string;
+  extra_paving_name: string;        // human-readable extra paving type
   epc_paver_cost: number;
   epc_wastage_cost: number;
   epc_margin_cost: number;
@@ -92,6 +101,7 @@ export interface ProposalSnapshot {
   
   // Existing concrete paving
   existing_paving_category: string;
+  existing_paving_name: string;     // human-readable existing paving type
   existing_paving_sqm: number;
   existing_paving_cost: number;
   
@@ -105,15 +115,34 @@ export interface ProposalSnapshot {
   // extra_concreting_calc_total and extra_concreting_saved_total removed.
   extra_concreting_cost: number; // Replaces extra_concreting_calc_total and extra_concreting_saved_total, matches SQL extra_concreting_cost
   
+  // Extra concrete finish options
+  extra_concrete_finish_one: string | null; // Options: "Brushed - Ready for Future Paving", "Brushed - Second Pour", "Second Pour", "Smooth - Ready for Imitation Turf", "Smooth - Second Pour"
+  extra_concrete_finish_two: string | null; // Options: "Brushed - Ready for Future Paving", "Brushed - Second Pour", "Second Pour", "Smooth - Ready for Imitation Turf", "Smooth - Second Pour"
+  
+  // Included coping options
+  coping_category: string | null; // Options: "Cat1", "Cat2", "Cat3", "Cat4"
+  grout_colour: string | null; // Options: "White", "Grey", "Custom"
+  recess_drainage: string | null; // Options: "Yes", "No"
+  
   // Concrete pump
   concrete_pump_needed: boolean;
   // concrete_pump_quantity renamed to concrete_pump_hours
   concrete_pump_hours: number | null; // Formerly concrete_pump_quantity
   concrete_pump_total_cost: number;
   
-  // Under-fence concrete strips
-  // uf_strips_raw renamed to uf_strips_data
-  uf_strips_data: string; // Formerly uf_strips_raw, matches SQL uf_strips_data (Type assumed string, could be JSON string)
+  // Extra concrete pump
+  extra_concrete_pump: boolean;
+  extra_concrete_pump_quantity: number | null;
+  extra_concrete_pump_total_cost: number;
+  
+  // Under-fence concrete strips (enriched with type and cost data)
+  uf_strips_data: Array<{
+    id: string;
+    length: number;
+    type: string;
+    unit_cost: number;
+    unit_margin: number;
+  }> | null; // Enriched strip data from fence_strips CTE
   uf_strips_cost: number;
   
   /* FRAMELESS-GLASS FENCING */

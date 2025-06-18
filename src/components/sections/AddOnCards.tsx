@@ -15,6 +15,7 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
   const hasHeatingOptions = snapshot.include_heat_pump || snapshot.include_blanket_roller;
   const hasCleaningOptions = snapshot.cleaner_included;
   const hasGeneralExtras = snapshot.selected_extras_json && snapshot.selected_extras_json.length > 0;
+  const hasCustomAddOns = snapshot.selected_extras_json && snapshot.selected_extras_json.filter(extra => extra.type === 'custom').length > 0;
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -164,11 +165,11 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
                     return name.includes('round pool 23');
                   };
 
-                  // Separate different types of extras
-                  const spaJetSystemItems = snapshot.selected_extras_json?.filter(extra => isSpaJetSystem(extra.name)) || [];
-                  const roundPool23Items = snapshot.selected_extras_json?.filter(extra => isRoundPool23Upgrade(extra.name)) || [];
+                  // Separate different types of extras (exclude custom add-ons)
+                  const spaJetSystemItems = snapshot.selected_extras_json?.filter(extra => isSpaJetSystem(extra.name) && extra.type !== 'custom') || [];
+                  const roundPool23Items = snapshot.selected_extras_json?.filter(extra => isRoundPool23Upgrade(extra.name) && extra.type !== 'custom') || [];
                   const otherExtras = snapshot.selected_extras_json?.filter(extra => 
-                    !isSpaJetSystem(extra.name) && !isRoundPool23Upgrade(extra.name)
+                    !isSpaJetSystem(extra.name) && !isRoundPool23Upgrade(extra.name) && extra.type !== 'custom'
                   ) || [];
 
                   const result = [];
@@ -277,6 +278,50 @@ export default function AddOnCards({ snapshot }: { snapshot: ProposalSnapshot })
                   });
 
                   return result;
+                })()}
+              </div>
+            </>
+          )}
+
+          {/* Custom Add Ons Section */}
+          {hasCustomAddOns && (
+            <>
+              {(hasCleaningOptions || hasHeatingOptions || hasGeneralExtras) && <Separator className="my-3" />}
+              
+              <div className="space-y-3">
+                <div className="mb-2">
+                  <p className="text-lg font-semibold">Custom Add Ons</p>
+                </div>
+                
+                {(() => {
+                  const customAddOns = snapshot.selected_extras_json?.filter(extra => extra.type === 'custom') || [];
+                  
+                  return customAddOns.map(extra => (
+                    <div key={extra.id} className="mb-4">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 pr-6 flex items-center justify-center h-full w-20">
+                          <Image 
+                            src="/VipCards/customaddon.png" 
+                            alt={extra.name} 
+                            width={80} 
+                            height={64} 
+                            className="w-full h-16 rounded-md object-contain" 
+                            priority
+                          />
+                        </div>
+                        <div className="flex-grow">
+                          <div className="flex justify-between">
+                            <p className="font-medium">{extra.name}</p>
+                            <p className="font-medium whitespace-nowrap">{fmt(extra.total_rrp)}</p>
+                          </div>
+                          <p className="text-base text-muted-foreground mt-0.5">{extra.description}</p>
+                          {extra.quantity > 1 && (
+                            <p className="text-sm text-muted-foreground mt-0.5">Quantity: {extra.quantity}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ));
                 })()}
               </div>
             </>

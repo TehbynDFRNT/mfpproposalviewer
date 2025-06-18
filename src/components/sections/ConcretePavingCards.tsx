@@ -50,14 +50,22 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
         cost: snapshot.concrete_cuts_cost
       } : null,
 
-    // Always show Concrete Pump if needed, even if cost is zero
-    snapshot.concrete_pump_needed ?
+    // Concrete Pump (combined regular + extra)
+    (snapshot.concrete_pump_needed || snapshot.extra_concrete_pump) ?
       {
         label: 'Concrete Pump',
-        detail: snapshot.concrete_pump_hours
-          ? `Needed for ${snapshot.concrete_pump_hours} Hour${snapshot.concrete_pump_hours !== 1 ? 's' : ''}`
-          : 'Required for installation',
-        cost: snapshot.concrete_pump_total_cost || 0
+        detail: (() => {
+          const regularHours = snapshot.concrete_pump_hours || 0;
+          const extraHours = snapshot.extra_concrete_pump_quantity || 0;
+          const totalHours = regularHours + extraHours;
+          
+          if (totalHours > 0) {
+            return `Needed for ${totalHours} Day${totalHours !== 1 ? 's' : ''}`;
+          } else {
+            return 'Required for installation';
+          }
+        })(),
+        cost: (snapshot.concrete_pump_total_cost || 0) + (snapshot.extra_concrete_pump_total_cost || 0)
       } : null,
 
     (snapshot.uf_strips_cost && snapshot.uf_strips_cost > 0) ?
@@ -78,8 +86,6 @@ export default function ConcretePavingCards({ snapshot }: { snapshot: ProposalSn
       cost: item.cost
     }));
   
-  // Use the concrete total from the price calculator
-  const totalCost = totals.concreteTotal;
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">

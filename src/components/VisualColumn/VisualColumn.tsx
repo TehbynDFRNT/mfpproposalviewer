@@ -31,7 +31,7 @@ export default function VisualColumn({
   resetScroll,
   use3DVisuals = false
 }: VisualColumnProps) {
-  // Fetch site plan data and pricing calculations
+  // Fetch site plan data and pricing calculations (hidden for this deployment)
   const { sitePlanVisual } = useSitePlan(snapshot?.project_id);
   const { fmt, totals, grandTotal, grandTotalWithoutDiscounts, discountBreakdown } = usePriceCalculator(snapshot);
   const { renders } = useRenders(snapshot?.project_id, use3DVisuals);
@@ -45,7 +45,7 @@ export default function VisualColumn({
   
   
   const [priceCardExpanded, setPriceCardExpanded] = useState<boolean>(false);
-  const [sitePlanExpanded, setSitePlanExpanded] = useState<boolean>(false);
+  // const [sitePlanExpanded, setSitePlanExpanded] = useState<boolean>(false); // Hidden for this deployment
 
   // Main visual to display based on section - use our selectVisual utility
   const visual = useMemo(
@@ -99,56 +99,46 @@ export default function VisualColumn({
 
   return (
     <div className="order-1 lg:order-2 w-full lg:w-2/3 h-[40vh] lg:sticky lg:top-16 lg:h-[calc(100vh-8rem)] flex flex-col items-center justify-center overflow-hidden touch-none proposal-right bg-[#07032D] proposal-background transition-colors duration-300">
-      {/* Site Plan Thumbnail - Only visible during Pool Selection section */}
-      <AnimatePresence>
-        {activeSection === CATEGORY_IDS.POOL_SELECTION && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: 1,
-              transition: { 
-                duration: 0.8,
-                ease: "easeInOut",
-                delay: 0.5
-              }
-            }}
-            exit={{ 
-              opacity: 0,
-              transition: { 
-                duration: 0.8,
-                ease: "easeInOut",
-                delay: 0
-              }
-            }}
-            className={`hidden lg:block absolute bottom-4 left-4 z-50 bg-white ${sitePlanExpanded ? 'pb-3 px-3 pt-2' : 'p-1.5'} rounded-lg shadow-md border border-[#DB9D6A]/10 transition-all duration-300`}
-            style={{ cursor: 'pointer' }}
-            onClick={() => setSitePlanExpanded(!sitePlanExpanded)}
-          >
-            <div>
-              <div className={`relative overflow-hidden ${sitePlanExpanded ? 'w-96 h-72' : 'w-48 h-36'} transition-all duration-300 rounded-[3px]`}>
-                <Image
-                  src={sitePlanVisual?.publicUrl || "/Unique2D/siteplan.webp"}
-                  alt="Property Site Plan"
-                  className="object-contain"
-                  fill
-                  sizes={sitePlanExpanded ? "384px" : "192px"}
-                />
+      {/* Site Plan Thumbnail - Hidden for this deployment version */}
+      {false && (
+        <AnimatePresence>
+          {activeSection === CATEGORY_IDS.POOL_SELECTION && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ 
+                opacity: 1,
+                transition: { 
+                  duration: 0.8,
+                  ease: "easeInOut",
+                  delay: 0.5
+                }
+              }}
+              exit={{ 
+                opacity: 0,
+                transition: { 
+                  duration: 0.8,
+                  ease: "easeInOut",
+                  delay: 0
+                }
+              }}
+              className={`hidden lg:block absolute bottom-4 left-4 z-50 bg-white p-1.5 rounded-lg shadow-md border border-[#DB9D6A]/10 transition-all duration-300`}
+              style={{ cursor: 'pointer' }}
+            >
+              <div>
+                <div className={`relative overflow-hidden w-48 h-36 transition-all duration-300 rounded-[3px]`}>
+                  <Image
+                    src={sitePlanVisual?.publicUrl || "/Unique2D/siteplan.webp"}
+                    alt="Property Site Plan"
+                    className="object-contain"
+                    fill
+                    sizes="192px"
+                  />
+                </div>
               </div>
-              {sitePlanExpanded && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                  className="mt-2 text-sm text-black"
-                >
-                  <p className="text-base font-semibold mb-1">2D Site Plan</p>
-                  <p className="text-base text-muted-foreground mb-4 max-w-[24rem]">Your personalised 2D digital siteplan prepared during your Site Inspection</p>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
       
       {/* Price Card Component */}
       <PriceCard

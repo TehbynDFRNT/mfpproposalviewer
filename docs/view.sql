@@ -119,6 +119,9 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
             pool_concrete_selections.concrete_pump_needed,
             pool_concrete_selections.concrete_pump_quantity,
             pool_concrete_selections.concrete_pump_total_cost,
+            pool_concrete_selections.extra_concrete_pump,
+            pool_concrete_selections.extra_concrete_pump_quantity,
+            pool_concrete_selections.extra_concrete_pump_total_cost,
             pool_concrete_selections.concrete_cuts,
             pool_concrete_selections.concrete_cuts_cost
            FROM pool_concrete_selections
@@ -261,6 +264,9 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     con.concrete_pump_needed,
     con.concrete_pump_quantity AS concrete_pump_hours,
     con.concrete_pump_total_cost,
+    con.extra_concrete_pump,
+    con.extra_concrete_pump_quantity,
+    con.extra_concrete_pump_total_cost,
     fs.strip_data_enriched AS uf_strips_data,
     fs.total_cost AS uf_strips_cost,
     gf.glass_linear_meters,

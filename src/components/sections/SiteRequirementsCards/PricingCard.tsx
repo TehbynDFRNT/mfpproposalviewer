@@ -13,31 +13,28 @@ export function PricingCard({ snapshot }: { snapshot: ProposalSnapshot }) {
   // Use the price calculator for formatting and calculated total
   const { fmt, totals } = usePriceCalculator(snapshot);
   
-  // Calculate margin multiplier for crane calculations
-  const marginMultiplier = 1 / (1 - (snapshot.pool_margin_pct || 0) / 100);
-  
-  // Site prep costs with margin applied to each item
+  // Site prep costs 
   const craneLabel = snapshot.crn_name;
   const rawCraneCost = snapshot.crane_cost;
   
-  // Handle crane cost logic: $700 allowance included in base price with margin applied
+  // Handle crane cost logic: ‼️ New logic — margin ONLY on allowance, no margin on excess
   const getCraneDisplayInfo = () => {
-    const craneCostWithMargin = rawCraneCost * marginMultiplier;
-    const craneAllowanceWithMargin = 700 * marginMultiplier;
+    const craneAllowance = 700;
+    const craneExcessCost = Math.max(rawCraneCost - craneAllowance, 0);
     
-    if (craneCostWithMargin <= craneAllowanceWithMargin) {
+    if (craneExcessCost === 0) {
       return {
         displayCost: 'Included in Base Price',
         showSubtext: false,
         isIncluded: true,
-        allowanceAmount: craneAllowanceWithMargin
+        allowanceAmount: craneAllowance
       };
     } else {
       return {
-        displayCost: craneCostWithMargin - craneAllowanceWithMargin,
+        displayCost: craneExcessCost,
         showSubtext: true,
         isIncluded: false,
-        allowanceAmount: craneAllowanceWithMargin
+        allowanceAmount: craneAllowance
       };
     }
   };
