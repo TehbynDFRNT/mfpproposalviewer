@@ -6,6 +6,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 import { CATEGORY_IDS } from '@/lib/constants';
 
+// Configure route to handle larger file uploads (100MB limit)
+export const runtime = 'nodejs';
+export const maxDuration = 60; // 60 seconds timeout for large file uploads
+
+// Override Next.js body size limit to 100MB
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '100mb',
+    },
+  },
+};
+
 /**
  * Uploads a video file to Supabase storage and creates or updates a database record
  * @param file The file to upload
