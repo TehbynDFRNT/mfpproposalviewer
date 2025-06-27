@@ -26,9 +26,11 @@ export type ImageVisual = {
 // New type for 3D renders from Supabase
 export type RenderVisual = {
   type: '3d';
-  videoPath: string; // Supabase storage path
+  videoPath: string; // Supabase storage path (original)
   videoType: string; // Category ID
   createdAt: string; // Timestamp for freshness
+  compressionStatus?: 'pending' | 'processing' | 'completed' | 'failed';
+  compressedPath?: string | null; // Path to compressed version when available
   alt?: string;
 };
 

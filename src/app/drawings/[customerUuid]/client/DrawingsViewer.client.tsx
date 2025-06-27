@@ -27,6 +27,7 @@ import { areAllRequiredVideosPresent } from "@/lib/videoRequirementsChecker";
 // Import custom hooks
 import { useVideos } from "@/hooks/use-videos";
 import { useUploads } from "@/hooks/use-uploads";
+import { useCompressionRealtime } from "@/hooks/use-compression-realtime";
 
 export interface DrawingsViewerProps {
   snapshot: ProposalSnapshot;
@@ -46,6 +47,9 @@ export default function DrawingsViewer({ snapshot }: DrawingsViewerProps) {
     replaceVideo,
     setStatus
   } = useUploads(snapshot.project_id, refreshVideos);
+
+  // Subscribe to realtime compression status updates
+  useCompressionRealtime(snapshot.project_id, refreshVideos);
 
   // Check if all sections are complete
   const is3DReady = useMemo(() => 

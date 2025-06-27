@@ -1,0 +1,1406 @@
+RENDI VIDEO COMPRESSION INTEGRATION - CODE EXPORT
+Generated on: Thu Jun 26 15:34:47 AEST 2025
+=================================================
+
+This document contains all code changes for integrating Rendi video compression
+Files are ordered by event flow: Upload → Compression → Retrieval
+
+=================================================================================
+FILE: supabase/migrations/add_video_compression_fields.sql
+DESCRIPTION: Database migration - Adds compression tracking fields
+=================================================================================
+
+-- Migration: Add video compression fields to 3d table
+-- This migration adds fields needed for Rendi video compression integration
+
+-- Add compression status enum type
+DO $$ BEGIN
+    CREATE TYPE compression_status AS ENUM ('pending', 'processing', 'completed', 'failed');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Add new columns to the 3d table
+ALTER TABLE public."3d"
+ADD COLUMN IF NOT EXISTS compression_status compression_status DEFAULT 'pending',
+ADD COLUMN IF NOT EXISTS compressed_path text,
+ADD COLUMN IF NOT EXISTS rendi_command_id text,
+ADD COLUMN IF NOT EXISTS compression_error text,
+ADD COLUMN IF NOT EXISTS updated_at timestamp with time zone DEFAULT now();
+
+-- Create an index on compression_status for faster queries
+CREATE INDEX IF NOT EXISTS idx_3d_compression_status ON public."3d" (compression_status);
+
+-- Create an index on rendi_command_id for webhook lookups
+CREATE INDEX IF NOT EXISTS idx_3d_rendi_command_id ON public."3d" (rendi_command_id);
+
+-- Add a comment to document the schema changes
+COMMENT ON COLUMN public."3d".compression_status IS 'Status of video compression: pending, processing, completed, or failed';
+COMMENT ON COLUMN public."3d".compressed_path IS 'Storage path to the compressed video file';
+COMMENT ON COLUMN public."3d".rendi_command_id IS 'Unique ID from Rendi for tracking compression jobs';
+COMMENT ON COLUMN public."3d".compression_error IS 'Error message if compression fails';
+COMMENT ON COLUMN public."3d".updated_at IS 'Timestamp of last update to the record';
+
+=================================================================================
+FILE: src/types/video.ts
+DESCRIPTION: TypeScript types - Updated VideoRecord interface
+=================================================================================
+
+/**
+ * Types related to 3D videos and upload functionality
+ */
+import React from 'react';
+import { UploadStatus } from '@/components/Drawings/FileUploadStatus';
+
+/**
+ * Represents a video record from the database
+ */
+export interface VideoRecord {
+  video_type: string;
+  video_path: string;
+  created_at: string;
+  compression_status?: 'pending' | 'processing' | 'completed' | 'failed';
+  compressed_path?: string | null;
+  rendi_command_id?: string | null;
+  compression_error?: string | null;
+}
+
+/**
+ * Status tracking for file uploads including file reference
+ */
+export interface UploadStatusRecord {
+  status: UploadStatus;
+  message: string;
+  file: File | null;
+}
+
+/**
+ * Map of upload statuses by video type
+ */
+export type StatusMap = Record<string, UploadStatusRecord>;
+
+/**
+ * Result of an upload operation
+ */
+export interface UploadResult {
+  success: boolean;
+  message: string;
+}
+
+/**
+ * Result of batch upload operations
+ */
+export interface BatchUploadResult {
+  success: boolean;
+  results: Record<string, string>;
+}
+
+/**
+ * Map of file references by section ID
+ */
+export type FileRefMap = {
+  [key: string]: React.RefObject<HTMLInputElement | null>;
+};
+
+=================================================================================
+FILE: src/lib/uploadHandler.ts
+DESCRIPTION: Upload handler - Saves videos and creates DB records with compression status
+=================================================================================
+
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/MFPProposalViewer/src/app/drawings/[customerUuid]/lib/uploadHandler.ts
+ * Handles file uploads to Supabase storage and database
+ */
+import { supabase } from '@/lib/supabaseClient';
+import { CATEGORY_IDS } from '@/lib/constants';
+
+/**
+ * Uploads a video file to Supabase storage and creates or updates a database record
+ * @param file The file to upload
+ * @param videoType The section category ID (e.g., 'pool-selection-section')
+ * @param projectId The project ID from the snapshot
+ * @param isReplacement Whether this is replacing an existing video
+ * @returns Promise that resolves when upload is complete
+ */
+export const handleUpload = async (
+  file: File,
+  videoType: string,
+  projectId: string,
+  isReplacement: boolean = false
+): Promise<{ success: boolean; message: string }> => {
+  if (!file || !projectId) {
+    return {
+      success: false,
+      message: "Missing file or project ID"
+    };
+  }
+
+  // Validate that videoType is a valid category ID
+  const validVideoTypes = [
+    CATEGORY_IDS.POOL_SELECTION,
+    CATEGORY_IDS.FILTRATION_MAINTENANCE,
+    CATEGORY_IDS.CONCRETE_PAVING,
+    CATEGORY_IDS.FENCING,
+    CATEGORY_IDS.RETAINING_WALLS,
+    CATEGORY_IDS.WATER_FEATURE,
+    CATEGORY_IDS.ADD_ONS,
+    CATEGORY_IDS.SITE_REQUIREMENTS,
+    CATEGORY_IDS.PROPOSAL_SUMMARY
+  ];
+
+  if (!validVideoTypes.includes(videoType)) {
+    return {
+      success: false,
+      message: `Invalid video type: ${videoType}`
+    };
+  }
+
+  try {
+    // Check if we already have a video of this type for this project
+    if (isReplacement) {
+      // Find the existing video record to get its path
+      const { data: existingVideos, error: queryError } = await supabase
+        .from('3d')
+        .select('*')
+        .eq('pool_project_id', projectId)
+        .eq('video_type', videoType);
+
+      if (queryError) {
+        console.error("Error querying existing videos:", queryError);
+        return {
+          success: false,
+          message: `Failed to check for existing videos: ${queryError.message}`
+        };
+      }
+
+      // If found, delete the old file from storage
+      if (existingVideos && existingVideos.length > 0) {
+        const oldPath = existingVideos[0].video_path;
+        if (oldPath) {
+          const { error: deleteError } = await supabase.storage
+            .from('3d-renders')
+            .remove([oldPath]);
+
+          if (deleteError) {
+            console.warn("Could not delete old video file:", deleteError);
+            // Continue with replacement even if old file deletion fails
+          }
+        }
+      }
+    }
+
+    // Upload the file to Supabase Storage
+    const timestamp = Date.now();
+    const filePath = `${projectId}/${videoType}-${timestamp}.mp4`;
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('3d-renders')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Storage upload error:", uploadError);
+      return {
+        success: false,
+        message: `Upload failed: ${uploadError.message}`
+      };
+    }
+
+    if (isReplacement) {
+      // Update the existing record
+      const { error: updateError } = await supabase
+        .from('3d')
+        .update({
+          video_path: filePath,
+          compression_status: 'pending',
+          compressed_path: null,
+          rendi_command_id: null,
+          compression_error: null,
+          created_at: new Date().toISOString(),
+        })
+        .eq('pool_project_id', projectId)
+        .eq('video_type', videoType);
+
+      if (updateError) {
+        console.error("Update in '3d' table failed:", updateError);
+        return {
+          success: false,
+          message: `Database update failed: ${updateError.message}`
+        };
+      }
+
+      return {
+        success: true,
+        message: "Video replaced successfully"
+      };
+    } else {
+      // Insert a new record
+      const { error: insertError } = await supabase
+        .from('3d')
+        .insert([
+          {
+            pool_project_id: projectId,
+            video_path: filePath,
+            video_type: videoType,
+            compression_status: 'pending',
+            compressed_path: null,
+            rendi_command_id: null,
+            compression_error: null,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+      if (insertError) {
+        console.error("Insert into '3d' table failed:", insertError);
+        return {
+          success: false,
+          message: `Database record failed: ${insertError.message}`
+        };
+      }
+
+      return {
+        success: true,
+        message: "Video uploaded and reference saved successfully"
+      };
+    }
+  } catch (error) {
+    console.error("Unexpected error during upload:", error);
+    return {
+      success: false,
+      message: `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`
+    };
+  }
+};
+
+/**
+ * Processes all uploads in the section cards
+ * @param files Object containing video type category IDs as keys and files as values
+ * @param projectId The project ID from the snapshot
+ * @param replacements Object containing which video types should be treated as replacements
+ * @returns Promise that resolves when all uploads are complete
+ */
+export const processAllUploads = async (
+  files: Record<string, File | null>,
+  projectId: string,
+  replacements: Record<string, boolean> = {}
+): Promise<{ success: boolean; results: Record<string, string> }> => {
+  const results: Record<string, string> = {};
+  let hasErrors = false;
+
+  // Filter out null files and create upload promises
+  const uploadPromises = Object.entries(files)
+    .filter(([_, file]) => file !== null)
+    .map(async ([videoType, file]) => {
+      if (!file) return;
+
+      // Check if this is a replacement or a new upload
+      const isReplacement = replacements[videoType] || false;
+
+      const result = await handleUpload(file, videoType, projectId, isReplacement);
+      results[videoType] = result.message;
+      if (!result.success) {
+        hasErrors = true;
+      }
+    });
+
+  // Wait for all uploads to complete
+  await Promise.all(uploadPromises);
+
+  return {
+    success: !hasErrors,
+    results
+  };
+};
+
+=================================================================================
+FILE: src/hooks/use-videos.ts
+DESCRIPTION: Videos hook - Fetches video data including compression status
+=================================================================================
+
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import type { VideoRecord } from '@/types/video';
+
+/**
+ * Result returned by the useVideos hook
+ */
+interface UseVideosResult {
+  videos: VideoRecord[];
+  loading: boolean;
+  error: string | null;
+  refresh: () => void;
+  findVideoByType: (videoType: string) => VideoRecord | null;
+}
+
+/**
+ * Hook to fetch and manage 3D render videos for a project
+ * 
+ * @param projectId The pool project ID to fetch videos for
+ * @returns Object containing videos array, loading state, error message, refresh function, and helper to find videos by type
+ */
+export function useVideos(projectId: string | undefined): UseVideosResult {
+  const [videos, setVideos] = useState<VideoRecord[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+
+  // Function to manually refresh the videos
+  const refresh = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
+
+  // Helper function to find a video by type
+  const findVideoByType = useCallback((videoType: string): VideoRecord | null => {
+    if (!videos || !Array.isArray(videos)) return null;
+    return videos.find(video => video.video_type === videoType) || null;
+  }, [videos]);
+
+  // Fetch videos when component mounts or refresh is triggered
+  useEffect(() => {
+    const fetchVideos = async () => {
+      if (!projectId) {
+        setLoading(false);
+        setError('Missing project ID');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const { data, error: fetchError } = await supabase
+          .from('3d')
+          .select('video_type, video_path, created_at, compression_status, compressed_path, rendi_command_id, compression_error')
+          .eq('pool_project_id', projectId);
+
+        if (fetchError) {
+          console.error('Error fetching videos:', fetchError);
+          setError(`Failed to fetch videos: ${fetchError.message}`);
+          setVideos([]);
+        } else {
+          setVideos(data || []);
+          console.log('Videos refreshed:', data);
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching videos:', err);
+        setError(`Unexpected error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        setVideos([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVideos();
+  }, [projectId, refreshTrigger]);
+
+  return { videos, loading, error, refresh, findVideoByType };
+}
+
+=================================================================================
+FILE: src/app/api/check-compression-status/route.ts
+DESCRIPTION: API endpoint - Checks if compressed videos exist and updates DB
+=================================================================================
+
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/MFPProposalViewer/src/app/api/check-compression-status/route.ts
+ * API endpoint to check if compressed videos exist and update database status
+ */
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+interface CheckCompressionRequest {
+  projectId: string;
+  videoType?: string; // Optional - if not provided, check all videos for project
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const { projectId, videoType }: CheckCompressionRequest = await req.json();
+
+    if (!projectId) {
+      return NextResponse.json(
+        { error: 'Missing required field: projectId' },
+        { status: 400 }
+      );
+    }
+
+    // Build query
+    let query = supabase
+      .from('3d')
+      .select('*')
+      .eq('pool_project_id', projectId);
+
+    if (videoType) {
+      query = query.eq('video_type', videoType);
+    }
+
+    // Fetch video records
+    const { data: videos, error: fetchError } = await query;
+
+    if (fetchError) {
+      console.error('Error fetching videos:', fetchError);
+      return NextResponse.json(
+        { error: 'Failed to fetch videos' },
+        { status: 500 }
+      );
+    }
+
+    if (!videos || videos.length === 0) {
+      return NextResponse.json(
+        { message: 'No videos found for project' },
+        { status: 404 }
+      );
+    }
+
+    const results = [];
+
+    // Check each video for compressed version
+    for (const video of videos) {
+      const compressedPath = `compressed/${video.video_path}`;
+      
+      // Check if compressed file exists
+      const { data: fileData, error: fileError } = await supabase.storage
+        .from('3d-renders')
+        .list(`compressed/${video.video_path.split('/')[0]}`, {
+          search: video.video_path.split('/')[1]
+        });
+
+      const compressedExists = !fileError && fileData && fileData.length > 0;
+
+      // Update database if status has changed
+      if (compressedExists && video.compression_status !== 'completed') {
+        const { error: updateError } = await supabase
+          .from('3d')
+          .update({
+            compression_status: 'completed',
+            compressed_path: compressedPath,
+            updated_at: new Date().toISOString()
+          })
+          .eq('pool_project_id', projectId)
+          .eq('video_type', video.video_type);
+
+        if (updateError) {
+          console.error('Failed to update compression status:', updateError);
+        }
+
+        results.push({
+          video_type: video.video_type,
+          status: 'completed',
+          compressed_path: compressedPath
+        });
+      } else if (!compressedExists && video.compression_status === 'pending') {
+        // Still pending
+        results.push({
+          video_type: video.video_type,
+          status: 'pending',
+          compressed_path: null
+        });
+      } else {
+        // No change
+        results.push({
+          video_type: video.video_type,
+          status: video.compression_status || 'pending',
+          compressed_path: video.compressed_path
+        });
+      }
+    }
+
+    return NextResponse.json({
+      project_id: projectId,
+      videos: results
+    });
+
+  } catch (error) {
+    console.error('Error checking compression status:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  // Simple health check
+  return NextResponse.json({ status: 'ok' });
+}
+
+=================================================================================
+FILE: src/hooks/use-compression-check.ts
+DESCRIPTION: Compression check hook - Periodically checks for compression completion
+=================================================================================
+
+'use client';
+
+import { useEffect } from 'react';
+
+/**
+ * Hook to periodically check compression status for videos
+ * 
+ * @param projectId The project ID to check
+ * @param enabled Whether to enable periodic checks
+ * @param onUpdate Callback when compression status updates
+ * @param interval Check interval in milliseconds (default: 10 seconds)
+ */
+export function useCompressionCheck(
+  projectId: string | undefined,
+  enabled: boolean = true,
+  onUpdate?: () => void,
+  interval: number = 10000
+) {
+  useEffect(() => {
+    if (!projectId || !enabled) return;
+
+    const checkCompression = async () => {
+      try {
+        const response = await fetch('/api/check-compression-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Check if any videos were updated to completed
+          const hasNewlyCompleted = data.videos?.some(
+            (v: any) => v.status === 'completed'
+          );
+
+          if (hasNewlyCompleted && onUpdate) {
+            onUpdate();
+          }
+        }
+      } catch (error) {
+        console.error('Error checking compression status:', error);
+      }
+    };
+
+    // Initial check
+    checkCompression();
+
+    // Set up interval
+    const intervalId = setInterval(checkCompression, interval);
+
+    return () => clearInterval(intervalId);
+  }, [projectId, enabled, onUpdate, interval]);
+}
+
+=================================================================================
+FILE: src/app/api/trigger-compression/route.ts
+DESCRIPTION: API endpoint - Manually trigger compression for testing
+=================================================================================
+
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/MFPProposalViewer/src/app/api/trigger-compression/route.ts
+ * API endpoint to manually trigger video compression for testing or re-processing
+ * This endpoint simulates what the Supabase Edge Function will do
+ */
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+const RENDI_API_KEY = process.env.RENDI_API_KEY!;
+
+interface TriggerCompressionRequest {
+  projectId: string;
+  videoType: string;
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const { projectId, videoType }: TriggerCompressionRequest = await req.json();
+
+    if (!projectId || !videoType) {
+      return NextResponse.json(
+        { error: 'Missing required fields: projectId and videoType' },
+        { status: 400 }
+      );
+    }
+
+    // Fetch the video record
+    const { data: videoRecord, error: fetchError } = await supabase
+      .from('3d')
+      .select('*')
+      .eq('pool_project_id', projectId)
+      .eq('video_type', videoType)
+      .single();
+
+    if (fetchError || !videoRecord) {
+      return NextResponse.json(
+        { error: 'Video not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if already compressed
+    if (videoRecord.compression_status === 'completed' && videoRecord.compressed_path) {
+      return NextResponse.json(
+        { message: 'Video already compressed', compressed_path: videoRecord.compressed_path },
+        { status: 200 }
+      );
+    }
+
+    // Create a signed URL for the original video
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from('3d-renders')
+      .createSignedUrl(videoRecord.video_path, 300); // 5 minutes
+
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      console.error('Failed to create signed URL:', signedUrlError);
+      return NextResponse.json(
+        { error: 'Failed to create signed URL' },
+        { status: 500 }
+      );
+    }
+
+    // Prepare Rendi API request (matching Edge Function settings)
+    const rendiPayload = {
+      ffmpeg_command: "-i {{in_1}} -c:v libx264 -preset veryfast -crf 26 -movflags +faststart {{out_1}}",
+      input_files: { in_1: signedUrlData.signedUrl },
+      output_files: { out_1: "compressed.mp4" },
+      max_command_run_seconds: 900 // 15 minutes
+    };
+
+    // Call Rendi API
+    const rendiResponse = await fetch("https://api.rendi.dev/v1/run-ffmpeg-command", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": RENDI_API_KEY,
+      },
+      body: JSON.stringify(rendiPayload),
+    });
+
+    if (!rendiResponse.ok) {
+      const errorText = await rendiResponse.text();
+      console.error('Rendi API error:', errorText);
+      return NextResponse.json(
+        { error: 'Failed to start compression', details: errorText },
+        { status: 500 }
+      );
+    }
+
+    const rendiData = await rendiResponse.json();
+
+    // Update database with processing status
+    const { error: updateError } = await supabase
+      .from('3d')
+      .update({
+        compression_status: 'processing',
+        rendi_command_id: rendiData.command_id,
+        updated_at: new Date().toISOString()
+      })
+      .eq('pool_project_id', projectId)
+      .eq('video_type', videoType);
+
+    if (updateError) {
+      console.error('Failed to update compression status:', updateError);
+    }
+
+    return NextResponse.json({
+      message: 'Compression started',
+      command_id: rendiData.command_id,
+      status: 'processing'
+    });
+
+  } catch (error) {
+    console.error('Error triggering compression:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+=================================================================================
+FILE: src/components/Drawings/VideoPreview.tsx
+DESCRIPTION: Video preview component - Shows videos with compression status indicators
+=================================================================================
+
+'use client';
+
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/MFPProposalViewer/src/components/Drawings/VideoPreview.tsx
+ * Component for displaying uploaded 3D render videos with controls
+ */
+import React, { useState, useRef, useEffect } from 'react';
+import { Play, Pause, Maximize, X, Upload, Loader2, Check, Zap, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from "@/lib/utils";
+import { supabase } from '@/lib/supabaseClient';
+import { FileUploadStatus, UploadStatus } from "@/components/Drawings/FileUploadStatus";
+
+interface VideoData {
+  video_type: string;
+  video_path: string;
+  created_at: string;
+  compression_status?: 'pending' | 'processing' | 'completed' | 'failed';
+  compressed_path?: string | null;
+  rendi_command_id?: string | null;
+  compression_error?: string | null;
+}
+
+interface VideoPreviewProps {
+  video: VideoData;
+  onReplace?: (file: File) => void;
+  className?: string;
+  videoType?: string;
+  uploadStatus?: {
+    status: UploadStatus;
+    message: string;
+    file: File | null;
+  };
+}
+
+export function VideoPreview({ video, onReplace, className, videoType, uploadStatus }: VideoPreviewProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Handle file selection from hidden input
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onReplace) {
+      onReplace(file);
+    }
+  };
+
+  // Format date to a more readable format
+  const uploadDate = new Date(video.created_at).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+
+  // Handle play/pause
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  // Handle fullscreen toggle
+  const toggleFullscreen = () => {
+    if (videoRef.current) {
+      if (!isFullscreen) {
+        if (videoRef.current.requestFullscreen) {
+          videoRef.current.requestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+      setIsFullscreen(!isFullscreen);
+    }
+  };
+
+  // Listen for fullscreen change events
+  React.useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  // Check if compressed version exists by modifying the path
+  // Original: {projectId}/{videoType}-{timestamp}.mp4
+  // Compressed: compressed/{projectId}/{videoType}-{timestamp}.mp4
+  const compressedPath = `compressed/${video.video_path}`;
+  
+  // We'll try to use the compressed path if the compression status indicates it's ready
+  // or we can check if the file exists
+  const videoPath = (video.compression_status === 'completed' || video.compressed_path) 
+    ? (video.compressed_path || compressedPath)
+    : video.video_path;
+
+  // Get the public URL for the video using Supabase's getPublicUrl method
+  const { data } = supabase
+    .storage
+    .from('3d-renders')
+    .getPublicUrl(videoPath);
+
+  const videoUrl = videoPath.startsWith('http')
+    ? videoPath
+    : data?.publicUrl || '';
+
+  // Log for debugging purposes
+  useEffect(() => {
+    console.log('Video data:', video);
+    console.log('Supabase public URL data:', data);
+    console.log('Final video URL:', videoUrl);
+    console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+  }, [video, data, videoUrl]);
+
+  return (
+    <div className={cn("relative rounded-md overflow-hidden bg-black/5", className)}>
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        className="w-full h-auto rounded-md"
+        onEnded={() => setIsPlaying(false)}
+        onError={(e) => {
+          console.error('Video loading error:', e);
+          console.error('Video element:', videoRef.current);
+          console.error('Video URL that failed:', videoUrl);
+        }}
+        onLoadedData={() => console.log('Video loaded successfully:', videoUrl)}
+        controlsList="nodownload"
+        playsInline
+      />
+
+      {/* Video controls overlay - only covering the video area, not the bottom info bar */}
+      <div className="absolute inset-0 bottom-auto flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity z-10" style={{ bottom: '36px' }}>
+        <div className="flex gap-2">
+          <Button
+            onClick={togglePlay}
+            size="sm"
+            variant="secondary"
+            className="bg-white/80 hover:bg-white"
+          >
+            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          </Button>
+          <Button
+            onClick={toggleFullscreen}
+            size="sm"
+            variant="secondary"
+            className="bg-white/80 hover:bg-white"
+          >
+            <Maximize className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Bottom info bar - with higher z-index to ensure clickable buttons */}
+      <div className="flex flex-col p-2 text-xs text-gray-600 bg-white border-t relative z-20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span>Uploaded: {uploadDate}</span>
+            {/* Compression status indicator */}
+            {video.compression_status && (
+              <span className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
+                video.compression_status === 'pending' && "bg-yellow-100 text-yellow-700",
+                video.compression_status === 'processing' && "bg-blue-100 text-blue-700",
+                video.compression_status === 'completed' && "bg-green-100 text-green-700",
+                video.compression_status === 'failed' && "bg-red-100 text-red-700"
+              )}>
+                {video.compression_status === 'pending' && (
+                  <>
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                    Pending
+                  </>
+                )}
+                {video.compression_status === 'processing' && (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Compressing
+                  </>
+                )}
+                {video.compression_status === 'completed' && (
+                  <>
+                    <Zap className="h-3 w-3" />
+                    Optimized
+                  </>
+                )}
+                {video.compression_status === 'failed' && (
+                  <>
+                    <AlertCircle className="h-3 w-3" />
+                    Failed
+                  </>
+                )}
+              </span>
+            )}
+          </div>
+
+          {onReplace && (
+            <>
+              <input
+                type="file"
+                id={`replace-video-${videoType || 'default'}`}
+                className="hidden"
+                accept="video/mp4,video/x-m4v,video/*"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                size="sm"
+                variant={uploadStatus?.status === 'success' ? "default" : "outline"}
+                className={cn(
+                  "h-7 px-2 text-xs",
+                  uploadStatus?.status === 'success' && "bg-green-600 hover:bg-green-700 text-white"
+                )}
+                disabled={uploadStatus?.status === 'loading'}
+              >
+                {uploadStatus?.status === 'loading' ? (
+                  <>
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    Uploading...
+                  </>
+                ) : uploadStatus?.status === 'success' ? (
+                  <>
+                    <Check className="h-3 w-3 mr-1" />
+                    Replaced
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-3 w-3 mr-1" />
+                    Replace
+                  </>
+                )}
+              </Button>
+            </>
+          )}
+        </div>
+
+        {/* Show upload status if applicable */}
+        {uploadStatus && uploadStatus.status !== 'idle' && (
+          <div className="mt-2">
+            <FileUploadStatus
+              status={uploadStatus.status}
+              message={uploadStatus.message}
+              file={uploadStatus.file}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+
+=================================================================================
+FILE: src/app/drawings/[customerUuid]/client/DrawingsViewer.client.tsx
+DESCRIPTION: Drawings viewer - Main component that uses compression checking
+=================================================================================
+
+'use client';
+
+/**
+ * File: /Users/tehbynnova/Code/MyProjects/Web/MFPProposalViewer/src/app/drawings/[customerUuid]/DrawingsViewer.client.tsx
+ * Client component for the drawings page - follows the same structure as ProposalViewer.client.tsx
+ */
+import React, { useState, useEffect, useMemo } from 'react';
+import type { ProposalSnapshot } from '@/types/snapshot';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
+import { Download, ExternalLink, Upload, Camera, Image as ImageIcon, FileVideo, MapPin, LayoutGrid, Grid3X3, Loader2, Map } from 'lucide-react';
+import { InputFile } from "@/components/Drawings/InputFile";
+// Import motion from framer-motion
+import { motion } from 'framer-motion';
+// Import directly from source to avoid the barrel file
+import Header from '@/components/Header/Header';
+// Import from local components folder
+import SimpleFooter from "@/components/Drawings/SimpleFooter";
+import Image from 'next/image';
+// Import application constants
+import { CATEGORY_IDS, CATEGORY_NAMES } from '@/lib/constants';
+import { isSectionEmpty } from '@/lib/utils';
+import { VideoPreview } from "@/components/Drawings/VideoPreview";
+import { SitePlanPreview } from "@/components/Drawings/SitePlanPreview";
+import { cn } from "@/lib/utils";
+import { areAllRequiredVideosPresent } from "@/lib/videoRequirementsChecker";
+// Import custom hooks
+import { useVideos } from "@/hooks/use-videos";
+import { useUploads } from "@/hooks/use-uploads";
+import { useCompressionCheck } from "@/hooks/use-compression-check";
+
+export interface DrawingsViewerProps {
+  snapshot: ProposalSnapshot;
+}
+
+export default function DrawingsViewer({ snapshot }: DrawingsViewerProps) {
+  // Use the useVideos hook to fetch and manage videos
+  const { videos, refresh: refreshVideos, findVideoByType } = useVideos(snapshot.project_id);
+  
+  // Use the useUploads hook for handling file uploads
+  const { 
+    uploadStatus, 
+    fileRefs,
+    handleFileChange,
+    uploadFile,
+    processAllFiles,
+    replaceVideo,
+    setStatus
+  } = useUploads(snapshot.project_id, refreshVideos);
+
+  // Check for compression status updates every 10 seconds
+  useCompressionCheck(snapshot.project_id, true, refreshVideos, 10000);
+
+  // Check if all sections are complete
+  const is3DReady = useMemo(() => 
+    areAllRequiredVideosPresent(videos, snapshot),
+    [videos, snapshot]
+  );
+
+  // Helper to render a section card with conditional video display
+  const renderSectionCard = (videoType: string, title: string, description: string, icon: React.ReactNode) => {
+    const existingVideo = findVideoByType(videoType);
+
+    return (
+      <Card className="bg-white overflow-hidden border border-[#DB9D6A]/20">
+        <CardHeader className="p-4 bg-[#DB9D6A]/10">
+          <div className="flex items-center gap-2">
+            {icon}
+            <CardTitle>{title}</CardTitle>
+          </div>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+        <CardContent className="p-4">
+          {/* Check if we have an existing video for this type */}
+          {existingVideo ? (
+            <div className="space-y-3">
+              <VideoPreview
+                video={existingVideo}
+                videoType={videoType}
+                uploadStatus={uploadStatus[videoType]}
+                onReplace={(file) => replaceVideo(file, videoType)}
+              />
+            </div>
+          ) : (
+            <>
+              <InputFile
+                id={`${videoType}-render`}
+                label="3D Render Video"
+                accept="video/mp4,video/x-m4v,video/*"
+                onChange={(e) => handleFileChange(e, videoType)}
+                ref={fileRefs[videoType as keyof typeof fileRefs]}
+                status={uploadStatus[videoType]?.status || 'idle'}
+                statusMessage={uploadStatus[videoType]?.message}
+                selectedFile={uploadStatus[videoType]?.file}
+              />
+              <div className="mt-4 flex justify-end">
+                <Button
+                  className="gap-2"
+                  onClick={() => uploadFile(videoType)}
+                  disabled={uploadStatus[videoType]?.status === 'loading'}
+                >
+                  {uploadStatus[videoType]?.status === 'loading' ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  Upload Video
+                </Button>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="relative flex min-h-screen flex-col bg-[#07032D] proposal-background">
+      {/* Header - same as proposal page */}
+      <Header />
+
+      {/* Main Content - similar layout but simpler than proposal */}
+      <main className="flex flex-col flex-1 pt-16 lg:pb-16 overscroll-none">
+        <div className="w-full proposal-left pb-5 lg:pb-0 lg:sticky lg:top-16 lg:h-[calc(100vh-8rem)] lg:overflow-y-auto proposal-content relative">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="major-section w-full flex flex-col p-8 pb-8 lg:pb-0 overflow-hidden"
+          >
+              {/* Admin header */}
+              <h2 className="header-welcome font-bold font-sans text-white text-2xl lg:text-3xl mb-6">
+                3D Render <span className="header-owners text-2xl lg:text-3xl !text-[#DB9D6A]">Upload Portal</span>
+              </h2>
+
+              <p className="text-white/90 mb-6">
+                Upload 3D render videos for customer: <span className="font-semibold text-[#DB9D6A]">{snapshot.owner1} {snapshot.owner2 ? `& ${snapshot.owner2}` : ''}</span>
+                <span className="text-sm ml-2 text-white/60">(ID: {snapshot.project_id?.slice(0, 8)})</span>
+              </p>
+
+              {/* Status Message */}
+              {uploadStatus.general?.status && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="mb-8"
+                >
+                  <div className={cn(
+                    "p-4 rounded-md",
+                    uploadStatus.general.status === 'success' ? "bg-green-100 text-green-800 border border-green-200" :
+                    uploadStatus.general.status === 'error' ? "bg-red-100 text-red-800 border border-red-200" :
+                    "bg-blue-100 text-blue-800 border border-blue-200"
+                  )}>
+                    {uploadStatus.general.message}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Site Plan Preview Card */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <Card className="bg-white overflow-hidden border border-[#DB9D6A]/20">
+                  <CardHeader className="p-4 bg-[#DB9D6A]/10">
+                    <div className="flex items-center gap-2">
+                      <Map className="h-5 w-5 text-[#DB9D6A]" />
+                      <CardTitle>Site Plan</CardTitle>
+                    </div>
+                    <CardDescription>Current site plan from external design tool</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <SitePlanPreview projectId={snapshot.project_id || ''} className="w-full" />
+                  </CardContent>
+                </Card>
+              </div>
+
+            {/* Upload cards for each major section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
+
+                {/* Pool Selection Section - Always show as it's a core section */}
+                {renderSectionCard(
+                  CATEGORY_IDS.POOL_SELECTION,
+                  CATEGORY_NAMES[CATEGORY_IDS.POOL_SELECTION],
+                  "Pool model 3D visualization",
+                  <LayoutGrid className="h-5 w-5 text-[#DB9D6A]" />
+                )}
+
+                {/* Site Requirements Section - intentionally removed as it always uses FrannaCrane video */}
+
+                {/* Filtration & Maintenance - Always show as it's a core section */}
+                {renderSectionCard(
+                  CATEGORY_IDS.FILTRATION_MAINTENANCE,
+                  CATEGORY_NAMES[CATEGORY_IDS.FILTRATION_MAINTENANCE],
+                  "Equipment operation visualization",
+                  <FileVideo className="h-5 w-5 text-[#DB9D6A]" />
+                )}
+
+                {/* Concrete & Paving - Show only if not empty */}
+                {!isSectionEmpty(CATEGORY_IDS.CONCRETE_PAVING, snapshot) && renderSectionCard(
+                  CATEGORY_IDS.CONCRETE_PAVING,
+                  CATEGORY_NAMES[CATEGORY_IDS.CONCRETE_PAVING],
+                  "Surface finishes visualization",
+                  <FileVideo className="h-5 w-5 text-[#DB9D6A]" />
+                )}
+
+                {/* Fencing Section - Show only if not empty */}
+                {!isSectionEmpty(CATEGORY_IDS.FENCING, snapshot) && renderSectionCard(
+                  CATEGORY_IDS.FENCING,
+                  CATEGORY_NAMES[CATEGORY_IDS.FENCING],
+                  "Safety barrier visualization",
+                  <FileVideo className="h-5 w-5 text-[#DB9D6A]" />
+                )}
+
+                {/* Retaining Walls - Show only if not empty */}
+                {!isSectionEmpty(CATEGORY_IDS.RETAINING_WALLS, snapshot) && renderSectionCard(
+                  CATEGORY_IDS.RETAINING_WALLS,
+                  CATEGORY_NAMES[CATEGORY_IDS.RETAINING_WALLS],
+                  "Structural visualization",
+                  <FileVideo className="h-5 w-5 text-[#DB9D6A]" />
+                )}
+
+                {/* Water Feature - Show only if not empty */}
+                {!isSectionEmpty(CATEGORY_IDS.WATER_FEATURE, snapshot) && renderSectionCard(
+                  CATEGORY_IDS.WATER_FEATURE,
+                  CATEGORY_NAMES[CATEGORY_IDS.WATER_FEATURE],
+                  "Water effects visualization",
+                  <FileVideo className="h-5 w-5 text-[#DB9D6A]" />
+                )}
+
+                {/* Add-Ons - Show only if not empty */}
+                {!isSectionEmpty(CATEGORY_IDS.ADD_ONS, snapshot) && renderSectionCard(
+                  CATEGORY_IDS.ADD_ONS,
+                  CATEGORY_NAMES[CATEGORY_IDS.ADD_ONS],
+                  "Premium features visualization",
+                  <FileVideo className="h-5 w-5 text-[#DB9D6A]" />
+                )}
+
+                {/* Proposal Summary - Always include this as it's a core section */}
+                {renderSectionCard(
+                  CATEGORY_IDS.PROPOSAL_SUMMARY,
+                  CATEGORY_NAMES[CATEGORY_IDS.PROPOSAL_SUMMARY],
+                  "Final proposal overview",
+                  <FileVideo className="h-5 w-5 text-[#DB9D6A]" />
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </main>
+
+        {/* Simple Footer without navigation */}
+        <SimpleFooter
+          snapshot={snapshot}
+          is3DReady={is3DReady}
+          onStatusChange={(message, status) => {
+            setStatus('general', {
+              status: status,
+              message: message,
+              file: null
+            });
+          }}
+        />
+      </div>
+  );
+}
+
+=================================================================================
+FILE: docs/rendi-integration.md
+DESCRIPTION: Integration documentation - Setup and usage guide
+=================================================================================
+
+# Rendi Video Compression Integration
+
+This document describes the integration of Rendi's FFmpeg-as-a-Service for automatic video compression.
+
+## Architecture Overview
+
+```
+User Upload → Supabase Storage → Edge Function → Rendi API
+                                        ↓
+                                   Polling Loop
+                                        ↓
+                              Compression Complete
+                                        ↓
+Playback ← Supabase Storage (compressed/) ← Edge Function Downloads Result
+```
+
+## Key Components
+
+### 1. Upload Flow (`/src/lib/uploadHandler.ts`)
+- Videos are uploaded to `3d-renders/{projectId}/{videoType}-{timestamp}.mp4`
+- Database record created with `compression_status: 'pending'`
+
+### 2. Edge Function (`video-compress.ts`)
+- Triggers on OBJECT_FINALIZED for `.mp4` files
+- Creates signed URL and sends to Rendi API
+- Polls for completion and downloads result to `compressed/`
+- Optionally deletes source file if `DELETE_SOURCE=true`
+
+### 3. Video Playback (`/src/components/Drawings/VideoPreview.tsx`)
+- Automatically uses compressed video when available
+- Falls back to original if compression pending/failed
+- Shows compression status indicator
+
+## Database Schema
+
+New fields added to the `3d` table:
+- `compression_status`: enum ('pending', 'processing', 'completed', 'failed')
+- `compressed_path`: Path to compressed video
+- `rendi_command_id`: Rendi job tracking ID
+- `compression_error`: Error message if compression fails
+- `updated_at`: Last update timestamp
+
+## Environment Variables
+
+Required environment variables:
+```env
+# Next.js App
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Edge Function
+SUPABASE_URL=your-supabase-url
+SUPABASE_SERVICE_KEY=your-service-role-key
+RENDI_API_KEY=your-rendi-api-key
+POLL_MS=5000          # Optional: polling interval (default 5s)
+TIMEOUT_S=240         # Optional: timeout in seconds (default 4min)
+DELETE_SOURCE=false   # Optional: delete original after compression
+```
+
+## Setup Instructions
+
+1. **Run Database Migration**
+   ```sql
+   -- Execute the migration script in Supabase SQL editor
+   -- File: /supabase/migrations/add_video_compression_fields.sql
+   ```
+
+2. **Deploy Edge Function**
+   - Deploy the `video-compress.ts` Edge Function
+   - Configure Storage trigger for OBJECT_FINALIZED events
+
+3. **Create Supabase Edge Function**
+   - Deploy the edge function that triggers on OBJECT_FINALIZED
+   - Configure to watch the `3d-renders/originals/` path
+   - Function should call Rendi API with signed URL
+
+4. **Update Environment Variables**
+   - Add the required environment variables to your deployment
+
+## API Endpoints
+
+### `/api/check-compression-status` (POST)
+Checks if compressed videos exist
+- Scans for compressed files in storage
+- Updates database status when found
+- Can be called periodically or on-demand
+
+### `/api/trigger-compression` (POST) - Optional
+Manual endpoint for testing/re-processing
+```json
+{
+  "projectId": "uuid",
+  "videoType": "pool-selection-section"
+}
+```
+
+## Compression Settings
+
+Default FFmpeg command (from Edge Function):
+```bash
+-i {{in_1}} -c:v libx264 -preset veryfast -crf 26 -movflags +faststart {{out_1}}
+```
+
+- `crf 26`: Higher quality than 28 (lower = better quality)
+- `preset veryfast`: Fast encoding
+- `movflags +faststart`: Optimizes for web streaming
+
+## Monitoring
+
+Track compression status:
+- Check `compression_status` in database
+- Monitor Rendi dashboard for job status
+- Check webhook logs for failures
+
+## Troubleshooting
+
+1. **Videos not compressing**
+   - Verify Edge Function is deployed
+   - Check Rendi API key is valid
+   - Ensure webhook URL is accessible
+
+2. **Compression failures**
+   - Check `compression_error` field in database
+   - Review Rendi job logs
+   - Verify input video format is supported
+
+3. **Playback issues**
+   - Ensure Supabase Storage bucket permissions are correct
+   - Check if compressed video path exists
+   - Verify video URL generation logic
+
+=================================================================================
+END OF EXPORT
+Total files: 10 (4 created, 6 modified)
+=================================================================================

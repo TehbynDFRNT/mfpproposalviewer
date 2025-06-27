@@ -11,6 +11,10 @@ export interface VideoRecord {
   video_type: string;
   video_path: string;
   created_at: string;
+  compression_status?: 'pending' | 'processing' | 'completed' | 'failed';
+  compressed_path?: string | null;
+  rendi_command_id?: string | null;
+  compression_error?: string | null;
 }
 
 /**

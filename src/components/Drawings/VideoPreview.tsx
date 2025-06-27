@@ -5,7 +5,7 @@
  * Component for displaying uploaded 3D render videos with controls
  */
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Maximize, X, Upload, Loader2, Check } from 'lucide-react';
+import { Play, Pause, Maximize, X, Upload, Loader2, Check, Zap, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils";
 import { supabase } from '@/lib/supabaseClient';
@@ -15,6 +15,10 @@ interface VideoData {
   video_type: string;
   video_path: string;
   created_at: string;
+  compression_status?: 'pending' | 'processing' | 'completed' | 'failed';
+  compressed_path?: string | null;
+  rendi_command_id?: string | null;
+  compression_error?: string | null;
 }
 
 interface VideoPreviewProps {
@@ -90,23 +94,34 @@ export function VideoPreview({ video, onReplace, className, videoType, uploadSta
     };
   }, []);
 
+  // Check if compressed version exists by modifying the path
+  // Original: {projectId}/{videoType}-{timestamp}.mp4
+  // Compressed: compressed/{projectId}/{videoType}-{timestamp}.mp4
+  const compressedPath = `compressed/${video.video_path}`;
+  
+  // We'll try to use the compressed path if the compression status indicates it's ready
+  // or we can check if the file exists
+  const videoPath = (video.compression_status === 'completed' || video.compressed_path) 
+    ? (video.compressed_path || compressedPath)
+    : video.video_path;
+
   // Get the public URL for the video using Supabase's getPublicUrl method
   const { data } = supabase
     .storage
     .from('3d-renders')
-    .getPublicUrl(video.video_path);
+    .getPublicUrl(videoPath);
 
-  const videoUrl = video.video_path.startsWith('http')
-    ? video.video_path
+  const videoUrl = videoPath.startsWith('http')
+    ? videoPath
     : data?.publicUrl || '';
 
-  // Log for debugging purposes
-  useEffect(() => {
-    console.log('Video data:', video);
-    console.log('Supabase public URL data:', data);
-    console.log('Final video URL:', videoUrl);
-    console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-  }, [video, data, videoUrl]);
+  // Log for debugging purposes - commented out to reduce console noise
+  // useEffect(() => {
+  //   console.log('Video data:', video);
+  //   console.log('Supabase public URL data:', data);
+  //   console.log('Final video URL:', videoUrl);
+  //   console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+  // }, [video, data, videoUrl]);
 
   return (
     <div className={cn("relative rounded-md overflow-hidden bg-black/5", className)}>
@@ -120,7 +135,7 @@ export function VideoPreview({ video, onReplace, className, videoType, uploadSta
           console.error('Video element:', videoRef.current);
           console.error('Video URL that failed:', videoUrl);
         }}
-        onLoadedData={() => console.log('Video loaded successfully:', videoUrl)}
+        onLoadedData={() => { /* Video loaded successfully */ }}
         controlsList="nodownload"
         playsInline
       />
@@ -150,7 +165,44 @@ export function VideoPreview({ video, onReplace, className, videoType, uploadSta
       {/* Bottom info bar - with higher z-index to ensure clickable buttons */}
       <div className="flex flex-col p-2 text-xs text-gray-600 bg-white border-t relative z-20">
         <div className="flex items-center justify-between">
-          <span>Uploaded: {uploadDate}</span>
+          <div className="flex items-center gap-2">
+            <span>Uploaded: {uploadDate}</span>
+            {/* Compression status indicator */}
+            {video.compression_status && (
+              <span className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
+                video.compression_status === 'pending' && "bg-yellow-100 text-yellow-700",
+                video.compression_status === 'processing' && "bg-blue-100 text-blue-700",
+                video.compression_status === 'completed' && "bg-green-100 text-green-700",
+                video.compression_status === 'failed' && "bg-red-100 text-red-700"
+              )}>
+                {video.compression_status === 'pending' && (
+                  <>
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                    Pending
+                  </>
+                )}
+                {video.compression_status === 'processing' && (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Compressing
+                  </>
+                )}
+                {video.compression_status === 'completed' && (
+                  <>
+                    <Zap className="h-3 w-3" />
+                    Optimized
+                  </>
+                )}
+                {video.compression_status === 'failed' && (
+                  <>
+                    <AlertCircle className="h-3 w-3" />
+                    Failed
+                  </>
+                )}
+              </span>
+            )}
+          </div>
 
           {onReplace && (
             <>

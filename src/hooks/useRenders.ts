@@ -12,6 +12,8 @@ interface RenderData {
   video_type: string;
   video_path: string;
   created_at: string;
+  compression_status?: 'pending' | 'processing' | 'completed' | 'failed';
+  compressed_path?: string | null;
 }
 
 interface UseRendersResult {
@@ -42,7 +44,7 @@ export function useRenders(projectId: string | undefined, enabled: boolean): Use
       try {
         const { data, error: fetchError } = await supabase
           .from('3d')
-          .select('video_type, video_path, created_at')
+          .select('video_type, video_path, created_at, compression_status, compressed_path')
           .eq('pool_project_id', projectId);
 
         if (fetchError) {
@@ -56,6 +58,8 @@ export function useRenders(projectId: string | undefined, enabled: boolean): Use
             videoType: item.video_type,
             videoPath: item.video_path,
             createdAt: item.created_at,
+            compressionStatus: item.compression_status,
+            compressedPath: item.compressed_path,
             alt: `3D ${item.video_type} Visualization`
           })) || null);
           setIsLoading(false);

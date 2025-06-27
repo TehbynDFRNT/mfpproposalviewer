@@ -58,7 +58,7 @@ export default function VisualColumn({
     if (visual.type !== '3d') return null;
 
     let videoUrl = '';
-    const { videoType, videoPath } = visual;
+    const { videoType, videoPath, compressionStatus, compressedPath } = visual;
 
     // Skip URL processing if section is empty (except for core sections)
     if (videoType !== CATEGORY_IDS.POOL_SELECTION &&
@@ -73,20 +73,28 @@ export default function VisualColumn({
       };
     }
 
+    // Determine which path to use: compressed if available and completed, otherwise original
+    const pathToUse = (compressionStatus === 'completed' && compressedPath) ? compressedPath : videoPath;
+    
+    // Log when using compressed version
+    if (compressionStatus === 'completed' && compressedPath) {
+      console.log(`Using compressed video for ${videoType}: ${compressedPath}`);
+    }
+
     // If path already starts with http, use it directly
-    if (videoPath.startsWith('http')) {
-      videoUrl = videoPath;
+    if (pathToUse.startsWith('http')) {
+      videoUrl = pathToUse;
     } else {
       try {
         // Get the public URL from Supabase
         const { data } = supabase
           .storage
           .from('3d-renders')
-          .getPublicUrl(videoPath);
+          .getPublicUrl(pathToUse);
 
         videoUrl = data?.publicUrl || '';
       } catch (error) {
-        console.error(`Error getting public URL for ${videoPath}:`, error);
+        console.error(`Error getting public URL for ${pathToUse}:`, error);
         videoUrl = '';
       }
     }

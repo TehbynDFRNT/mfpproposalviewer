@@ -81,7 +81,8 @@ export const handleUpload = async (
     }
 
     // Upload the file to Supabase Storage
-    const filePath = `${projectId}/${videoType}-${Date.now()}.mp4`;
+    const timestamp = Date.now();
+    const filePath = `${projectId}/${videoType}-${timestamp}.mp4`;
 
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('3d-renders')
@@ -104,6 +105,10 @@ export const handleUpload = async (
         .from('3d')
         .update({
           video_path: filePath,
+          compression_status: 'pending',
+          compressed_path: null,
+          rendi_command_id: null,
+          compression_error: null,
           created_at: new Date().toISOString(),
         })
         .eq('pool_project_id', projectId)
@@ -115,6 +120,28 @@ export const handleUpload = async (
           success: false,
           message: `Database update failed: ${updateError.message}`
         };
+      }
+
+      // Trigger compression for the replaced video via API route
+      console.log('Triggering compression for replaced video:', filePath);
+      try {
+        const response = await fetch('/api/invoke-compression', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ bucketId: '3d-renders', name: filePath })
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok) {
+          console.warn('Failed to trigger compression for replaced video:', result.error || 'Unknown error');
+        } else {
+          console.log('Compression triggered successfully:', result);
+        }
+      } catch (err) {
+        console.error('Error triggering compression for replaced video:', err);
       }
 
       return {
@@ -130,6 +157,10 @@ export const handleUpload = async (
             pool_project_id: projectId,
             video_path: filePath,
             video_type: videoType,
+            compression_status: 'pending',
+            compressed_path: null,
+            rendi_command_id: null,
+            compression_error: null,
             created_at: new Date().toISOString(),
           },
         ]);
@@ -140,6 +171,30 @@ export const handleUpload = async (
           success: false,
           message: `Database record failed: ${insertError.message}`
         };
+      }
+
+      // Trigger compression via API route
+      console.log('Triggering compression for new video:', filePath);
+      try {
+        const response = await fetch('/api/invoke-compression', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ bucketId: '3d-renders', name: filePath })
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok) {
+          console.warn('Failed to trigger compression:', result.error || 'Unknown error');
+          // Don't fail the upload if compression trigger fails
+        } else {
+          console.log('Compression triggered successfully:', result);
+        }
+      } catch (err) {
+        console.error('Error triggering compression:', err);
+        // Continue anyway - compression can be triggered manually later
       }
 
       return {

@@ -19,6 +19,7 @@ interface SitePlanPreviewProps {
 export function SitePlanPreview({ projectId, className }: SitePlanPreviewProps) {
   const { sitePlan, loading, error, publicUrl } = useSitePlan(projectId);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Format date to a more readable format
   const uploadDate = sitePlan?.created_at 
@@ -105,19 +106,45 @@ export function SitePlanPreview({ projectId, className }: SitePlanPreviewProps) 
   return (
     <div className={cn("relative rounded-md overflow-hidden bg-white border", className)}>
       <div className="relative aspect-video w-full h-48 bg-gray-50">
-        <Image
-          id="site-plan-image"
-          src={publicUrl || ''}
-          alt="Site Plan"
-          className="object-contain"
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={(e) => {
-            console.error('Site plan image loading error:', e);
-            console.error('Image URL that failed to load:', publicUrl);
-            console.error('Site plan data:', sitePlan);
-          }}
-        />
+        {publicUrl && !imageError ? (
+          sitePlan?.plan_path?.toLowerCase().endsWith('.pdf') ? (
+            // Handle PDF files differently
+            <div className="flex items-center justify-center h-full text-gray-600">
+              <div className="text-center">
+                <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+                <p className="text-sm">PDF preview not available</p>
+                <a 
+                  href={publicUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:underline mt-1 block"
+                >
+                  View PDF
+                </a>
+              </div>
+            </div>
+          ) : (
+            <Image
+              id="site-plan-image"
+              src={publicUrl}
+              alt="Site Plan"
+              className="object-contain"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              onError={() => {
+                setImageError(true);
+                // Silently handle error - site plan might not exist yet
+              }}
+            />
+          )
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="text-center">
+              <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+              <p className="text-sm">No site plan available</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Controls overlay - only visible on hover */}

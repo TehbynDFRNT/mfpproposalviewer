@@ -53,7 +53,7 @@ export function useVideos(projectId: string | undefined): UseVideosResult {
 
         const { data, error: fetchError } = await supabase
           .from('3d')
-          .select('video_type, video_path, created_at')
+          .select('video_type, video_path, created_at, compression_status, compressed_path, rendi_command_id, compression_error')
           .eq('pool_project_id', projectId);
 
         if (fetchError) {
