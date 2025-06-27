@@ -6,8 +6,8 @@
 // Env vars : SUPABASE_URL
 //            SUPABASE_SERVICE_ROLE_KEY
 //            RENDI_API_KEY         ← your long API key
-//            POLL_MS   (optional, default 5000)
-//            TIMEOUT_S (optional, default 240)   ← keep ≤ wall-clock-limit
+//            POLL_MS   (optional, default 15000)
+//            TIMEOUT_S (optional, default 395)   ← keep ≤ wall-clock-limit
 //
 // If you want to delete the raw upload after success, set DELETE_SOURCE=true
 //-----------------------------------------------------------------------
@@ -15,9 +15,9 @@ import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 const sb = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
 const RENDI_API_KEY = Deno.env.get('RENDI_API_KEY');
-const POLL_MS = Number(Deno.env.get('POLL_MS') ?? 5_000) // 5 s default
+const POLL_MS = Number(Deno.env.get('POLL_MS') ?? 15_000) // 15 s default
 ;
-const TIMEOUT_S = Number(Deno.env.get('TIMEOUT_S') ?? 240) // 4 min default
+const TIMEOUT_S = Number(Deno.env.get('TIMEOUT_S') ?? 395) // ~6 min 35 s
 ;
 // ─────────────────────────────────────────────────────────────────────────────
 // CORS headers – allow browser pre-flight OPTIONS requests to succeed
@@ -47,8 +47,17 @@ serve(async (req)=>{
     status: 500,
     headers: CORS_HEADERS
   });
-  /* 3 — kick off the FFmpeg command on Rendi -------------------------------*/ const rendiBody = {
-    ffmpeg_command: '-i {{in_1}} -c:v libx264 -preset veryfast -crf 26 -movflags +faststart {{out_1}}',
+  /* 3 — kick off the FFmpeg command on Rendi -------------------------------*/
+  /*  ■ centre-crop to (≈) 1.45:1, then scale down to fit 1127 px column
+      ■ keep even dimensions with -2, encode at fast preset, CRF 27        */
+  const rendiBody = {
+    ffmpeg_command:
+      `-i {{in_1}} \
+       -vf "crop=ih*1.45:ih,scale='min(1128,iw)':-2" \
+       -c:v libx264 -preset fast -crf 27 \
+       -movflags +faststart \
+       -an \
+       {{out_1}}`,
     input_files: {
       in_1: sourceUrl
     },
@@ -116,7 +125,7 @@ async function handleCommand(cmdId, bucket, srcName) {
       await pushToBucket(bucket, srcName, fileUrl);
 
       // build compressed/<same-path>.mp4
-      const compressedPath = `compressed/${srcName.replace(/\.mp4$/i, '.mp4')}`;
+      const compressedPath = `compressed/${srcName}`;
 
       // mark DB row as completed
       {
